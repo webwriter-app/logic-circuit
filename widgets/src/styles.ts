@@ -79,7 +79,7 @@ export const Styles = css`
         border: 1px solid black;
         width: 3000px;
         height: 2000px;
-        background: #f0f0f0;
+        background: #ffffff;
     }
 
     .trashCanIcon {
@@ -288,21 +288,35 @@ export const Styles = css`
 
     .connector {
         display: block;
-        width: 7.5px;
-        height: 7.5px;
-        background-color: black;
-        border: 2px solid black;
-        border-radius: 50%;
-        box-sizing: border-box;
+        width: 25px;
+        height: 25px;
         cursor: pointer;
         z-index: 5;
+        text-align: left;
+        line-height: 13px;
+    }
+    .dot{
+        height: 7.5px;
+        width: 7.5px;
+        background-color: #000000;
+        border-radius: 50%;
+        display: inline-block;
+
+    }
+    .dotTrue {
+        height: 7.5px;
+        width: 7.5px;
+        background-color: green;
+        border-radius: 50%;
+        display: inline-block;
     }
 
-    .connectorTrue {
-        background-color: green;
-    }
-    .connectorError {
+    .dotError {
+        height: 7.5px;
+        width: 7.5px;
         background-color: red;
+        border-radius: 50%;
+        display: inline-block;
     }
 
     .optionsMenu {

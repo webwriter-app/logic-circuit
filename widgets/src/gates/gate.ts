@@ -222,7 +222,7 @@ export default class Gate extends LitElementWw {
     }
 
     deleteGate() {
-        const workspace = document.querySelector('lukasww-logicgates') as LukaswwLogicgates;
+        const workspace = document.querySelector('webwriter-logic-circuit') as LukaswwLogicgates;
         const gateElements = workspace.getGateElements();
         const lineElements = workspace.getLineElements();
 
@@ -255,11 +255,32 @@ export default class Gate extends LitElementWw {
         workspace.lineElements.forEach((line) => {
             if (pathsToDelete.includes(line)) {
                 line.lineSVG.remove();
+
+                let consArr: string[] = this.widget.reflectCons.split(",")
+                let index: number = -1
+                for(let i = 0; i<consArr.length; i++){
+                    if(consArr[i].includes(line.start.id) && consArr[i].includes(line.end.id)){
+                        index = i
+                    }
+                };
+                consArr.splice(index,1)
+                this.widget.reflectCons = consArr.toString()
             } else {
                 lineElementsUpdated.push(line);
             }
+
         });
         workspace.lineElements = lineElementsUpdated;
+
+        let consArr: string[] = this.widget.reflectGates.split(",")
+        let index: number = -1
+        for(let i = 0; i<consArr.length; i++){
+            if(Number.parseInt(consArr[i][0]) === Number.parseInt(this.id.match(/^([a-zA-Z]+)(\d+)$/)[2])){
+                index = i
+            }
+        };
+        consArr.splice(index,1)
+        this.widget.reflectGates = consArr.toString()
 
         this.hideContextMenu();
     }
@@ -318,7 +339,7 @@ export default class Gate extends LitElementWw {
     }
 
     updateConnectorColor() {
-        let connector;
+        let connectorDot;
         let con;
         const slotIn1 = this.shadowRoot.querySelector('.gate').querySelector("slot[name='con1']");
         const slotIn2 = this.shadowRoot.querySelector('.gate').querySelector("slot[name='con2']");
@@ -342,46 +363,46 @@ export default class Gate extends LitElementWw {
                 }
             }
             if (slotOut) {
-                connector = slotOut.querySelector('connector-element').shadowRoot.querySelector('.connector');
+                connectorDot = slotOut.querySelector('connector-element').shadowRoot.querySelector('.connector').children[0];
                 con = slotOut.querySelector('connector-element');
-                if (connector && this.output === true) {
-                    connector.classList.add('connectorTrue');
+                if (connectorDot && this.output === true) {
+                    connectorDot.classList.add('dotTrue');
                     con.value = true;
-                } else if (connector) {
-                    connector.classList.remove('connectorTrue');
+                } else if (connectorDot) {
+                    connectorDot.classList.remove('dotTrue');
                     con.value = false;
                 }
             }
             if (slotOut2) {
-                connector = slotOut2.querySelector('connector-element').shadowRoot.querySelector('.connector');
+                connectorDot = slotOut2.querySelector('connector-element').shadowRoot.querySelector('.connector').children[0];
                 con = slotOut2.querySelector('connector-element');
-                if (connector && this.output === true) {
-                    connector.classList.add('connectorTrue');
+                if (connectorDot && this.output === true) {
+                    connectorDot.classList.add('dotTrue');
                     con.value = true;
-                } else if (connector) {
-                    connector.classList.remove('connectorTrue');
+                } else if (connectorDot) {
+                    connectorDot.classList.remove('dotTrue');
                     con.value = false;
                 }
             }
             if (slotIn1) {
-                connector = slotIn1.querySelector('connector-element').shadowRoot.querySelector('.connector');
+                connectorDot = slotIn1.querySelector('connector-element').shadowRoot.querySelector('.connector').children[0];
                 con = slotIn1.querySelector('connector-element');
-                if (connector && this.input1 === true) {
-                    connector.classList.add('connectorTrue');
+                if (connectorDot && this.input1 === true) {
+                    connectorDot.classList.add('dotTrue');
                     con.value = true;
-                } else if (connector) {
-                    connector.classList.remove('connectorTrue');
+                } else if (connectorDot) {
+                    connectorDot.classList.remove('dotTrue');
                     con.value = false;
                 }
             }
             if (slotIn2) {
-                connector = slotIn2.querySelector('connector-element').shadowRoot.querySelector('.connector');
+                connectorDot = slotIn2.querySelector('connector-element').shadowRoot.querySelector('.connector').children[0];
                 con = slotIn2.querySelector('connector-element');
-                if (connector && this.input2 === true) {
-                    connector.classList.add('connectorTrue');
+                if (connectorDot && this.input2 === true) {
+                    connectorDot.classList.add('dotTrue');
                     con.value = true;
-                } else if (connector) {
-                    connector.classList.remove('connectorTrue');
+                } else if (connectorDot) {
+                    connectorDot.classList.remove('dotTrue');
                     con.value = false;
                 }
             }
@@ -399,38 +420,38 @@ export default class Gate extends LitElementWw {
             this.shadowRoot.querySelector('.gate').classList.remove('gateTrue');
         }
         if (slotOut) {
-            connector = slotOut.querySelector('connector-element').shadowRoot.querySelector('.connector');
+            connector = slotOut.querySelector('connector-element').shadowRoot.querySelector('.connector').children[0];
             con = slotOut.querySelector('connector-element');
             if (connector) {
-                connector.classList.remove('connectorTrue');
-                connector.classList.remove('connectorError');
+                connector.classList.remove('dotTrue');
+                connector.classList.remove('dotError');
                 con.value = false;
             }
         }
         if (slotOut2) {
-            connector = slotOut2.querySelector('connector-element').shadowRoot.querySelector('.connector');
+            connector = slotOut2.querySelector('connector-element').shadowRoot.querySelector('.connector').children[0];
             con = slotOut2.querySelector('connector-element');
             if (connector) {
-                connector.classList.remove('connectorTrue');
-                connector.classList.remove('connectorError');
+                connector.classList.remove('dotTrue');
+                connector.classList.remove('dotError');
                 con.value = false;
             }
         }
         if (slotIn1) {
-            connector = slotIn1.querySelector('connector-element').shadowRoot.querySelector('.connector');
+            connector = slotIn1.querySelector('connector-element').shadowRoot.querySelector('.connector').children[0];
             con = slotIn1.querySelector('connector-element');
             if (connector) {
-                connector.classList.remove('connectorTrue');
-                connector.classList.remove('connectorError');
+                connector.classList.remove('dotTrue');
+                connector.classList.remove('dotError');
                 con.value = false;
             }
         }
         if (slotIn2) {
-            connector = slotIn2.querySelector('connector-element').shadowRoot.querySelector('.connector');
+            connector = slotIn2.querySelector('connector-element').shadowRoot.querySelector('.connector').children[0];
             con = slotIn2.querySelector('connector-element');
             if (connector) {
-                connector.classList.remove('connectorTrue');
-                connector.classList.remove('connectorError');
+                connector.classList.remove('dotTrue');
+                connector.classList.remove('dotError');
                 con.value = false;
             }
         }

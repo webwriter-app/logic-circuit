@@ -32,7 +32,7 @@ import SlInput from '@shoelace-style/shoelace/dist/components/input/input.compon
 import { Styles } from './src/styles.js';
 import { trash } from './src/assets/icons.js';
 
-import { calculatePath, updateLines, resetLines } from './src/helper/line-helper.js';
+import { calculatePath, updateLines, resetLines, createLine} from './src/helper/line-helper.js';
 import { addGate, moveGate, transferOutputToNextGate } from './src/helper/gate-helper.js';
 import { gateCounter, isDropOverTrashIcon, resetGates } from './src/helper/gate-helper.js';
 
@@ -80,6 +80,8 @@ export default class LogicCircuit extends LitElementWw {
 
     @property({ type: Array }) accessor lineElements = [];
     @property({ type: Array }) accessor gateElements = [];
+    @property({type: String, reflect: true}) accessor reflectGates: String = ""
+    @property({type: String, reflect: true}) accessor reflectCons: String = ""
     @property({ type: Number }) accessor gateID: number = 0;
     @property({ type: Number }) accessor lineID: number = 0;
     @property({ type: Number }) accessor zoom: number = 1;
@@ -303,7 +305,47 @@ export default class LogicCircuit extends LitElementWw {
         this.svgPathToMouse.setAttribute('stroke-width', '3');
         this.svgPathToMouse.setAttribute('id', 'lineToMouse');
         this.svgCanvas.appendChild(this.svgPathToMouse);
+
+        if(this.reflectGates.length>0){
+            this.reflectGates.split(",").forEach(gate=>{
+                addGate(this, null, gate.split("|").splice(1))
+            })
+        }
+        if(this.reflectCons.length>0){
+            this.reflectCons.split(",").forEach(con=>{
+                let startID: string = con.split("|")[0]
+                let endID: string = con.split("|")[1]
+                let start: any, end: any
+                this.shadowRoot.querySelector(".workspaceArea").childNodes.forEach(node=>{
+                    if(node.nodeName.includes("GATE")){
+                        setTimeout(()=>{
+                            if(startID.includes(node.shadowRoot.querySelector("div").id)){
+                                let gate: any = node.shadowRoot.querySelector("div")
+                                let connectorArr: any = gate.querySelectorAll("slot")
+                                connectorArr.forEach(slot=>{
+                                    if(slot.children[0].id === startID){
+                                        start = (slot.childNodes as NodeList).item(0)
+                                    }
+                                })
+                            }
+                            if(endID.includes(node.shadowRoot.querySelector("div").id)){
+                                let gate: any = node.shadowRoot.querySelector("div")
+                                let connectorArr: any = gate.querySelectorAll("slot")
+                                connectorArr.forEach(slot=>{
+                                    if(slot.children[0].id === endID){
+                                        end = (slot.childNodes as NodeList).item(0)
+                                    }
+                                })
+                            }
+                            createLine(this,start,end)
+                        }, 1)
+                    }
+                })
+            })
+        }
     }
+
+
 
     handleAllowSimulation() {
         if (this.allowSimulation === 0) {

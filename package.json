@@ -1,25 +1,28 @@
 {
-    "name": "@webwriter/logic-circuit",
-    "description": "Create and simulate circuits with logic gates (AND, OR, XOR, etc.).",
-    "version": "1.0.0",
-    "keywords": [
-        "webwriter-widget"
-    ],
-    "license": "MIT",
-    "author": "Lukas Schneider",
-    "dependencies": {
-        "@shoelace-style/shoelace": "^2.13.1",
-        "@webwriter/lit": "^2",
-        "lit": "^3.1.2"
-    },
-    "scripts": {
-        "prepublishOnly": "npx @webwriter/build",
-        "preview": "npx @webwriter/build preview webwriter-logic-circuit"
-    },
-    "exports": {
-        "./widgets/webwriter-logic-circuit.*": {
-            "source": "./widgets/webwriter-logic-circuit.ts",
-            "default": "./dist/webwriter-logic-circuit.*"
-        }
-    }
+	"name": "@webwriter/logic-circuit",
+	"version": "1.1.0",
+	"description": "Create and simulate circuits with logic gates (AND, OR, XOR, etc.).",
+	"keywords": [
+		"webwriter-widget"
+	],
+	"license": "MIT",
+	"author": "Lukas Schneider",
+	"scripts": {
+		"prepublishOnly": "npx @webwriter/build",
+		"preview": "npx @webwriter/build preview webwriter-logic-circuit"
+	},
+	"dependencies": {
+		"@shoelace-style/shoelace": "^2.13.1",
+		"@webwriter/lit": "^2",
+		"lit": "^3.1.2"
+	},
+	"exports": {
+		"./widgets/webwriter-logic-circuit.*": {
+			"source": "./widgets/webwriter-logic-circuit.ts",
+			"default": "./dist/webwriter-logic-circuit.*"
+		},
+        "./snippets/Halbaddierer.html": "./snippets/Halbaddierer.html",
+        "./snippets/RS-FlipFlop.html": "./snippets/RS-FlipFlop.html",
+		"./icon": "./icon.svg"
+	}
 }

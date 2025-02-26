@@ -61,6 +61,8 @@ export default class ConnectorElement extends LitElement {
     }
 
     render() {
-        return html` <div class="connector" id="${this.id}"></div> `;
+        return html` <div class="connector" id="${this.id}">
+            <span class="dot"></span>
+        </div> `;
     }
 }

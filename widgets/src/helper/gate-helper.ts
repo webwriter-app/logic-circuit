@@ -2,8 +2,8 @@ import LogicCircuit from '../../webwriter-logic-circuit';
 import ConnectorElement from '../connector';
 import { updateLines } from '../helper/line-helper';
 
-export function addGate(widget: any, event: any) {
-    const gateType = event.dataTransfer.getData('type');
+export function addGate(widget: any, event: any, load?: string[]) {
+    const gateType = load != undefined ? load[0] : event.dataTransfer.getData('type');
     let newGate;
 
     if (gateType !== 'INPUT' && gateType !== 'OUTPUT' && gateType !== 'SPLITTER') {
@@ -57,13 +57,15 @@ export function addGate(widget: any, event: any) {
 
     newGate.style.position = 'absolute';
 
-    const grabPosX = parseFloat(event.dataTransfer.getData('offsetX'));
-    const grabPosY = parseFloat(event.dataTransfer.getData('offsetY'));
+    if(load == undefined){
+        var grabPosX = parseFloat(event.dataTransfer.getData('offsetX'));
+        var grabPosY = parseFloat(event.dataTransfer.getData('offsetY'));
+
+        var mouseX = event.clientX;
+        var mouseY = event.clientY;
+    }
 
     const offsetX = widget.wsDrag.getBoundingClientRect().left;
-
-    const mouseX = event.clientX;
-    const mouseY = event.clientY;
 
     const workspaceX = widget.wsDrag.getBoundingClientRect().left;
     const workspaceY = widget.wsDrag.getBoundingClientRect().top;
@@ -74,8 +76,8 @@ export function addGate(widget: any, event: any) {
     const scaledRelativeX = relativeX / widget.zoom;
     const scaledRelativeY = relativeY / widget.zoom;
 
-    newGate.style.left = scaledRelativeX - grabPosX + 'px';
-    newGate.style.top = scaledRelativeY - grabPosY + 'px';
+    newGate.style.left = load != undefined ? load[1] : scaledRelativeX - grabPosX + 'px';
+    newGate.style.top = load != undefined ? load[2] : scaledRelativeY - grabPosY + 'px';
 
     widget.gateID++;
 
@@ -84,6 +86,11 @@ export function addGate(widget: any, event: any) {
 
     widget.wsDrag.appendChild(newGate);
     widget.gateElements = [...widget.gateElements, newGate];
+    if(load == undefined){
+        widget.reflectGates+= widget.reflectGates != "" ? "," : ""
+        widget.reflectGates+=  (widget.gateID-1)+"|"+gateType+"|"+newGate.style.left+"|"+newGate.style.top
+    }
+
 }
 
 export function moveGate(widget, event) {
@@ -110,6 +117,17 @@ export function moveGate(widget, event) {
     draggedGate.style.top = scaledRelativeY - grabPosY + 'px';
 
     updateLines(widget, draggedGate);
+
+    let gatesArr = widget.reflectGates.split(",")
+    for(let i = 0; i<gatesArr.length; i++){
+        if(Number.parseInt(gatesArr[i][0]) === Number.parseInt(id.match(/^([a-zA-Z]+)(\d+)$/)[2])){
+            let arr: string[] = gatesArr[i].split("|")
+            arr[2] = draggedGate.style.left
+            arr[3] = draggedGate.style.top
+            gatesArr[i] = arr.toString().replaceAll(",","|")
+        }
+    };
+    widget.reflectGates = gatesArr.toString()
 }
 
 export function transferOutputToNextGate(widget: any, gate: any) {

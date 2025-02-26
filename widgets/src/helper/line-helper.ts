@@ -2,8 +2,8 @@ export function getConnectorCoordinates(svgCanvas, connector, zoom) {
     const connectorRect = connector?.getBoundingClientRect();
     const offsetX = connector?.getBoundingClientRect().width / 2;
     const offsetY = connector?.getBoundingClientRect().height / 2;
-    const x = (connectorRect?.left - svgCanvas?.getBoundingClientRect()?.left + offsetX) / zoom;
-    const y = (connectorRect?.top - svgCanvas?.getBoundingClientRect()?.top + offsetY) / zoom;
+    const x = (connectorRect?.left - svgCanvas?.getBoundingClientRect()?.left + offsetX - (9*zoom)) / zoom;
+    const y = (connectorRect?.top - svgCanvas?.getBoundingClientRect()?.top + offsetY - (9*zoom)) / zoom;
     return { x, y };
 }
 
@@ -21,12 +21,12 @@ export function getConnectorCoordinatesGhost(svgCanvas, connector) {
     const connectorRect = connector?.getBoundingClientRect();
     const offsetX = connector?.getBoundingClientRect().width / 2;
     const offsetY = connector?.getBoundingClientRect().height / 2;
-    const x = connectorRect?.left - svgCanvas?.getBoundingClientRect()?.left + offsetX;
-    const y = connectorRect?.top - svgCanvas?.getBoundingClientRect()?.top + offsetY;
+    const x = connectorRect?.left - svgCanvas?.getBoundingClientRect()?.left + offsetX - 9;
+    const y = connectorRect?.top - svgCanvas?.getBoundingClientRect()?.top + offsetY - 9;
     return { x, y };
 }
 
-export function calculatePath(svgCanvas, startCon, endCon, zoom, x1 = 0, y1 = 0, x2 = 0, y2 = 0) {
+export function calculatePath(svgCanvas, startCon, endCon, zoom) {
     let startConnector;
     let endConnector;
 
@@ -45,14 +45,14 @@ export function calculatePath(svgCanvas, startCon, endCon, zoom, x1 = 0, y1 = 0,
     const offsetX = 5;
 
     const start = {
-        x: getConnectorCoordinates(svgCanvas, startConnector, zoom).x + x1,
-        y: getConnectorCoordinates(svgCanvas, startConnector, zoom).y + y1,
+        x: getConnectorCoordinates(svgCanvas, startConnector, zoom).x,
+        y: getConnectorCoordinates(svgCanvas, startConnector, zoom).y,
         type: startConnector?.id?.substring(startConnector.id.length - 3),
     };
 
     const end = {
-        x: getConnectorCoordinates(svgCanvas, endConnector, zoom).x + x2,
-        y: getConnectorCoordinates(svgCanvas, endConnector, zoom).y + y2,
+        x: getConnectorCoordinates(svgCanvas, endConnector, zoom).x ,
+        y: getConnectorCoordinates(svgCanvas, endConnector, zoom).y,
         type: endConnector?.id?.substring(endConnector.id.length - 3),
     };
 
@@ -102,7 +102,7 @@ export function calculatePath(svgCanvas, startCon, endCon, zoom, x1 = 0, y1 = 0,
     return points;
 }
 
-export function calculatePathToMouse(svgCanvas, connector, zoom, mouseX, mouseY) {
+export function calculatePathToMouse(svgCanvas, connector, zoom, mouseX, mouseY, x1 = -9, y1 = -9, x2 = -9, y2 = -9){
     let start;
     let end;
     if (connector.type === 'input') {
@@ -139,7 +139,7 @@ export function calculatePathToMouse(svgCanvas, connector, zoom, mouseX, mouseY)
     const isLeft = end.x < start.x;
 
     if (start.type === 'Out' || start.type === 'ut2' || start.type === 'ut3') {
-        points.push({ x: start.x + padding, y: start.y });
+        points.push({ x: start.x + padding, y: start.y});
 
         if (end.type === 'In1' || end.type === 'In2') {
             if (start.y === end.y && isLeft) {
@@ -251,6 +251,15 @@ export function createLine(widget, startCon, endCon) {
     });
 
     widget.svgCanvas.appendChild(svgPath);
+    console.log(widget.lineElements)
+
+    let entry: string = startCon.id+"|"+endCon.id
+    console.log(entry)
+
+    if(!widget.reflectCons.includes(entry)){
+        widget.reflectCons+= widget.reflectCons != "" ? "," : ""
+        widget.reflectCons+= entry
+    } 
 }
 
 export function updateLineColor(widget) {
