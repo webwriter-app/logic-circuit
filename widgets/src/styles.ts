@@ -62,6 +62,10 @@ export const Styles = css`
     .container {
         display: flex;
         height: max-content;
+        border-width: 2px;
+        border-style: solid;
+        border-radius: 5px;
+        border-color: #6a6a6a;
     }
 
     .workspaceContainer {

@@ -1326,11 +1326,11 @@ var LitElementWw = class extends (_a = ScopedElementsMixin2(h32), _contentEditab
   }
   set lang(value) {
     __privateSet2(this, _lang, value);
-    this.localize.setLocale(value).finally(() => this.requestUpdate("lang"));
+    this.localize?.setLocale(value).finally(() => this.requestUpdate("lang"));
   }
   connectedCallback() {
     super.connectedCallback();
-    this.localize.setLocale(this.lang).finally(() => this.requestUpdate());
+    this.localize?.setLocale(this.lang).finally(() => this.requestUpdate());
     this.getAttributeNames().forEach((k22) => this.setAttribute(k22, this.getAttribute(k22)));
   }
 };
@@ -7027,6 +7027,10 @@ var Styles = i`
     .container {
         display: flex;
         height: max-content;
+        border-width: 2px;
+        border-style: solid;
+        border-radius: 5px;
+        border-color: #6a6a6a;
     }
 
     .workspaceContainer {
