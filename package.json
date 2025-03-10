@@ -1,6 +1,6 @@
 {
     "name": "@webwriter/logic-circuit",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "description": "Create and simulate circuits with logic gates (AND, OR, XOR, etc.).",
     "keywords": [
         "webwriter-widget",
@@ -34,5 +34,12 @@
         "./snippets/halfadder.html": "./snippets/halfadder.html",
         "./snippets/RS-FlipFlop.html": "./snippets/RS-FlipFlop.html",
         "./icon": "./icon.svg"
+    },
+    "editingConfig": {
+        ".": {
+            "description": {
+                "de": "Erstellen und Simulieren von Schaltungen mit logischen Gattern (AND, OR, XOR, etc.)."
+            }
+        }
     }
 }
