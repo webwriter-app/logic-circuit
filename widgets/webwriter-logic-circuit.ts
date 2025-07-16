@@ -353,6 +353,8 @@ export default class LogicCircuit extends LitElementWw {
             this.simCheckbox.checked = false;
             this.allowSimulation = 1;
         } else {
+            this.simulate = false
+            this.resetCircuit();
             this.allowSimulation = 0;
         }
     }
