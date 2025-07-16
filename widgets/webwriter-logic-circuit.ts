@@ -87,7 +87,7 @@ export default class LogicCircuit extends LitElementWw {
     @property({ type: Number }) accessor zoom: number = 1;
     @property({ type: Number }) accessor dragStartX: number = 0;
     @property({ type: Number }) accessor dragStartY: number = 0;
-    @property({ type: Boolean }) accessor simulate: boolean = false;
+    @property({ type: Boolean }) accessor simulate: boolean = true;
 
     @property({ type: Number, attribute: true, reflect: true }) accessor allowSimulation: number = 1;
     @property({ type: Number, attribute: true, reflect: true }) accessor notGateAllowed: number = -1;
@@ -158,7 +158,7 @@ export default class LogicCircuit extends LitElementWw {
                 </div>
 
                 <div class="workspaceContainer" id="workspace">
-                    <sl-checkbox id="simCheckbox" class="simulateCheckbox" @sl-change=${() => this.simulateCircuit()}
+                    <sl-checkbox id="simCheckbox" class="simulateCheckbox" @sl-change=${() => this.simulateCircuit()} checked
                         >Simulate</sl-checkbox
                     >
 
