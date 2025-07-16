@@ -166,7 +166,7 @@ export default class LogicCircuit extends LitElementWw {
                         >Show all Truthtables</sl-switch
                     >
 
-                    <div class="trashCanIcon" style="font-size: 35px;">${trash}</div>
+                    <div class="trashCanIcon" style="font-size: 35px;" title="Drag items here to delete them">${trash}</div>
 
                     <div class="workspaceArea" id="workspaceDraggable">
                         <svg class="svgArea" id="svgCanvas"></svg>
