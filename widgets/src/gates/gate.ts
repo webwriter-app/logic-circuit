@@ -238,6 +238,11 @@ export default class Gate extends LitElementWw {
 
         gateElements.forEach((gate, index) => {
             if (this === gate) {
+                // Update inputs of the lines that are connected with the outputs of this gate
+                this.output = false;
+                this.output2 = false
+                transferOutputToNextGate(this.widget, this)
+                
                 this.remove();
                 gateElements.splice(index, 1);
             }
