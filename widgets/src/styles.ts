@@ -107,6 +107,50 @@ export const Styles = css`
         color: white;
     }
 
+    .infoButton {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        color: black;
+        background: #ffffff;
+        border: 1px solid lightgray;
+        font-size: 80%;
+        padding: 5px 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 4px;
+        gap: 5px;
+        z-index: 30;
+        transition: background 0.2s;
+        cursor: pointer;
+    }
+
+    .instructions {
+        position: absolute;
+        bottom: 50px;
+        left: 10px;
+        color: black;
+        background: #ffffff;
+        border: 1px solid lightgray;
+        font-size: 80%;
+        padding: 10px;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        border-radius: 4px;
+        z-index: 30;
+        transition: background 0.2s;
+        display: none;
+    }
+
+    .instruction {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 10px;
+    }
+
     .svgArea {
         position: absolute;
         overflow: auto;

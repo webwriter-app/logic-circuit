@@ -30,7 +30,7 @@ import SlMenuItem from '@shoelace-style/shoelace/dist/components/menu-item/menu-
 import SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.component.js';
 import SlInput from '@shoelace-style/shoelace/dist/components/input/input.component.js';
 import { Styles } from './src/styles.js';
-import { trash } from './src/assets/icons.js';
+import { add, connect, info, remove, trash } from './src/assets/icons.js';
 
 import { calculatePath, updateLines, resetLines, createLine} from './src/helper/line-helper.js';
 import { addGate, moveGate, transferOutputToNextGate } from './src/helper/gate-helper.js';
@@ -108,6 +108,7 @@ export default class LogicCircuit extends LitElementWw {
     @query('#workspace') accessor workspaceContainer;
     @query('#workspaceDraggable') accessor wsDrag;
     @query('#simCheckbox') accessor simCheckbox;
+    @query('#instructions') accessor instructionsContainer;
     public getGateElements = () => this.gateElements;
     public getLineElements = () => this.lineElements;
 
@@ -167,6 +168,21 @@ export default class LogicCircuit extends LitElementWw {
                     >
 
                     <div class="trashCanIcon" style="font-size: 35px;" title="Drag items here to delete them">${trash}</div>
+                    
+                    <div id="instructions" class="instructions">
+                        <div class="instruction">
+                        ${add}Drag and drop elements from the left sidebar to add them.
+                        </div>
+                        <div class="instruction">
+                        ${connect}Left click a connection endpoint to start a connection<br/>
+                        and then click another connection endpoint to add it.
+                        </div>
+                        <div class="instruction">
+                        ${remove}Right click on a connection to remove it.
+                        </div>
+                    </div>
+
+                    <div class="infoButton" @click=${() => this.toggleInstructions()}>${info}Instructions</div>
 
                     <div class="workspaceArea" id="workspaceDraggable">
                         <svg class="svgArea" id="svgCanvas"></svg>
@@ -283,6 +299,14 @@ export default class LogicCircuit extends LitElementWw {
         this.removeEventListener('mousedown', this.handleMouseDown);
         this.removeEventListener('mousemove', this.handleMouseMove);
         this.removeEventListener('mouseup', this.handleMouseUp);
+    }
+
+    toggleInstructions() {
+        if (this.instructionsContainer.style.display == "none") {
+            this.instructionsContainer.style.display = 'block';
+        } else {
+            this.instructionsContainer.style.display = 'none';
+        }
     }
 
     firstUpdated() {
