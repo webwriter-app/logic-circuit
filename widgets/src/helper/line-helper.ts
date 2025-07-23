@@ -246,6 +246,17 @@ export function createLine(widget, startCon, endCon) {
                 const deletePath = svgPath;
                 deletePath.remove();
                 widget.lineElements.splice(index, 1);
+
+                // Remove the connection from the widget state
+                let consArr: string[] = widget.reflectCons.split(",")
+                let reflectIndex: number = -1
+                for(let i = 0; i<consArr.length; i++){
+                    if(consArr[i].includes(line.start.id) && consArr[i].includes(line.end.id)){
+                        reflectIndex = i
+                    }
+                };
+                consArr.splice(reflectIndex,1)
+                widget.reflectCons = consArr.toString()
             }
         });
     });
