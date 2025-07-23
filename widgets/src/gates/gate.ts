@@ -111,7 +111,9 @@ export default class Gate extends LitElementWw {
             if (this.gatetype === 'INPUT' && changedProperties.has('input1')) {
                 this.calculateOutput();
                 this.updateConnectorColor();
-                transferOutputToNextGate(this.widget, this);
+                setTimeout(() => {
+                    transferOutputToNextGate(this.widget, this);
+                }, widget.simulationDelay)
             }
 
             if (widget.simulate === true) {
@@ -120,7 +122,9 @@ export default class Gate extends LitElementWw {
                     this.updateConnectorColor();
                 } else if (changedProperties.has('input1') || changedProperties.has('input2')) {
                     this.calculateOutput();
-                    transferOutputToNextGate(this.widget, this);
+                    setTimeout(() => {
+                        transferOutputToNextGate(this.widget, this);
+                    }, widget.simulationDelay)
                     this.updateConnectorColor();
                 }
             }

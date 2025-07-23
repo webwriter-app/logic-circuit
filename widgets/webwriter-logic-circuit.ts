@@ -89,6 +89,8 @@ export default class LogicCircuit extends LitElementWw {
     @property({ type: Number }) accessor dragStartY: number = 0;
     @property({ type: Boolean }) accessor simulate: boolean = true;
 
+    @property({ type: Number, attribute: true, reflect: true }) accessor simulationDelay: number = 500;
+
     @property({ type: Number, attribute: true, reflect: true }) accessor allowSimulation: number = 1;
     @property({ type: Number, attribute: true, reflect: true }) accessor notGateAllowed: number = -1;
     @property({ type: Number, attribute: true, reflect: true }) accessor andGateAllowed: number = -1;
@@ -191,9 +193,23 @@ export default class LogicCircuit extends LitElementWw {
             </div>
 
             <div part="options" class="optionsMenu">
-                <sl-checkbox class="optionsCheckbox" @sl-change=${() => this.handleAllowSimulation()} checked
-                    >Allow Simulation</sl-checkbox
-                >
+                <p>Simulation:</p>
+                <div class="optionsItem">
+                    <sl-checkbox class="optionsCheckbox" @sl-change=${() => this.handleAllowSimulation()} checked
+                        >Allow Simulation</sl-checkbox
+                    >
+                </div>
+                <div class="optionsItem">
+                    <sl-input
+                        class="optionsCheckbox"
+                        type="number"
+                        size="small"
+                        @sl-change=${(e) => this.handleInputChange(e, 'simulationDelay')}
+                        .value=${this.simulationDelay}
+                        min="0"
+                    ></sl-input>
+                    <p>Delay (in ms)</p>
+                </div>
                 <p></p>
                 <p>Limit max. number of Gates:</p>
 
@@ -602,7 +618,9 @@ export default class LogicCircuit extends LitElementWw {
             inputGates.forEach((gate) => {
                 gate.calculateOutput();
                 gate.updateConnectorColor();
-                transferOutputToNextGate(this, gate);
+                setTimeout(() => {
+                    transferOutputToNextGate(this, gate);
+                }, this.simulationDelay)
             });
         } else {
             this.simulate = false;
