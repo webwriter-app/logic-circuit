@@ -3,7 +3,9 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { createLine } from './helper/line-helper.js';
 import { Styles } from './styles.js';
 import LogicCircuit from '../webwriter-logic-circuit.js';
+import { localized, msg } from "@lit/localize";
 
+@localized()
 export default class ConnectorElement extends LitElement {
     static styles = Styles;
 
@@ -33,7 +35,7 @@ export default class ConnectorElement extends LitElement {
                 widget.isDrawingLine = false;
                 widget.svgPathToMouse.setAttribute('d', '');
 
-                console.error('Only one connection allowed');
+                console.error(msg('Only one connection allowed'));
 
                 return;
             }
@@ -51,7 +53,7 @@ export default class ConnectorElement extends LitElement {
             ) {
                 createLine(widget, widget.startConnector, widget.endConnector);
             } else {
-                console.error('Connector are from the same type');
+                console.error(msg('Connectors are from the same type'));
             }
             widget.startConnector = null;
             widget.endConnector = null;

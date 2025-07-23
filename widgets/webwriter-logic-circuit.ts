@@ -35,6 +35,8 @@ import { add, connect, info, remove, trash } from './src/assets/icons.js';
 import { calculatePath, updateLines, resetLines, createLine} from './src/helper/line-helper.js';
 import { addGate, moveGate, transferOutputToNextGate } from './src/helper/gate-helper.js';
 import { gateCounter, isDropOverTrashIcon, resetGates } from './src/helper/gate-helper.js';
+import LOCALIZE from "../localization/generated";
+import { localized, msg } from "@lit/localize";
 
 const workspaceWidth: number = 3000;
 const workspaceHeight: number = 2000;
@@ -43,11 +45,14 @@ let workspaceOffsetX: number = -workspaceWidth / 2;
 let workspaceOffsetY: number = -workspaceHeight / 2;
 
 @customElement('webwriter-logic-circuit')
+@localized()
 export default class LogicCircuit extends LitElementWw {
     static shadowRootOptions = {
         ...LitElementWw.shadowRootOptions,
         delegatesFocus: true,
     };
+
+    public localize = LOCALIZE;
 
     static styles = Styles;
 
@@ -162,29 +167,28 @@ export default class LogicCircuit extends LitElementWw {
 
                 <div class="workspaceContainer" id="workspace">
                     <sl-checkbox id="simCheckbox" class="simulateCheckbox" @sl-change=${() => this.simulateCircuit()} checked
-                        >Simulate</sl-checkbox
+                        >${msg("Simulate")}</sl-checkbox
                     >
 
                     <sl-switch class="flipSwitch" id="switch" @sl-change=${() => this.handleFlipAllGates()}
-                        >Show all Truthtables</sl-switch
+                        >${msg("Show all Truthtables")}</sl-switch
                     >
 
-                    <div class="trashCanIcon" style="font-size: 35px;" title="Drag items here to delete them">${trash}</div>
+                    <div class="trashCanIcon" style="font-size: 35px;" title="${msg("Drag items here to delete them")}">${trash}</div>
                     
                     <div id="instructions" class="instructions">
                         <div class="instruction">
-                        ${add}Drag and drop elements from the left sidebar to add them.
+                        ${add}${msg("Drag and drop elements from the left sidebar to add them.")}
                         </div>
                         <div class="instruction">
-                        ${connect}Left click a connection endpoint to start a connection<br/>
-                        and then click another connection endpoint to add it.
+                        ${connect}${msg("Left click a connection endpoint to start a connection and then click another connection endpoint to add it.")}
                         </div>
                         <div class="instruction">
-                        ${remove}Right click on a connection to remove it.
+                        ${remove}${msg("Right click on a connection to remove it.")}
                         </div>
                     </div>
 
-                    <div class="infoButton" @click=${() => this.toggleInstructions()}>${info}Instructions</div>
+                    <div class="infoButton" @click=${() => this.toggleInstructions()}>${info}${msg("Instructions")}</div>
 
                     <div class="workspaceArea" id="workspaceDraggable">
                         <svg class="svgArea" id="svgCanvas"></svg>
@@ -196,7 +200,7 @@ export default class LogicCircuit extends LitElementWw {
                 <p>Simulation:</p>
                 <div class="optionsItem">
                     <sl-checkbox class="optionsCheckbox" @sl-change=${() => this.handleAllowSimulation()} checked
-                        >Allow Simulation</sl-checkbox
+                        >${msg("Allow Simulation")}</sl-checkbox
                     >
                 </div>
                 <div class="optionsItem">
@@ -208,10 +212,10 @@ export default class LogicCircuit extends LitElementWw {
                         .value=${this.simulationDelay}
                         min="0"
                     ></sl-input>
-                    <p>Delay (in ms)</p>
+                    <p>${msg("Delay (in ms)")}</p>
                 </div>
                 <p></p>
-                <p>Limit max. number of Gates:</p>
+                <p>${msg("Limit max. number of Gates:")}</p>
 
                 <div class="optionsItem">
                     <sl-input
@@ -222,7 +226,7 @@ export default class LogicCircuit extends LitElementWw {
                         .value=${this.notGateAllowed >= 0 ? this.notGateAllowed : ''}
                         min="0"
                     ></sl-input>
-                    <p>NOT-Gates</p>
+                    <p>NOT-${msg("Gates")}</p>
                 </div>
                 <div class="optionsItem">
                     <sl-input
@@ -233,7 +237,7 @@ export default class LogicCircuit extends LitElementWw {
                         .value=${this.andGateAllowed >= 0 ? this.andGateAllowed : ''}
                         min="0"
                     ></sl-input>
-                    <p>AND-Gates</p>
+                    <p>AND-${msg("Gates")}</p>
                 </div>
                 <div class="optionsItem">
                     <sl-input
@@ -244,7 +248,7 @@ export default class LogicCircuit extends LitElementWw {
                         .value=${this.orGateAllowed >= 0 ? this.orGateAllowed : ''}
                         min="0"
                     ></sl-input>
-                    <p>OR-Gates</p>
+                    <p>OR-${msg("Gates")}</p>
                 </div>
                 <div class="optionsItem">
                     <sl-input
@@ -255,7 +259,7 @@ export default class LogicCircuit extends LitElementWw {
                         .value=${this.nandGateAllowed >= 0 ? this.nandGateAllowed : ''}
                         min="0"
                     ></sl-input>
-                    <p>NAND-Gates</p>
+                    <p>NAND-${msg("Gates")}</p>
                 </div>
                 <div class="optionsItem">
                     <sl-input
@@ -266,7 +270,7 @@ export default class LogicCircuit extends LitElementWw {
                         .value=${this.norGateAllowed >= 0 ? this.norGateAllowed : ''}
                         min="0"
                     ></sl-input>
-                    <p>NOR-Gates</p>
+                    <p>NOR-${msg("Gates")}</p>
                 </div>
                 <div class="optionsItem">
                     <sl-input
@@ -277,7 +281,7 @@ export default class LogicCircuit extends LitElementWw {
                         .value=${this.xnorGateAllowed >= 0 ? this.xnorGateAllowed : ''}
                         min="0"
                     ></sl-input>
-                    <p>XNOR-Gates</p>
+                    <p>XNOR-${msg("Gates")}</p>
                 </div>
                 <div class="optionsItem">
                     <sl-input
@@ -288,7 +292,7 @@ export default class LogicCircuit extends LitElementWw {
                         .value=${this.xorGateAllowed >= 0 ? this.xorGateAllowed : ''}
                         min="0"
                     ></sl-input>
-                    <p>XOR-Gates</p>
+                    <p>XOR-${msg("Gates")}</p>
                 </div>
             </div>
         `;

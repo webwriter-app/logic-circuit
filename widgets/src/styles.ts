@@ -142,6 +142,7 @@ export const Styles = css`
         z-index: 30;
         transition: background 0.2s;
         display: none;
+        max-width: 500px;
     }
 
     .instruction {
@@ -149,6 +150,10 @@ export const Styles = css`
         align-items: center;
         gap: 10px;
         margin: 10px;
+    }
+
+    .instruction .bi {
+        flex-shrink: 0;
     }
 
     .svgArea {
@@ -371,8 +376,11 @@ export const Styles = css`
         position: relative;
         display: flex;
         flex-direction: column;
-        line-height: 0%;
         font-size: 80%;
+    }
+
+    .optionsMenu > p {
+        margin-bottom: 5px;
     }
 
     .optionsCheckbox {
@@ -386,6 +394,11 @@ export const Styles = css`
         align-items: center;
         padding: 2px;
         margin: 2px;
+    }
+
+    .optionsItem > p {
+        margin: 0px;
+        margin-left: 5px;
     }
 
     sl-input {

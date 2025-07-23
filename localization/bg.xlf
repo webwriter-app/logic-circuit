@@ -1,0 +1,58 @@
+<xliff xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd" xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="lit-localize-inputs" datatype="plaintext" source-language="en" target-language="bg">
+    <body>
+      <trans-unit id="scfcffcf35292bc6f">
+        <source>Simulate</source>
+        <target>Симулирайте</target>
+      </trans-unit>
+      <trans-unit id="s49b0a472a8e77b9b">
+        <source>Show all Truthtables</source>
+        <target>Покажи всички таблици на истината</target>
+      </trans-unit>
+      <trans-unit id="s4635f32ac7e5b41b">
+        <source>Drag items here to delete them</source>
+        <target>Плъзнете елементите тук, за да ги изтриете</target>
+      </trans-unit>
+      <trans-unit id="s6aa6cfde13238a46">
+        <source>Drag and drop elements from the left sidebar to add them.</source>
+        <target>Плъзнете и пуснете елементи от лявата странична лента, за да ги добавите.</target>
+      </trans-unit>
+      <trans-unit id="s2b77630e54db68e1">
+        <source>Left click a connection endpoint to start a connection and then click another connection endpoint to add it.</source>
+        <target>Щракнете с левия бутон на мишката върху крайна точка на връзка, за да стартирате връзка, и след това щракнете върху друга крайна точка на връзка, за да я добавите.</target>
+      </trans-unit>
+      <trans-unit id="sfc8aedc3e52543e9">
+        <source>Right click on a connection to remove it.</source>
+        <target>Щракнете с десния бутон върху връзка, за да я премахнете.</target>
+      </trans-unit>
+      <trans-unit id="s34bc4cc9fb5b7aa4">
+        <source>Instructions</source>
+        <target>Инструкции</target>
+      </trans-unit>
+      <trans-unit id="sef93972726cc5929">
+        <source>Allow Simulation</source>
+        <target>Разрешаване на симулацията</target>
+      </trans-unit>
+      <trans-unit id="s212fec3bc805b040">
+        <source>Delay (in ms)</source>
+        <target>Закъснение (в ms)</target>
+      </trans-unit>
+      <trans-unit id="sb4a640f8347f726c">
+        <source>Limit max. number of Gates:</source>
+        <target>Ограничаване на максималния брой врати:</target>
+      </trans-unit>
+      <trans-unit id="s3133c523be71ab93">
+        <source>Gates</source>
+        <target>Врати</target>
+      </trans-unit>
+      <trans-unit id="sb785914856ab26c5">
+        <source>Only one connection allowed</source>
+        <target>Разрешена е само една връзка</target>
+      </trans-unit>
+      <trans-unit id="sc49c6f9b07b93aec">
+        <source>Connectors are from the same type</source>
+        <target>Съединителите са от същия тип</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

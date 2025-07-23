@@ -1,0 +1,37 @@
+{
+  ".": {
+    "description": {
+      "de": "Erstellen und Simulieren von Schaltungen mit logischen Gattern (AND, OR, XOR, etc.).",
+      "bg": "Създаване и симулиране на вериги с логически врати (AND, OR, XOR и др.).",
+      "ar": "إنشاء ومحاكاة الدوائر باستخدام بوابات منطقية (AND، OR، XOR، إلخ).",
+      "cs": "Vytvářet a simulovat obvody s logickými hradly (AND, OR, XOR atd.).",
+      "da": "Opret og simulér kredsløb med logiske porte (AND, OR, XOR osv.).",
+      "nl": "Schakelingen maken en simuleren met logische poorten (AND, OR, XOR, enz.).",
+      "et": "Loogikaväravate (AND, OR, XOR jne) abil ahelate loomine ja simuleerimine.",
+      "fi": "Luo ja simuloi logiikkaportteja (AND, OR, XOR jne.) sisältäviä piirejä.",
+      "fr": "Créer et simuler des circuits avec des portes logiques (AND, OR, XOR, etc.).",
+      "el": "Δημιουργία και προσομοίωση κυκλωμάτων με λογικές πύλες (AND, OR, XOR κ.λπ.).",
+      "hu": "Logikai kapukkal (AND, OR, XOR stb.) ellátott áramkörök létrehozása és szimulálása.",
+      "it": "Creare e simulare circuiti con porte logiche (AND, OR, XOR, ecc.).",
+      "lv": "Izveidot un simulēt shēmas ar loģiskajiem vārtiem (AND, OR, XOR utt.).",
+      "lt": "Kurkite ir modeliuokite grandines su loginiais vartais (AND, OR, XOR ir kt.).",
+      "pl": "Tworzenie i symulowanie obwodów z bramkami logicznymi (AND, OR, XOR itp.).",
+      "nb": "Lage og simulere kretser med logiske porter (AND, OR, XOR osv.).",
+      "pt-PT": "Criar e simular circuitos com portas lógicas (AND, OR, XOR, etc.).",
+      "ru": "Создание и моделирование схем с логическими затворами (AND, OR, XOR и т.д.).",
+      "ro": "Creați și simulați circuite cu porți logice (AND, OR, XOR etc.).",
+      "sk": "Vytvárajte a simulujte obvody s logickými hradlami (AND, OR, XOR atď.).",
+      "sl": "Ustvarite in simulirajte vezja z logičnimi vrati (AND, OR, XOR itd.).",
+      "es": "Crear y simular circuitos con puertas lógicas (AND, OR, XOR, etc.).",
+      "sv": "Skapa och simulera kretsar med logiska grindar (AND, OR, XOR, etc.).",
+      "tr": "Mantık kapıları (VE, VEYA, XOR, vb.) ile devreler oluşturun ve simüle edin.",
+      "uk": "Створюйте та моделюйте схеми з логічними вентилями (AND, OR, XOR тощо).",
+      "pt-BR": "Criar e simular circuitos com portas lógicas (AND, OR, XOR, etc.).",
+      "id": "Membuat dan mensimulasikan sirkuit dengan gerbang logika (AND, OR, XOR, dll.).",
+      "ko": "논리 게이트(AND, OR, XOR 등)를 사용하여 회로를 만들고 시뮬레이션합니다.",
+      "ja": "論理ゲート（AND、OR、XORなど）を使った回路を作成し、シミュレーションする。",
+      "zh-hans": "利用逻辑门（AND、OR、XOR 等）创建和模拟电路。",
+      "zh-hant": "使用邏輯門（AND、OR、XOR 等）建立和模擬電路。"
+    }
+  }
+}
