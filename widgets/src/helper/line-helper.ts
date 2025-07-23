@@ -26,7 +26,7 @@ export function getConnectorCoordinatesGhost(svgCanvas, connector) {
     return { x, y };
 }
 
-export function calculatePath(svgCanvas, startCon, endCon, zoom) {
+export function calculatePath(svgCanvas, startCon, endCon, zoom, offsetStartX?, offsetStartY?, offsetEndX?, offsetEndY?) {
     let startConnector;
     let endConnector;
 
@@ -45,14 +45,14 @@ export function calculatePath(svgCanvas, startCon, endCon, zoom) {
     const offsetX = 5;
 
     const start = {
-        x: getConnectorCoordinates(svgCanvas, startConnector, zoom).x,
-        y: getConnectorCoordinates(svgCanvas, startConnector, zoom).y,
+        x: getConnectorCoordinates(svgCanvas, startConnector, zoom).x + (offsetStartX ?? 0),
+        y: getConnectorCoordinates(svgCanvas, startConnector, zoom).y + (offsetStartY ?? 0),
         type: startConnector?.id?.substring(startConnector.id.length - 3),
     };
 
     const end = {
-        x: getConnectorCoordinates(svgCanvas, endConnector, zoom).x ,
-        y: getConnectorCoordinates(svgCanvas, endConnector, zoom).y,
+        x: getConnectorCoordinates(svgCanvas, endConnector, zoom).x + (offsetEndX ?? 0),
+        y: getConnectorCoordinates(svgCanvas, endConnector, zoom).y + (offsetEndY ?? 0),
         type: endConnector?.id?.substring(endConnector.id.length - 3),
     };
 
