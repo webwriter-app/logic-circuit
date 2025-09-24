@@ -491,7 +491,7 @@ export default class LogicCircuit extends LitElementWw {
                                     }
                                 })
                             }
-                            createLine(this,start,end)
+                            if(start && end) createLine(this,start,end)
                         }, 1)
                     }
                 })

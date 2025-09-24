@@ -428,10 +428,8 @@ export function createLine(widget, startCon, endCon) {
     });
 
     widget.svgCanvas.appendChild(svgPath);
-    console.log(widget.lineElements);
 
     let entry: string = startCon.id + "|" + endCon.id;
-    console.log(entry);
 
     if (!widget.reflectCons.includes(entry)) {
         widget.reflectCons += widget.reflectCons != "" ? "," : "";

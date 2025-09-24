@@ -466,7 +466,7 @@ export default class Gate extends LitElementWw {
                 }
             }
             if (slotOut) {
-                connectorDot = slotOut.querySelector('connector-element').shadowRoot.querySelector('.connector').children[0];
+                connectorDot = slotOut.querySelector('connector-element').shadowRoot.querySelector('.connector')?.children[0];
                 con = slotOut.querySelector('connector-element');
                 if (connectorDot && this.output === true) {
                     connectorDot.classList.add('dotTrue');
@@ -477,7 +477,7 @@ export default class Gate extends LitElementWw {
                 }
             }
             if (slotOut2) {
-                connectorDot = slotOut2.querySelector('connector-element').shadowRoot.querySelector('.connector').children[0];
+                connectorDot = slotOut2.querySelector('connector-element').shadowRoot.querySelector('.connector')?.children[0];
                 con = slotOut2.querySelector('connector-element');
                 if (connectorDot && this.output === true) {
                     connectorDot.classList.add('dotTrue');
@@ -488,7 +488,7 @@ export default class Gate extends LitElementWw {
                 }
             }
             if (slotIn1) {
-                connectorDot = slotIn1.querySelector('connector-element').shadowRoot.querySelector('.connector').children[0];
+                connectorDot = slotIn1.querySelector('connector-element').shadowRoot.querySelector('.connector')?.children[0];
                 con = slotIn1.querySelector('connector-element');
                 if (connectorDot && this.input1 === true) {
                     connectorDot.classList.add('dotTrue');
@@ -499,7 +499,7 @@ export default class Gate extends LitElementWw {
                 }
             }
             if (slotIn2) {
-                connectorDot = slotIn2.querySelector('connector-element').shadowRoot.querySelector('.connector').children[0];
+                connectorDot = slotIn2.querySelector('connector-element').shadowRoot.querySelector('.connector')?.children[0];
                 con = slotIn2.querySelector('connector-element');
                 if (connectorDot && this.input2 === true) {
                     connectorDot.classList.add('dotTrue');
