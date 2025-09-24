@@ -2,12 +2,29 @@ import { html } from 'lit';
 import Gate from './gate.js';
 import { customElement } from 'lit/decorators.js';
 
+/**
+ * Output gate component for displaying circuit results.
+ * 
+ * @description Output gates display the final result of logic calculations.
+ * They show the current logic value (true/false) flowing through the circuit.
+ * Output gates are typically placed at the end of logic chains to observe results.
+ * 
+ * @example
+ * ```html
+ * <output-gate></output-gate>
+ * ```
+ */
 export default class Output extends Gate {
     constructor() {
         super();
         this.gatetype = 'OUTPUT';
     }
 
+    /**
+     * Passes through the input value to the output.
+     * @description For output gates, the output simply equals the input value.
+     * The gate serves as a visual indicator of the circuit's final result.
+     */
     calculateOutput() {
         this.output = this.input1;
         this.requestUpdate();
