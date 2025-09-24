@@ -8,8 +8,42 @@
       "declarations": [
         {
           "kind": "class",
-          "description": "",
+          "description": "A WebWriter widget for creating and simulating digital logic circuits.",
           "name": "LogicCircuit",
+          "cssProperties": [
+            {
+              "description": "Background color of the workspace (default: #f5f5f5)",
+              "name": "--logic-circuit-background"
+            },
+            {
+              "description": "Default color for logic gates (default: #ffffff)",
+              "name": "--logic-circuit-gate-color"
+            },
+            {
+              "description": "Color for connections between gates (default: #000000)",
+              "name": "--logic-circuit-connection-color"
+            }
+          ],
+          "cssParts": [
+            {
+              "description": "The main workspace area where gates are placed",
+              "name": "workspace"
+            },
+            {
+              "description": "The sidebar containing available gates",
+              "name": "sidebar"
+            },
+            {
+              "description": "The options panel for controlling simulation and gate limits",
+              "name": "options"
+            }
+          ],
+          "slots": [
+            {
+              "description": "No slots available - content is generated programmatically",
+              "name": ""
+            }
+          ],
           "members": [
             {
               "kind": "field",
@@ -35,86 +69,13 @@
             },
             {
               "kind": "field",
-              "name": "lineElements",
-              "type": {
-                "text": "array"
-              },
-              "default": "[]",
-              "attribute": "lineElements"
-            },
-            {
-              "kind": "field",
-              "name": "gateElements",
-              "type": {
-                "text": "array"
-              },
-              "default": "[]",
-              "attribute": "gateElements"
-            },
-            {
-              "kind": "field",
-              "name": "reflectGates",
-              "type": {
-                "text": "String"
-              },
-              "default": "\"\"",
-              "attribute": "reflectGates",
-              "reflects": true
-            },
-            {
-              "kind": "field",
-              "name": "reflectCons",
-              "type": {
-                "text": "String"
-              },
-              "default": "\"\"",
-              "attribute": "reflectCons",
-              "reflects": true
-            },
-            {
-              "kind": "field",
-              "name": "gateID",
-              "type": {
-                "text": "number"
-              },
-              "default": "0",
-              "attribute": "gateID"
-            },
-            {
-              "kind": "field",
-              "name": "lineID",
-              "type": {
-                "text": "number"
-              },
-              "default": "0",
-              "attribute": "lineID"
-            },
-            {
-              "kind": "field",
               "name": "zoom",
               "type": {
                 "text": "number"
               },
               "default": "1",
+              "description": "Current zoom level of the workspace.",
               "attribute": "zoom"
-            },
-            {
-              "kind": "field",
-              "name": "dragStartX",
-              "type": {
-                "text": "number"
-              },
-              "default": "0",
-              "attribute": "dragStartX"
-            },
-            {
-              "kind": "field",
-              "name": "dragStartY",
-              "type": {
-                "text": "number"
-              },
-              "default": "0",
-              "attribute": "dragStartY"
             },
             {
               "kind": "field",
@@ -123,6 +84,7 @@
                 "text": "boolean"
               },
               "default": "true",
+              "description": "Whether the circuit simulation is currently active.",
               "attribute": "simulate"
             },
             {
@@ -132,6 +94,7 @@
                 "text": "number"
               },
               "default": "500",
+              "description": "Delay in milliseconds between simulation steps.",
               "attribute": "simulationDelay",
               "reflects": true
             },
@@ -142,6 +105,7 @@
                 "text": "number"
               },
               "default": "1",
+              "description": "Whether simulation controls are enabled.",
               "attribute": "allowSimulation",
               "reflects": true
             },
@@ -152,6 +116,7 @@
                 "text": "number"
               },
               "default": "-1",
+              "description": "Maximum number of NOT gates allowed in the circuit.",
               "attribute": "notGateAllowed",
               "reflects": true
             },
@@ -162,6 +127,7 @@
                 "text": "number"
               },
               "default": "-1",
+              "description": "Maximum number of AND gates allowed in the circuit.",
               "attribute": "andGateAllowed",
               "reflects": true
             },
@@ -172,6 +138,7 @@
                 "text": "number"
               },
               "default": "-1",
+              "description": "Maximum number of OR gates allowed in the circuit.",
               "attribute": "orGateAllowed",
               "reflects": true
             },
@@ -182,6 +149,7 @@
                 "text": "number"
               },
               "default": "-1",
+              "description": "Maximum number of NAND gates allowed in the circuit.",
               "attribute": "nandGateAllowed",
               "reflects": true
             },
@@ -192,6 +160,7 @@
                 "text": "number"
               },
               "default": "-1",
+              "description": "Maximum number of NOR gates allowed in the circuit.",
               "attribute": "norGateAllowed",
               "reflects": true
             },
@@ -202,6 +171,7 @@
                 "text": "number"
               },
               "default": "-1",
+              "description": "Maximum number of XNOR gates allowed in the circuit.",
               "attribute": "xnorGateAllowed",
               "reflects": true
             },
@@ -212,6 +182,7 @@
                 "text": "number"
               },
               "default": "-1",
+              "description": "Maximum number of XOR gates allowed in the circuit.",
               "attribute": "xorGateAllowed",
               "reflects": true
             },
@@ -222,71 +193,31 @@
                 "text": "number"
               },
               "default": "-1",
+              "description": "Maximum number of splitter gates allowed in the circuit.",
               "attribute": "splitterAllowed",
               "reflects": true
             },
             {
               "kind": "field",
-              "name": "isDragging",
-              "type": {
-                "text": "boolean"
-              },
-              "default": "false",
-              "attribute": "isDragging"
-            },
-            {
-              "kind": "field",
-              "name": "isDrawingLine",
-              "type": {
-                "text": "boolean"
-              },
-              "default": "false"
-            },
-            {
-              "kind": "field",
-              "name": "startConnector",
-              "type": {
-                "text": "ConnectorElement"
-              },
-              "default": "null"
-            },
-            {
-              "kind": "field",
-              "name": "endConnector",
-              "type": {
-                "text": "ConnectorElement"
-              },
-              "default": "null"
-            },
-            {
-              "kind": "field",
-              "name": "svgCanvas"
-            },
-            {
-              "kind": "field",
-              "name": "workspaceContainer"
-            },
-            {
-              "kind": "field",
-              "name": "wsDrag"
-            },
-            {
-              "kind": "field",
-              "name": "simCheckbox"
-            },
-            {
-              "kind": "field",
-              "name": "instructionsContainer"
-            },
-            {
-              "kind": "field",
               "name": "getGateElements",
-              "privacy": "public"
+              "privacy": "public",
+              "description": "Public getter for accessing gate elements array.",
+              "return": {
+                "type": {
+                  "text": ""
+                }
+              }
             },
             {
               "kind": "field",
               "name": "getLineElements",
-              "privacy": "public"
+              "privacy": "public",
+              "description": "Public getter for accessing line elements array.",
+              "return": {
+                "type": {
+                  "text": ""
+                }
+              }
             },
             {
               "kind": "field",
@@ -298,7 +229,8 @@
             },
             {
               "kind": "method",
-              "name": "toggleInstructions"
+              "name": "toggleInstructions",
+              "description": "Toggles the visibility of the instruction panel."
             },
             {
               "kind": "method",
@@ -375,92 +307,161 @@
               "name": "handleDrop",
               "parameters": [
                 {
-                  "name": "event"
+                  "name": "event",
+                  "description": "The drop event containing drag data",
+                  "type": {
+                    "text": "DragEvent"
+                  }
                 }
-              ]
+              ],
+              "description": "Handles drop events when gates are dropped on the workspace or trash can."
             },
             {
               "kind": "method",
               "name": "handleDropTrashCan",
               "parameters": [
                 {
-                  "name": "event"
+                  "name": "event",
+                  "description": "The drop event containing the gate ID to delete",
+                  "type": {
+                    "text": "DragEvent"
+                  }
                 }
-              ]
+              ],
+              "description": "Handles deletion of gates when dropped on the trash can."
             },
             {
               "kind": "method",
               "name": "handleInputChange",
               "parameters": [
                 {
-                  "name": "event"
+                  "name": "event",
+                  "description": "The input change event from the form element",
+                  "type": {
+                    "text": "Event"
+                  }
                 },
                 {
-                  "name": "propertyName"
+                  "name": "propertyName",
+                  "description": "The name of the property to update (e.g., 'andGateAllowed', 'simulationDelay')",
+                  "type": {
+                    "text": "string"
+                  }
                 }
-              ]
+              ],
+              "description": "Handles changes to input fields in the options panel."
             },
             {
               "kind": "method",
-              "name": "simulateCircuit"
+              "name": "simulateCircuit",
+              "description": "Starts or stops circuit simulation based on the simulation checkbox state."
             },
             {
               "kind": "method",
-              "name": "resetCircuit"
+              "name": "resetCircuit",
+              "description": "Resets all gates and connections to their default non-simulated state."
+            }
+          ],
+          "events": [
+            {
+              "description": "Dispatched when the circuit structure changes",
+              "name": "circuit-changed"
             },
             {
-              "kind": "method",
-              "name": "calculateBoundaries"
+              "description": "Dispatched when simulation is started/stopped",
+              "name": "simulation-state-changed"
             }
           ],
           "attributes": [
             {
-              "name": "lineElements",
-              "type": {
-                "text": "array"
-              },
-              "default": "[]",
-              "fieldName": "lineElements"
-            },
-            {
-              "name": "gateElements",
-              "type": {
-                "text": "array"
-              },
-              "default": "[]",
-              "fieldName": "gateElements"
-            },
-            {
-              "name": "reflectGates",
-              "type": {
-                "text": "String"
-              },
-              "default": "\"\"",
-              "fieldName": "reflectGates"
-            },
-            {
-              "name": "reflectCons",
-              "type": {
-                "text": "String"
-              },
-              "default": "\"\"",
-              "fieldName": "reflectCons"
-            },
-            {
-              "name": "gateID",
+              "name": "simulation-delay",
               "type": {
                 "text": "number"
               },
-              "default": "0",
-              "fieldName": "gateID"
+              "default": "500",
+              "description": "Delay in milliseconds between simulation steps.",
+              "fieldName": "simulationDelay"
             },
             {
-              "name": "lineID",
+              "name": "allow-simulation",
               "type": {
                 "text": "number"
               },
-              "default": "0",
-              "fieldName": "lineID"
+              "default": "1",
+              "description": "Whether simulation controls are enabled.",
+              "fieldName": "allowSimulation"
+            },
+            {
+              "name": "not-gate-allowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Maximum number of NOT gates allowed in the circuit.",
+              "fieldName": "notGateAllowed"
+            },
+            {
+              "name": "and-gate-allowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Maximum number of AND gates allowed in the circuit.",
+              "fieldName": "andGateAllowed"
+            },
+            {
+              "name": "or-gate-allowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Maximum number of OR gates allowed in the circuit.",
+              "fieldName": "orGateAllowed"
+            },
+            {
+              "name": "nand-gate-allowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Maximum number of NAND gates allowed in the circuit.",
+              "fieldName": "nandGateAllowed"
+            },
+            {
+              "name": "nor-gate-allowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Maximum number of NOR gates allowed in the circuit.",
+              "fieldName": "norGateAllowed"
+            },
+            {
+              "name": "xnor-gate-allowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Maximum number of XNOR gates allowed in the circuit.",
+              "fieldName": "xnorGateAllowed"
+            },
+            {
+              "name": "xor-gate-allowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Maximum number of XOR gates allowed in the circuit.",
+              "fieldName": "xorGateAllowed"
+            },
+            {
+              "name": "splitter-allowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Maximum number of splitter gates allowed in the circuit.",
+              "fieldName": "splitterAllowed"
             },
             {
               "name": "zoom",
@@ -468,23 +469,8 @@
                 "text": "number"
               },
               "default": "1",
+              "description": "Current zoom level of the workspace.",
               "fieldName": "zoom"
-            },
-            {
-              "name": "dragStartX",
-              "type": {
-                "text": "number"
-              },
-              "default": "0",
-              "fieldName": "dragStartX"
-            },
-            {
-              "name": "dragStartY",
-              "type": {
-                "text": "number"
-              },
-              "default": "0",
-              "fieldName": "dragStartY"
             },
             {
               "name": "simulate",
@@ -492,6 +478,7 @@
                 "text": "boolean"
               },
               "default": "true",
+              "description": "Whether the circuit simulation is currently active.",
               "fieldName": "simulate"
             },
             {
@@ -500,6 +487,8 @@
                 "text": "number"
               },
               "default": "500",
+              "description": "Delay in milliseconds between simulation steps.",
+              "attribute": "simulation-delay",
               "fieldName": "simulationDelay"
             },
             {
@@ -508,6 +497,8 @@
                 "text": "number"
               },
               "default": "1",
+              "description": "Whether simulation controls are enabled.",
+              "attribute": "allow-simulation",
               "fieldName": "allowSimulation"
             },
             {
@@ -516,6 +507,8 @@
                 "text": "number"
               },
               "default": "-1",
+              "description": "Maximum number of NOT gates allowed in the circuit.",
+              "attribute": "not-gate-allowed",
               "fieldName": "notGateAllowed"
             },
             {
@@ -524,6 +517,8 @@
                 "text": "number"
               },
               "default": "-1",
+              "description": "Maximum number of AND gates allowed in the circuit.",
+              "attribute": "and-gate-allowed",
               "fieldName": "andGateAllowed"
             },
             {
@@ -532,6 +527,8 @@
                 "text": "number"
               },
               "default": "-1",
+              "description": "Maximum number of OR gates allowed in the circuit.",
+              "attribute": "or-gate-allowed",
               "fieldName": "orGateAllowed"
             },
             {
@@ -540,6 +537,8 @@
                 "text": "number"
               },
               "default": "-1",
+              "description": "Maximum number of NAND gates allowed in the circuit.",
+              "attribute": "nand-gate-allowed",
               "fieldName": "nandGateAllowed"
             },
             {
@@ -548,6 +547,8 @@
                 "text": "number"
               },
               "default": "-1",
+              "description": "Maximum number of NOR gates allowed in the circuit.",
+              "attribute": "nor-gate-allowed",
               "fieldName": "norGateAllowed"
             },
             {
@@ -556,6 +557,8 @@
                 "text": "number"
               },
               "default": "-1",
+              "description": "Maximum number of XNOR gates allowed in the circuit.",
+              "attribute": "xnor-gate-allowed",
               "fieldName": "xnorGateAllowed"
             },
             {
@@ -564,6 +567,8 @@
                 "text": "number"
               },
               "default": "-1",
+              "description": "Maximum number of XOR gates allowed in the circuit.",
+              "attribute": "xor-gate-allowed",
               "fieldName": "xorGateAllowed"
             },
             {
@@ -572,15 +577,9 @@
                 "text": "number"
               },
               "default": "-1",
+              "description": "Maximum number of splitter gates allowed in the circuit.",
+              "attribute": "splitter-allowed",
               "fieldName": "splitterAllowed"
-            },
-            {
-              "name": "isDragging",
-              "type": {
-                "text": "boolean"
-              },
-              "default": "false",
-              "fieldName": "isDragging"
             }
           ],
           "superclass": {

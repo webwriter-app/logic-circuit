@@ -17,6 +17,15 @@ import '@shoelace-style/shoelace/dist/themes/light.css';
 import { Styles } from '../styles';
 import LogicCircuit from '../../webwriter-logic-circuit';
 
+/**
+ * Base class for all logic gates in the circuit builder.
+ * 
+ * @description Gate provides common functionality for all logic gate types including
+ * drag and drop behavior, connection management, context menus, and simulation logic.
+ * Specific gate types (AND, OR, NOT, etc.) extend this class to implement their logic.
+ * 
+ * @internal - Base class not directly instantiated by consumers
+ */
 export default class Gate extends LitElementWw {
     static movedGate;
     static x;
@@ -37,17 +46,77 @@ export default class Gate extends LitElementWw {
 
     static styles = Styles;
 
+    /**
+     * First input value for the gate logic.
+     * @description null = no connection, true/false = logic values during simulation.
+     */
     @property({ type: Boolean }) accessor input1: boolean = null;
+    
+    /**
+     * Second input value for the gate logic.
+     * @description null = no connection, true/false = logic values during simulation.
+     * Not used by single-input gates like NOT.
+     */
     @property({ type: Boolean }) accessor input2: boolean = null;
+    
+    /**
+     * Primary output value of the gate.
+     * @description Calculated based on gate type and input values during simulation.
+     */
     @property({ type: Boolean }) accessor output: boolean = null;
+    
+    /**
+     * Secondary output value for gates with multiple outputs.
+     * @description Used by splitter gates and other specialized gates.
+     */
     @property({ type: Boolean }) accessor output2: boolean = null;
+    
+    /**
+     * Type identifier for this gate.
+     * @description String identifier like 'AND', 'OR', 'NOT', 'INPUT', 'OUTPUT', etc.
+     */
     @property({ type: String }) accessor gatetype: string = null;
+    
+    /**
+     * Whether this gate can be moved after being placed.
+     * @description false for sidebar template gates, true for placed gates in workspace.
+     */
     @property({ type: Boolean }) accessor movable: boolean = false;
+    
+    /**
+     * Unique identifier for this gate instance.
+     * @description Used for tracking connections and managing gate lifecycle.
+     */
     @property({ type: String }) accessor id: string = null;
+    
+    /**
+     * First input connector element.
+     * @description Connection point for the first input of the gate.
+     */
     @property({ type: Object }) accessor conIn1: ConnectorElement = null;
+    
+    /**
+     * Second input connector element.
+     * @description Connection point for the second input of the gate.
+     */
     @property({ type: Object }) accessor conIn2: ConnectorElement = null;
+    
+    /**
+     * Primary output connector element.
+     * @description Connection point for the main output of the gate.
+     */
     @property({ type: Object }) accessor conOut: Object = null;
+    
+    /**
+     * Secondary output connector element.
+     * @description Connection point for additional outputs on specialized gates.
+     */
     @property({ type: Object }) accessor conOut2: Object = null;
+    
+    /**
+     * Whether to display the truth table for this gate.
+     * @description Controls visibility of the truth table overlay.
+     */
     @property({ type: Boolean }) accessor showTruthTable: boolean = false;
 
     @query('#contextMenu') accessor contextMenu: SlMenu;
