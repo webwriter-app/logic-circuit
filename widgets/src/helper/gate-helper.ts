@@ -11,14 +11,14 @@ import { updateLines } from '../helper/line-helper';
  */
 export function addGate(widget: any, event: any, load?: string[]) {
     // Extract loaded gate ID or choose new gate ID
-    const id = load != undefined ? load[0] : widget.gateID;
+    const id = load != undefined ? parseInt(load[0]) : widget.gateID;
 
     if(load == undefined) {
         // If new gate ID was chosen, increment gate ID counter for next gate
         widget.gateID++;
     }else {
         // If loaded gate ID was chosen, set the ID counter to higher value than current ID
-        widget.gateId = Math.max(widget.gateID, id + 1)
+        widget.gateID = Math.max(widget.gateID, id + 1)
     }
 
     const gateType = load != undefined ? load[1] : event.dataTransfer.getData('type');
