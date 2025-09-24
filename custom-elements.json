@@ -1,0 +1,824 @@
+{
+  "schemaVersion": "1.0.0",
+  "readme": "",
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "widgets/webwriter-logic-circuit.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "LogicCircuit",
+          "cssProperties": [
+            {
+              "description": "Background color of the workspace",
+              "name": "--circuit-background"
+            }
+          ],
+          "cssParts": [
+            {
+              "description": "Styles individual gate components",
+              "name": "gate"
+            },
+            {
+              "description": "Styles the connecting lines between gates",
+              "name": "line"
+            }
+          ],
+          "slots": [
+            {
+              "description": "The default slot (currently unused in this widget)",
+              "name": ""
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "shadowRootOptions",
+              "type": {
+                "text": "object"
+              },
+              "static": true,
+              "default": "{ ...LitElementWw.shadowRootOptions, delegatesFocus: true, }"
+            },
+            {
+              "kind": "field",
+              "name": "localize",
+              "privacy": "public",
+              "default": "LOCALIZE",
+              "description": "i18n handler for the widget."
+            },
+            {
+              "kind": "field",
+              "name": "scopedElements",
+              "privacy": "public",
+              "static": true,
+              "description": "Registers scoped custom elements used within the logic circuit widget.",
+              "readonly": true
+            },
+            {
+              "kind": "field",
+              "name": "lineElements",
+              "type": {
+                "text": "array"
+              },
+              "default": "[]",
+              "description": "The list of all current wire (line) elements.",
+              "attribute": "lineElements"
+            },
+            {
+              "kind": "field",
+              "name": "gateElements",
+              "type": {
+                "text": "array"
+              },
+              "default": "[]",
+              "description": "The list of all current gate elements.",
+              "attribute": "gateElements"
+            },
+            {
+              "kind": "field",
+              "name": "reflectGates",
+              "type": {
+                "text": "String"
+              },
+              "default": "\"\"",
+              "description": "Stringified representation of gate state, synced via attribute.",
+              "attribute": "reflectGates",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "reflectCons",
+              "type": {
+                "text": "String"
+              },
+              "default": "\"\"",
+              "description": "Stringified representation of connector state, synced via attribute.",
+              "attribute": "reflectCons",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "gateID",
+              "type": {
+                "text": "number"
+              },
+              "default": "0",
+              "description": "Internal gate ID counter for uniquely identifying gates.",
+              "attribute": "gateID"
+            },
+            {
+              "kind": "field",
+              "name": "lineID",
+              "type": {
+                "text": "number"
+              },
+              "default": "0",
+              "description": "Internal line ID counter for uniquely identifying wires.",
+              "attribute": "lineID"
+            },
+            {
+              "kind": "field",
+              "name": "zoom",
+              "type": {
+                "text": "number"
+              },
+              "default": "1",
+              "description": "Current zoom level of the circuit canvas.",
+              "attribute": "zoom"
+            },
+            {
+              "kind": "field",
+              "name": "dragStartX",
+              "type": {
+                "text": "number"
+              },
+              "default": "0",
+              "description": "X coordinate where the drag operation started.",
+              "attribute": "dragStartX"
+            },
+            {
+              "kind": "field",
+              "name": "dragStartY",
+              "type": {
+                "text": "number"
+              },
+              "default": "0",
+              "description": "Y coordinate where the drag operation started.",
+              "attribute": "dragStartY"
+            },
+            {
+              "kind": "field",
+              "name": "simulate",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "true",
+              "description": "Whether the simulation is running.",
+              "attribute": "simulate"
+            },
+            {
+              "kind": "field",
+              "name": "simulationDelay",
+              "type": {
+                "text": "number"
+              },
+              "default": "500",
+              "description": "Delay in milliseconds between simulation steps.",
+              "attribute": "simulationDelay",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "allowSimulation",
+              "type": {
+                "text": "number"
+              },
+              "default": "1",
+              "description": "Whether simulation is allowed (1 = allowed, 0 = disallowed).",
+              "attribute": "allowSimulation",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "notGateAllowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Limit or enable state for NOT gates (-1 = unlimited, 0+ = limited).",
+              "attribute": "notGateAllowed",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "andGateAllowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Limit or enable state for AND gates.",
+              "attribute": "andGateAllowed",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "orGateAllowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Limit or enable state for OR gates.",
+              "attribute": "orGateAllowed",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "nandGateAllowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Limit or enable state for NAND gates.",
+              "attribute": "nandGateAllowed",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "norGateAllowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Limit or enable state for NOR gates.",
+              "attribute": "norGateAllowed",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "xnorGateAllowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Limit or enable state for XNOR gates.",
+              "attribute": "xnorGateAllowed",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "xorGateAllowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Limit or enable state for XOR gates.",
+              "attribute": "xorGateAllowed",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "splitterAllowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Limit or enable state for splitter gates.",
+              "attribute": "splitterAllowed",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "isDragging",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Whether the user is currently dragging the canvas or an element.",
+              "attribute": "isDragging"
+            },
+            {
+              "kind": "field",
+              "name": "isDrawingLine",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Whether a connection line is currently being drawn."
+            },
+            {
+              "kind": "field",
+              "name": "startConnector",
+              "type": {
+                "text": "ConnectorElement"
+              },
+              "default": "null",
+              "description": "Reference to the starting connector for a wire being drawn."
+            },
+            {
+              "kind": "field",
+              "name": "endConnector",
+              "type": {
+                "text": "ConnectorElement"
+              },
+              "default": "null",
+              "description": "Reference to the ending connector for a wire being drawn."
+            },
+            {
+              "kind": "field",
+              "name": "svgCanvas",
+              "description": "Reference to the SVG canvas element."
+            },
+            {
+              "kind": "field",
+              "name": "workspaceContainer",
+              "description": "Reference to the overall workspace container."
+            },
+            {
+              "kind": "field",
+              "name": "wsDrag",
+              "description": "Reference to the draggable inner workspace."
+            },
+            {
+              "kind": "field",
+              "name": "simCheckbox",
+              "description": "Reference to the simulation checkbox toggle."
+            },
+            {
+              "kind": "field",
+              "name": "instructionsContainer",
+              "description": "Reference to the instructions container."
+            },
+            {
+              "kind": "field",
+              "name": "getGateElements",
+              "privacy": "public",
+              "description": "Get the current list of gate elements."
+            },
+            {
+              "kind": "field",
+              "name": "getLineElements",
+              "privacy": "public",
+              "description": "Get the current list of line elements."
+            },
+            {
+              "kind": "field",
+              "name": "svgPathToMouse",
+              "type": {
+                "text": "SVGPathElement | null"
+              },
+              "default": "null",
+              "description": "The temporary path element used when drawing a wire to follow the mouse."
+            },
+            {
+              "kind": "method",
+              "name": "toggleInstructions",
+              "description": "Toggles the visibility of the instructions container in the UI."
+            },
+            {
+              "kind": "method",
+              "name": "handleAllowSimulation",
+              "description": "Toggles simulation mode on or off.\nResets the circuit and updates the simulation checkbox and internal flag."
+            },
+            {
+              "kind": "method",
+              "name": "handleFlipAllGates",
+              "description": "Enables or disables the \"truth table\" display on all gates,\ndepending on the state of the main switch."
+            },
+            {
+              "kind": "method",
+              "name": "handleMouseDown",
+              "parameters": [
+                {
+                  "name": "event",
+                  "type": {
+                    "text": "MouseEvent"
+                  }
+                }
+              ],
+              "description": "Handles mouse down interactions on the workspace.\n- Starts dragging the canvas if the background is clicked.\n- Cancels in-progress line drawing.\n- Hides any open gate context menus."
+            },
+            {
+              "kind": "method",
+              "name": "handleMouseMove",
+              "parameters": [
+                {
+                  "name": "event",
+                  "type": {
+                    "text": "MouseEvent"
+                  }
+                }
+              ],
+              "description": "Handles mouse move events during dragging or line drawing.\nUpdates canvas position or live line path accordingly."
+            },
+            {
+              "kind": "method",
+              "name": "transformWorkspace",
+              "description": "Applies the current workspace offset and zoom transform to the container."
+            },
+            {
+              "kind": "method",
+              "name": "handleMouseUp",
+              "description": "Stops dragging behavior."
+            },
+            {
+              "kind": "method",
+              "name": "handleWheel",
+              "parameters": [
+                {
+                  "name": "event",
+                  "type": {
+                    "text": "WheelEvent"
+                  }
+                }
+              ],
+              "description": "Handles zooming the workspace with the mouse wheel.\nClamps zoom between 0.5 and 2.5, and recalculates boundaries."
+            },
+            {
+              "kind": "method",
+              "name": "handleMouseOut",
+              "parameters": [
+                {
+                  "name": "event",
+                  "type": {
+                    "text": "MouseEvent"
+                  }
+                }
+              ],
+              "description": "Handles mouse leaving the workspace area.\nUpdates line positions and cancels dragging."
+            },
+            {
+              "kind": "method",
+              "name": "handleContextMenu",
+              "parameters": [
+                {
+                  "name": "event",
+                  "type": {
+                    "text": "MouseEvent"
+                  }
+                }
+              ],
+              "description": "Prevents the default browser context menu."
+            },
+            {
+              "kind": "method",
+              "name": "handleDragOver",
+              "parameters": [
+                {
+                  "name": "event",
+                  "type": {
+                    "text": "DragEvent"
+                  }
+                }
+              ],
+              "description": "Called when a gate is dragged over the workspace.\n- Moves any connected lines dynamically.\n- Highlights the trash can icon if hovering over it."
+            },
+            {
+              "kind": "method",
+              "name": "handleDrop",
+              "parameters": [
+                {
+                  "name": "event",
+                  "type": {
+                    "text": "DragEvent"
+                  }
+                }
+              ],
+              "description": "Handles a drop event on the workspace.\n- Adds new gates or moves existing ones.\n- Deletes gates if dropped over the trash icon."
+            },
+            {
+              "kind": "method",
+              "name": "handleDropTrashCan",
+              "parameters": [
+                {
+                  "name": "event",
+                  "type": {
+                    "text": "DragEvent"
+                  }
+                }
+              ],
+              "description": "Deletes a gate when it is dropped over the trash can."
+            },
+            {
+              "kind": "method",
+              "name": "handleInputChange",
+              "parameters": [
+                {
+                  "name": "event",
+                  "type": {
+                    "text": "InputEvent"
+                  }
+                },
+                {
+                  "name": "propertyName",
+                  "description": "The name of the property to update",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Parses a numeric input field and sets the corresponding property.\nDefaults to -1 if the value is invalid."
+            },
+            {
+              "kind": "method",
+              "name": "simulateCircuit",
+              "description": "Starts circuit simulation.\nCalculates outputs from all input gates and propagates through the circuit.\nStops simulation if the checkbox is unchecked."
+            },
+            {
+              "kind": "method",
+              "name": "resetCircuit",
+              "description": "Resets all gates and lines in the circuit to their initial state."
+            },
+            {
+              "kind": "method",
+              "name": "calculateBoundaries",
+              "description": "Ensures the workspace stays within bounds during dragging or zooming.\nClamps `workspaceOffsetX` and `workspaceOffsetY` based on viewport and canvas size."
+            }
+          ],
+          "attributes": [
+            {
+              "type": {
+                "text": "number"
+              },
+              "description": "Delay (in ms) between simulation ticks",
+              "name": "simulation-delay"
+            },
+            {
+              "type": {
+                "text": "number"
+              },
+              "description": "Whether simulation is enabled (1 = enabled, 0 = disabled)",
+              "name": "allow-simulation"
+            },
+            {
+              "type": {
+                "text": "number"
+              },
+              "description": "Whether NOT gates are allowed (-1 = unlimited, 0+ = limited)",
+              "name": "not-gate-allowed"
+            },
+            {
+              "type": {
+                "text": "number"
+              },
+              "description": "Whether AND gates are allowed",
+              "name": "and-gate-allowed"
+            },
+            {
+              "type": {
+                "text": "number"
+              },
+              "description": "Whether OR gates are allowed",
+              "name": "or-gate-allowed"
+            },
+            {
+              "type": {
+                "text": "number"
+              },
+              "description": "Whether NAND gates are allowed",
+              "name": "nand-gate-allowed"
+            },
+            {
+              "type": {
+                "text": "number"
+              },
+              "description": "Whether NOR gates are allowed",
+              "name": "nor-gate-allowed"
+            },
+            {
+              "type": {
+                "text": "number"
+              },
+              "description": "Whether XOR gates are allowed",
+              "name": "xor-gate-allowed"
+            },
+            {
+              "type": {
+                "text": "number"
+              },
+              "description": "Whether XNOR gates are allowed",
+              "name": "xnor-gate-allowed"
+            },
+            {
+              "type": {
+                "text": "number"
+              },
+              "description": "Whether splitters are allowed",
+              "name": "splitter-allowed"
+            },
+            {
+              "type": {
+                "text": "string"
+              },
+              "description": "Stringified representation of gates (for syncing or reflecting state)",
+              "name": "reflect-gates"
+            },
+            {
+              "type": {
+                "text": "string"
+              },
+              "description": "Stringified representation of connections (for syncing or reflecting state)",
+              "name": "reflect-cons"
+            },
+            {
+              "name": "lineElements",
+              "type": {
+                "text": "array"
+              },
+              "default": "[]",
+              "description": "The list of all current wire (line) elements.",
+              "fieldName": "lineElements"
+            },
+            {
+              "name": "gateElements",
+              "type": {
+                "text": "array"
+              },
+              "default": "[]",
+              "description": "The list of all current gate elements.",
+              "fieldName": "gateElements"
+            },
+            {
+              "name": "reflectGates",
+              "type": {
+                "text": "String"
+              },
+              "default": "\"\"",
+              "description": "Stringified representation of gate state, synced via attribute.",
+              "fieldName": "reflectGates"
+            },
+            {
+              "name": "reflectCons",
+              "type": {
+                "text": "String"
+              },
+              "default": "\"\"",
+              "description": "Stringified representation of connector state, synced via attribute.",
+              "fieldName": "reflectCons"
+            },
+            {
+              "name": "gateID",
+              "type": {
+                "text": "number"
+              },
+              "default": "0",
+              "description": "Internal gate ID counter for uniquely identifying gates.",
+              "fieldName": "gateID"
+            },
+            {
+              "name": "lineID",
+              "type": {
+                "text": "number"
+              },
+              "default": "0",
+              "description": "Internal line ID counter for uniquely identifying wires.",
+              "fieldName": "lineID"
+            },
+            {
+              "name": "zoom",
+              "type": {
+                "text": "number"
+              },
+              "default": "1",
+              "description": "Current zoom level of the circuit canvas.",
+              "fieldName": "zoom"
+            },
+            {
+              "name": "dragStartX",
+              "type": {
+                "text": "number"
+              },
+              "default": "0",
+              "description": "X coordinate where the drag operation started.",
+              "fieldName": "dragStartX"
+            },
+            {
+              "name": "dragStartY",
+              "type": {
+                "text": "number"
+              },
+              "default": "0",
+              "description": "Y coordinate where the drag operation started.",
+              "fieldName": "dragStartY"
+            },
+            {
+              "name": "simulate",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "true",
+              "description": "Whether the simulation is running.",
+              "fieldName": "simulate"
+            },
+            {
+              "name": "simulationDelay",
+              "type": {
+                "text": "number"
+              },
+              "default": "500",
+              "description": "Delay in milliseconds between simulation steps.",
+              "fieldName": "simulationDelay"
+            },
+            {
+              "name": "allowSimulation",
+              "type": {
+                "text": "number"
+              },
+              "default": "1",
+              "description": "Whether simulation is allowed (1 = allowed, 0 = disallowed).",
+              "fieldName": "allowSimulation"
+            },
+            {
+              "name": "notGateAllowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Limit or enable state for NOT gates (-1 = unlimited, 0+ = limited).",
+              "fieldName": "notGateAllowed"
+            },
+            {
+              "name": "andGateAllowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Limit or enable state for AND gates.",
+              "fieldName": "andGateAllowed"
+            },
+            {
+              "name": "orGateAllowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Limit or enable state for OR gates.",
+              "fieldName": "orGateAllowed"
+            },
+            {
+              "name": "nandGateAllowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Limit or enable state for NAND gates.",
+              "fieldName": "nandGateAllowed"
+            },
+            {
+              "name": "norGateAllowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Limit or enable state for NOR gates.",
+              "fieldName": "norGateAllowed"
+            },
+            {
+              "name": "xnorGateAllowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Limit or enable state for XNOR gates.",
+              "fieldName": "xnorGateAllowed"
+            },
+            {
+              "name": "xorGateAllowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Limit or enable state for XOR gates.",
+              "fieldName": "xorGateAllowed"
+            },
+            {
+              "name": "splitterAllowed",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1",
+              "description": "Limit or enable state for splitter gates.",
+              "fieldName": "splitterAllowed"
+            },
+            {
+              "name": "isDragging",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Whether the user is currently dragging the canvas or an element.",
+              "fieldName": "isDragging"
+            }
+          ],
+          "superclass": {
+            "name": "LitElementWw",
+            "package": "@webwriter/lit"
+          },
+          "tagName": "webwriter-logic-circuit",
+          "customElement": true,
+          "summary": "Logic circuit simulator widget for composing and simulating digital circuits with logic gates."
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "default",
+          "declaration": {
+            "name": "LogicCircuit",
+            "module": "widgets/webwriter-logic-circuit.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "webwriter-logic-circuit",
+          "declaration": {
+            "name": "LogicCircuit",
+            "module": "widgets/webwriter-logic-circuit.ts"
+          }
+        }
+      ]
+    }
+  ]
+}
