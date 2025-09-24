@@ -322,10 +322,10 @@ export default class LogicCircuit extends LitElementWw {
     }
 
     toggleInstructions() {
-        if (this.instructionsContainer.style.display == "none") {
-            this.instructionsContainer.style.display = 'block';
-        } else {
+        if (this.instructionsContainer.style.display == "block") {
             this.instructionsContainer.style.display = 'none';
+        } else {
+            this.instructionsContainer.style.display = 'block';
         }
     }
 
