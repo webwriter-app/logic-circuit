@@ -5,7 +5,6 @@ import { Styles } from './styles.js';
 import LogicCircuit from '../webwriter-logic-circuit.js';
 import { localized, msg } from "@lit/localize";
 
-@localized()
 /**
  * @summary Represents a connection point in a logic circuit.
  *
@@ -19,6 +18,7 @@ import { localized, msg } from "@lit/localize";
  * @property {*} value - Current value of the connector (can be null).
  */
 @customElement("connector-element")
+@localized()
 export default class ConnectorElement extends LitElement {
     static styles = Styles;
 

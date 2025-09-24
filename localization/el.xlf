@@ -5,10 +5,6 @@
         <source>Simulate</source>
         <target>Προσομοίωση</target>
       </trans-unit>
-      <trans-unit id="s49b0a472a8e77b9b">
-        <source>Show all Truthtables</source>
-        <target>Εμφάνιση όλων των Truthtables</target>
-      </trans-unit>
       <trans-unit id="s4635f32ac7e5b41b">
         <source>Drag items here to delete them</source>
         <target>Σύρετε στοιχεία εδώ για να τα διαγράψετε</target>
@@ -52,6 +48,22 @@
       <trans-unit id="sc49c6f9b07b93aec">
         <source>Connectors are from the same type</source>
         <target>Οι σύνδεσμοι είναι του ίδιου τύπου</target>
+      </trans-unit>
+      <trans-unit id="s21ab242e1b149ec7">
+        <source>Show Truthtable</source>
+        <target>Εμφάνιση Truthtable</target>
+      </trans-unit>
+      <trans-unit id="sdc673e73b5c13aea">
+        <source>Delete</source>
+        <target>Διαγραφή</target>
+      </trans-unit>
+      <trans-unit id="s125d2fd8e606e489">
+        <source>Show truth table</source>
+        <target>Εμφάνιση πίνακα αλήθειας</target>
+      </trans-unit>
+      <trans-unit id="s582cc89defd16fdf">
+        <source>Show all truth tables</source>
+        <target>Εμφάνιση όλων των πινάκων αλήθειας</target>
       </trans-unit>
     </body>
   </file>

@@ -5,10 +5,6 @@
         <source>Simulate</source>
         <target>Simuler</target>
       </trans-unit>
-      <trans-unit id="s49b0a472a8e77b9b">
-        <source>Show all Truthtables</source>
-        <target>Afficher tous les Truthtables</target>
-      </trans-unit>
       <trans-unit id="s4635f32ac7e5b41b">
         <source>Drag items here to delete them</source>
         <target>Faites glisser les éléments ici pour les supprimer</target>
@@ -52,6 +48,22 @@
       <trans-unit id="sc49c6f9b07b93aec">
         <source>Connectors are from the same type</source>
         <target>Les connecteurs sont du même type</target>
+      </trans-unit>
+      <trans-unit id="s21ab242e1b149ec7">
+        <source>Show Truthtable</source>
+        <target>Montrer la table de vérité</target>
+      </trans-unit>
+      <trans-unit id="sdc673e73b5c13aea">
+        <source>Delete</source>
+        <target>Supprimer</target>
+      </trans-unit>
+      <trans-unit id="s125d2fd8e606e489">
+        <source>Show truth table</source>
+        <target>Afficher la table de vérité</target>
+      </trans-unit>
+      <trans-unit id="s582cc89defd16fdf">
+        <source>Show all truth tables</source>
+        <target>Afficher toutes les tables de vérité</target>
       </trans-unit>
     </body>
   </file>

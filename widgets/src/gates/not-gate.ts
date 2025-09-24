@@ -1,5 +1,6 @@
 import { html } from 'lit';
 import Gate from './gate.js';
+import { localized, msg } from "@lit/localize";
 import LukaswwLogicgates from '../../webwriter-logic-circuit.js';
 
 /**
@@ -9,6 +10,7 @@ import LukaswwLogicgates from '../../webwriter-logic-circuit.js';
  *
  * @extends Gate
  */
+@localized()
 export default class NOTGate extends Gate {
     constructor() {
         super();
@@ -35,9 +37,9 @@ export default class NOTGate extends Gate {
             </div>
             <sl-menu class="contextMenuGates" id="contextMenu" style="display: none;">
                 <sl-menu-item id="flipCheckbox" type="checkbox" @click="${() => this.flipGate()}"
-                    >Show Truthtable</sl-menu-item
+                    >${msg("Show Truthtable")}</sl-menu-item
                 >
-                <sl-menu-item @click="${() => this.deleteGate()}">Delete</sl-menu-item>
+                <sl-menu-item @click="${() => this.deleteGate()}">${msg("Delete")}</sl-menu-item>
             </sl-menu>
         `;
     }

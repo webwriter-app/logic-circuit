@@ -11,8 +11,11 @@
     export const templates = {
       'sb785914856ab26c5': `Only one connection allowed`,
 'sc49c6f9b07b93aec': `Connectors are from the same type`,
+'s21ab242e1b149ec7': `Show Truthtable`,
+'sdc673e73b5c13aea': `Delete`,
+'s125d2fd8e606e489': `Show truth table`,
 'scfcffcf35292bc6f': `Simulate`,
-'s49b0a472a8e77b9b': `Show all Truthtables`,
+'s582cc89defd16fdf': `Show all truth tables`,
 's4635f32ac7e5b41b': `Drag items here to delete them`,
 's6aa6cfde13238a46': `Drag and drop elements from the left sidebar to add them.`,
 's2b77630e54db68e1': `Left click a connection endpoint to start a connection and then click another connection endpoint to add it.`,

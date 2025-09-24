@@ -1,6 +1,1 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.1" srcLang="en" trgLang="ko">
-<file id="." original=".">
-<unit id="description"><segment><source>Create and simulate circuits with logic gates (AND, OR, XOR, etc.).</source><target>논리 게이트(AND, OR, XOR 등)를 사용하여 회로를 만들고 시뮬레이션합니다.</target></segment></unit>
-</file>
-</xliff>
+﻿<?xml version="1.0" encoding="utf-8"?><xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.1" srcLang="en" trgLang="ko"><file id="." original="."><unit id="description"><segment><source>Create and simulate circuits with logic gates (AND, OR, XOR, etc.).</source><target>논리 게이트(AND, OR, XOR 등)를 사용하여 회로를 만들고 시뮬레이션합니다.</target></segment></unit></file></xliff>

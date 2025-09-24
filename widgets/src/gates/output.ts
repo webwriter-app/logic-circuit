@@ -1,5 +1,6 @@
 import { html } from 'lit';
 import Gate from './gate.js';
+import { localized, msg } from "@lit/localize";
 
 /**
  * Represents an Output gate in the logic circuit.
@@ -8,6 +9,7 @@ import Gate from './gate.js';
  *
  * @extends Gate
  */
+@localized()
 export default class Output extends Gate {
     constructor() {
         super();
@@ -28,7 +30,7 @@ export default class Output extends Gate {
                 <div class="gatepointer">${this.output ? "true" : "false"}</div>
             </div>
             <sl-menu class="contextMenuGates" id="contextMenu" style="display: none;">
-                <sl-menu-item @click="${() => this.deleteGate()}">Delete</sl-menu-item>
+                <sl-menu-item @click="${() => this.deleteGate()}">${msg("Delete")}</sl-menu-item>
             </sl-menu>
         `;
     }

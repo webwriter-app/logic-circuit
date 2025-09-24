@@ -1,6 +1,1 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.1" srcLang="en" trgLang="zh-hans">
-<file id="." original=".">
-<unit id="description"><segment><source>Create and simulate circuits with logic gates (AND, OR, XOR, etc.).</source><target>利用逻辑门（AND、OR、XOR 等）创建和模拟电路。</target></segment></unit>
-</file>
-</xliff>
+﻿<?xml version="1.0" encoding="utf-8"?><xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.1" srcLang="en" trgLang="zh-Hans"><file id="." original="."><unit id="description"><segment><source>Create and simulate circuits with logic gates (AND, OR, XOR, etc.).</source><target>利用逻辑门（AND、OR、XOR 等）创建和模拟电路。</target></segment></unit></file></xliff>

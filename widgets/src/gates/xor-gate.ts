@@ -1,5 +1,6 @@
 import { html } from 'lit';
 import Gate from './gate.js';
+import { localized, msg } from "@lit/localize";
 
 /**
  * Represents an XOR gate in the logic circuit.
@@ -8,6 +9,7 @@ import Gate from './gate.js';
  *
  * @extends Gate
  */
+@localized()
 export default class XORGate extends Gate {
     constructor() {
         super();
@@ -32,9 +34,9 @@ export default class XORGate extends Gate {
 
             <sl-menu class="contextMenuGates" id="contextMenu" style="display: none;">
                 <sl-menu-item id="flipCheckbox" type="checkbox" @click="${() => this.flipGate()}"
-                    >Show Truthtable</sl-menu-item
+                    >${msg("Show truth table")}</sl-menu-item
                 >
-                <sl-menu-item @click="${() => this.deleteGate()}">Delete</sl-menu-item>
+                <sl-menu-item @click="${() => this.deleteGate()}">${msg("Delete")}</sl-menu-item>
             </sl-menu>
         `;
     }

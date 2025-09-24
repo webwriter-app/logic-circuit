@@ -256,7 +256,7 @@ export default class LogicCircuit extends LitElementWw {
                     >
 
                     <sl-switch class="flipSwitch" id="switch" @sl-change=${() => this.handleFlipAllGates()}
-                        >${msg("Show all Truthtables")}</sl-switch
+                        >${msg("Show all truth tables")}</sl-switch
                     >
 
                     <div class="trashCanIcon" style="font-size: 35px;" title="${msg("Drag items here to delete them")}">${trash}</div>
