@@ -746,6 +746,10 @@ export default class LogicCircuit extends LitElementWw {
         if (event.dataTransfer.getData('movable') === 'false') {
             if (!isOverTrash) {
                 addGate(this, event);
+                // Refresh truthtable states of gates after gate is probably loaded
+                setTimeout(() => {
+                    this.handleFlipAllGates();
+                }, 100)
             }
         } else if (event.dataTransfer.getData('movable') === 'true') {
             const id = event.dataTransfer.getData('id');
