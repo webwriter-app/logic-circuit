@@ -469,6 +469,7 @@ export default class LogicCircuit extends LitElementWw {
                 let startID: string = con.split("|")[0]
                 let endID: string = con.split("|")[1]
                 let start: any, end: any
+                let added: boolean = false;
                 this.shadowRoot.querySelector(".workspaceArea").childNodes.forEach(node=>{
                     if(node.nodeName.includes("GATE")){
                         setTimeout(()=>{
@@ -491,7 +492,10 @@ export default class LogicCircuit extends LitElementWw {
                                     }
                                 })
                             }
-                            if(start && end) createLine(this,start,end)
+                            if(!added && start && end) {
+                                added = true
+                                createLine(this,start,end)
+                            }
                         }, 1)
                     }
                 })
