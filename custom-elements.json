@@ -8,7 +8,7 @@
       "declarations": [
         {
           "kind": "class",
-          "description": "A WebWriter widget for creating and simulating digital logic circuits.",
+          "description": "A WebWriter widget for creating and simulating digital logic circuits.\r\n\r\n@description This web component provides an interactive environment for building digital logic circuits\r\nusing drag-and-drop gates (AND, OR, NOT, XOR, etc.), connecting them with lines, and simulating their behavior.\r\nIt features a sidebar with available gates, a workspace for circuit construction, and simulation controls.\r\n\r\n## Circuit Serialization Format\r\n\r\nThe component uses two main attributes for persistence:\r\n\r\n### reflectGates Format\r\nGates are serialized as comma-separated entries: `\"gateID|gateType|xPosition|yPosition,...\"` \r\n\r\n**Gate Types (case-sensitive):**\r\n- `\"NOT\"` - NOT gate (1 input, 1 output)\r\n- `\"AND\"` - AND gate (2 inputs, 1 output) \r\n- `\"OR\"` - OR gate (2 inputs, 1 output)\r\n- `\"NAND\"` - NAND gate (2 inputs, 1 output)\r\n- `\"NOR\"` - NOR gate (2 inputs, 1 output)\r\n- `\"XOR\"` - XOR gate (2 inputs, 1 output)\r\n- `\"XNOR\"` - XNOR gate (2 inputs, 1 output)\r\n- `\"INPUT\"` - Input source (0 inputs, 1 output)\r\n- `\"OUTPUT\"` - Output display (1 input, 0 outputs)\r\n- `\"SPLITTER\"` - Signal splitter (1 input, 2 outputs)\r\n\r\n**Coordinates:** Pixel positions relative to workspace origin (top-left), including \"px\" suffix\r\n\r\n**Example:** `\"0|INPUT|50px|100px,1|AND|200px|100px,2|OUTPUT|350px|100px\"`\r\n\r\n### reflectCons Format\r\nConnections are serialized as comma-separated pairs: `\"startConnectorID|endConnectorID,...\"`\r\n\r\n**Connector ID Structure:** `{gateType}Gate{gateID}{portType}{portNumber?}`\r\n- `gateType`: Lowercase gate type (e.g., \"input\", \"and\", \"output\")\r\n- `gateID`: Numeric gate identifier  \r\n- `portType`: \"In1\", \"In2\", \"Out\", \"Out2\", \"Out3\"\r\n\r\n**Port Mappings by Gate Type:**\r\n- **INPUT:** `Out` (single output)\r\n- **OUTPUT:** `In1` (single input)\r\n- **NOT:** `In1` (input), `Out` (output)\r\n- **AND/OR/NAND/NOR/XOR/XNOR:** `In1`, `In2` (inputs), `Out` (output)\r\n- **SPLITTER:** `In1` (input), `Out2`, `Out3` (two outputs)\r\n\r\n**Example:** `\"inputGate0Out|andGate1In1,inputGate0Out|andGate1In2,andGate1Out|outputGate2In1\"`\r\n\r\n## Workspace Coordinate System\r\n- **Canvas Size:** 3000px wide × 2000px high (total workspace area)\r\n- **Origin:** Top-left corner of the workspace (0,0)\r\n- **Units:** Pixels (CSS pixels)\r\n- **Initial View:** Viewport starts centered at (-1500px, -1000px), showing the middle of the canvas\r\n\r\n### Recommended Coordinate Ranges\r\n**For gates to be immediately visible on load:**\r\n- **X coordinates:** 1200px - 1800px (center area, horizontally)\r\n- **Y coordinates:** 800px - 1200px (center area, vertically)\r\n- **Example good position:** `1500px|1000px` (exact center of canvas)\r\n\r\n**Full valid ranges:**\r\n- **X coordinates:** 0px - 3000px (left edge to right edge)\r\n- **Y coordinates:** 0px - 2000px (top edge to bottom edge)\r\n\r\n**⚠️ Avoid very small coordinates (< 500px) as they will be outside the initial viewport!**\r\n\r\n@example\r\n```html\r\n<!-- Basic usage -->\r\n<webwriter-logic-circuit></webwriter-logic-circuit>\r\n\r\n<!-- Pre-loaded circuit with gates and connections (center positioned) -->\r\n<webwriter-logic-circuit \r\n  reflectgates=\"0|INPUT|1300px|1000px,1|AND|1500px|1000px,2|OUTPUT|1700px|1000px\"\r\n  reflectcons=\"inputGate0Out|andGate1In1,andGate1Out|outputGate2In1\"\r\n  simulationdelay=\"1000\">\r\n</webwriter-logic-circuit>\r\n\r\n<!-- With gate restrictions and simulation settings -->\r\n<webwriter-logic-circuit \r\n  andgateallowed=\"5\"\r\n  orgateallowed=\"3\"\r\n  simulationdelay=\"500\"\r\n  allowsimulation=\"1\">\r\n</webwriter-logic-circuit>\r\n\r\n<!-- Disabled simulation with specific gate limits -->\r\n<webwriter-logic-circuit \r\n  allowsimulation=\"0\"\r\n  notgateallowed=\"2\"\r\n  andgateallowed=\"3\"\r\n  orgateallowed=\"0\">\r\n</webwriter-logic-circuit>\r\n```\r\n\r\n## AI Usage Examples\r\n\r\n### Simple AND Gate Circuit (well-positioned in viewport)\r\n```html\r\n<webwriter-logic-circuit \r\n  reflectgates=\"0|INPUT|1300px|900px,1|INPUT|1300px|1100px,2|AND|1500px|1000px,3|OUTPUT|1700px|1000px\"\r\n  reflectcons=\"inputGate0Out|andGate2In1,inputGate1Out|andGate2In2,andGate2Out|outputGate3In1\">\r\n</webwriter-logic-circuit>\r\n```\r\n\r\n### Half Adder Circuit (centered for immediate visibility)\r\n```html\r\n<webwriter-logic-circuit \r\n  reflectgates=\"0|INPUT|1300px|900px,1|INPUT|1300px|1100px,2|XOR|1500px|900px,3|AND|1500px|1100px,4|OUTPUT|1700px|900px,5|OUTPUT|1700px|1100px\"\r\n  reflectcons=\"inputGate0Out|xorGate2In1,inputGate1Out|xorGate2In2,inputGate0Out|andGate3In1,inputGate1Out|andGate3In2,xorGate2Out|outputGate4In1,andGate3Out|outputGate5In1\">\r\n</webwriter-logic-circuit>\r\n```\r\n\r\n## Input Gate Control\r\nInput gates can be toggled by clicking them during simulation. Initial values are always `false` (logic 0).\r\nTo programmatically set input values, access the gate element and set its `input1` property:\r\n```javascript\r\nconst circuit = document.querySelector('webwriter-logic-circuit');\r\nconst inputGate = circuit.gateElements.find(gate => gate.gatetype === 'INPUT' && gate.id === 'inputGate0');\r\ninputGate.input1 = true; // Set to logic 1\r\n```\r\n\r\n## Canvas Layout Tips\r\n**Problem:** Gates with very small coordinates (e.g., 50px, 100px) appear outside the initial viewport\r\n**Solution:** Use center-area coordinates for immediate visibility:\r\n- **Good coordinates:** `1400px|950px`, `1600px|1050px` (always visible on load)\r\n- **Avoid:** `50px|100px`, `200px|300px` (user must pan to find them)\r\n- **Tip:** Start with center coordinates (~1500px, ~1000px) and spread out from there\r\n\r\n## Attribute Name Schema\r\n- **Main data attributes:** Use camelCase without hyphens (e.g., `reflectgates`, `reflectcons`)\r\n- **Configuration attributes:** Use lowercase without hyphens (e.g., `simulationdelay`, `allowsimulation`, `andgateallowed`)\r\n- **Property names:** Use camelCase for JavaScript properties (e.g., `simulationDelay`, `andGateAllowed`)\r\n- **Reflection:** All gate limits and simulation settings reflect to attributes automatically\r\n\r\n## Workspace Control\r\n- **Pan:** Click and drag on empty workspace area\r\n- **Zoom:** Mouse wheel (0.5x to 2.5x range)\r\n- **Reset:** No automatic reset - use pan/zoom to navigate\r\n- **Grid:** No visible grid - free positioning\r\n\r\n## Programming Interface\r\n```javascript\r\n// Access the component\r\nconst circuit = document.querySelector('webwriter-logic-circuit');\r\n\r\n// Get current circuit state\r\nconst gates = circuit.getGateElements();\r\nconst connections = circuit.getLineElements();\r\n\r\n// Control simulation\r\ncircuit.simulate = true;  // Enable/disable simulation\r\ncircuit.simulationDelay = 1000;  // Set propagation delay\r\n\r\n// Modify input values\r\nconst inputGates = gates.filter(g => g.gatetype === 'INPUT');\r\ninputGates[0].input1 = true;  // Set input to logic 1\r\n\r\n// Access serialized state\r\nconsole.log(circuit.reflectGates);  // Current gate configuration\r\nconsole.log(circuit.reflectCons);   // Current connections\r\n```\r\n\r\n@fires circuit-changed - Dispatched when the circuit structure changes (gates added/removed/moved)\r\n@fires simulation-state-changed - Dispatched when simulation is started/stopped\r\n\r\n@slot - No slots available - content is generated programmatically\r\n\r\n@cssprop --logic-circuit-background - Background color of the workspace (default: #f5f5f5)\r\n@cssprop --logic-circuit-gate-color - Default color for logic gates (default: #ffffff)\r\n@cssprop --logic-circuit-connection-color - Color for connections between gates (default: #000000)\r\n\r\n@csspart workspace - The main workspace area where gates are placed\r\n@csspart sidebar - The sidebar containing available gates\r\n@csspart options - The options panel for controlling simulation and gate limits",
           "name": "LogicCircuit",
           "cssProperties": [
             {
@@ -69,12 +69,34 @@
             },
             {
               "kind": "field",
+              "name": "reflectGates",
+              "type": {
+                "text": "String"
+              },
+              "default": "\"\"",
+              "description": "Serialized representation of gates for persistence and initialization.\r\n\r\n@description Contains a comma-separated list of gate definitions for saving and restoring circuit state.\r\nEach gate entry follows the format: `\"gateID|gateType|xPosition|yPosition\"`\r\n\r\n**Format Details:**\r\n- **gateID:** Numeric identifier (0, 1, 2, ...) - automatically assigned during creation\r\n- **gateType:** Gate type string - must be one of: \"NOT\", \"AND\", \"OR\", \"NAND\", \"NOR\", \"XOR\", \"XNOR\", \"INPUT\", \"OUTPUT\", \"SPLITTER\"\r\n- **xPosition:** X coordinate in pixels with \"px\" suffix (e.g., \"150px\")\r\n- **yPosition:** Y coordinate in pixels with \"px\" suffix (e.g., \"200px\")\r\n- **Separator:** Pipe character \"|\" between fields, comma \",\" between gates\r\n\r\n**Coordinate System:**\r\n- Origin: Top-left of 3000×2000px workspace\r\n- Units: CSS pixels\r\n- Valid range: 0-3000px (X), 0-2000px (Y)\r\n\r\n@example \"0|INPUT|100px|150px,1|AND|300px|200px,2|OUTPUT|500px|200px\"\r\n\r\n@attribute reflectgates",
+              "attribute": "reflectGates",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "reflectCons",
+              "type": {
+                "text": "String"
+              },
+              "default": "\"\"",
+              "description": "Serialized representation of connections for persistence and initialization.\r\n\r\n@description Contains a comma-separated list of connection definitions linking gate ports.\r\nEach connection entry follows the format: `\"startConnectorID|endConnectorID\"`\r\n\r\n**Connector ID Structure:** `{gateType}Gate{gateID}{portType}`\r\n- **gateType:** Lowercase gate type (input, and, or, nand, nor, xor, xnor, output, splitter, not)\r\n- **gateID:** The numeric ID from reflectGates (0, 1, 2, ...)\r\n- **portType:** Port identifier specific to gate type\r\n\r\n**Port Types by Gate:**\r\n- **INPUT gates:** `Out` (single output port)\r\n- **OUTPUT gates:** `In1` (single input port)\r\n- **NOT gates:** `In1` (input), `Out` (output)\r\n- **2-input gates (AND/OR/NAND/NOR/XOR/XNOR):** `In1`, `In2` (inputs), `Out` (output)\r\n- **SPLITTER gates:** `In1` (input), `Out2`, `Out3` (two separate outputs)\r\n\r\n**Connection Rules:**\r\n- Only output→input connections allowed\r\n- Each input port accepts only one connection\r\n- Output ports can connect to multiple inputs\r\n- Separator: Pipe \"|\" between connector IDs, comma \",\" between connections\r\n\r\n@example \"inputGate0Out|andGate1In1,inputGate0Out|andGate1In2,andGate1Out|outputGate2In1\"\r\n\r\n@attribute reflectcons",
+              "attribute": "reflectCons",
+              "reflects": true
+            },
+            {
+              "kind": "field",
               "name": "zoom",
               "type": {
                 "text": "number"
               },
               "default": "1",
-              "description": "Current zoom level of the workspace.",
+              "description": "Current zoom level of the workspace.\r\n@description Controls the scaling of the workspace. 1.0 = 100%, 2.0 = 200%, etc.\r\n@default 1\r\n@minimum 0.1\r\n@maximum 5.0",
               "attribute": "zoom"
             },
             {
@@ -84,7 +106,7 @@
                 "text": "boolean"
               },
               "default": "true",
-              "description": "Whether the circuit simulation is currently active.",
+              "description": "Whether the circuit simulation is currently active.\r\n@description When true, the circuit will automatically calculate and display logic values.\r\n@default true",
               "attribute": "simulate"
             },
             {
@@ -94,7 +116,7 @@
                 "text": "number"
               },
               "default": "500",
-              "description": "Delay in milliseconds between simulation steps.",
+              "description": "Delay in milliseconds between simulation steps.\r\n@description Controls how fast the simulation propagates through the circuit.\r\nLower values = faster simulation, higher values = slower simulation for visualization.\r\n@default 500\r\n@minimum 0\r\n@maximum 5000\r\n@attribute simulationdelay",
               "attribute": "simulationDelay",
               "reflects": true
             },
@@ -105,7 +127,7 @@
                 "text": "number"
               },
               "default": "1",
-              "description": "Whether simulation controls are enabled.",
+              "description": "Whether simulation controls are enabled.\r\n@description Controls visibility and functionality of the simulation checkbox.\r\n- **0:** Simulation disabled and hidden, circuit remains static\r\n- **1:** Simulation enabled and visible, allows interactive logic calculation\r\n\r\nWhen disabled, gates show no logic values and connections remain neutral.\r\nWhen enabled, users can toggle input gates and see logic propagation through the circuit.\r\n\r\n@default 1\r\n@minimum 0\r\n@maximum 1\r\n@attribute allowsimulation",
               "attribute": "allowSimulation",
               "reflects": true
             },
@@ -116,7 +138,7 @@
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of NOT gates allowed in the circuit.",
+              "description": "Maximum number of NOT gates allowed in the circuit.\r\n@description Constrains the number of NOT gates that can be placed in the workspace.\r\nUseful for educational scenarios with specific requirements.\r\n\r\n**Value Meanings:**\r\n- **-1:** Unlimited gates allowed (default)\r\n- **0:** No gates of this type allowed (hides from sidebar)\r\n- **>0:** Specific maximum count (e.g., 3 allows up to 3 gates)\r\n\r\nWhen limit is reached, drag-and-drop from sidebar is disabled for this gate type.\r\n\r\n@default -1\r\n@minimum -1\r\n@attribute notgateallowed",
               "attribute": "notGateAllowed",
               "reflects": true
             },
@@ -127,7 +149,7 @@
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of AND gates allowed in the circuit.",
+              "description": "Maximum number of AND gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. AND gates perform logical conjunction (both inputs must be true).\r\n@default -1\r\n@minimum -1\r\n@attribute andgateallowed",
               "attribute": "andGateAllowed",
               "reflects": true
             },
@@ -138,7 +160,7 @@
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of OR gates allowed in the circuit.",
+              "description": "Maximum number of OR gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. OR gates perform logical disjunction (at least one input must be true).\r\n@default -1\r\n@minimum -1\r\n@attribute orgateallowed",
               "attribute": "orGateAllowed",
               "reflects": true
             },
@@ -149,7 +171,7 @@
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of NAND gates allowed in the circuit.",
+              "description": "Maximum number of NAND gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. NAND gates are inverted AND gates (output true unless both inputs true).\r\n@default -1\r\n@minimum -1\r\n@attribute nandgateallowed",
               "attribute": "nandGateAllowed",
               "reflects": true
             },
@@ -160,7 +182,7 @@
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of NOR gates allowed in the circuit.",
+              "description": "Maximum number of NOR gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. NOR gates are inverted OR gates (output true only when both inputs false).\r\n@default -1\r\n@minimum -1\r\n@attribute norgateallowed",
               "attribute": "norGateAllowed",
               "reflects": true
             },
@@ -171,7 +193,7 @@
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of XNOR gates allowed in the circuit.",
+              "description": "Maximum number of XNOR gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. XNOR gates output true when inputs are equal (both true or both false).\r\n@default -1\r\n@minimum -1\r\n@attribute xnorgateallowed",
               "attribute": "xnorGateAllowed",
               "reflects": true
             },
@@ -182,7 +204,7 @@
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of XOR gates allowed in the circuit.",
+              "description": "Maximum number of XOR gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. XOR gates output true when inputs differ (exclusive or).\r\n@default -1\r\n@minimum -1\r\n@attribute xorgateallowed",
               "attribute": "xorGateAllowed",
               "reflects": true
             },
@@ -193,7 +215,7 @@
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of splitter gates allowed in the circuit.",
+              "description": "Maximum number of splitter gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. Splitter gates duplicate input to two separate outputs.\r\n@default -1\r\n@minimum -1\r\n@attribute splitterallowed",
               "attribute": "splitterAllowed",
               "reflects": true
             },
@@ -230,7 +252,7 @@
             {
               "kind": "method",
               "name": "toggleInstructions",
-              "description": "Toggles the visibility of the instruction panel."
+              "description": "A WebWriter widget for creating and simulating digital logic circuits.\r\n\r\n@description This web component provides an interactive environment for building digital logic circuits\r\nusing drag-and-drop gates (AND, OR, NOT, XOR, etc.), connecting them with lines, and simulating their behavior.\r\nIt features a sidebar with available gates, a workspace for circuit construction, and simulation controls.\r\n\r\n## Circuit Serialization Format\r\n\r\nThe component uses two main attributes for persistence:\r\n\r\n### reflectGates Format\r\nGates are serialized as comma-separated entries: `\"gateID|gateType|xPosition|yPosition,...\"` \r\n\r\n**Gate Types (case-sensitive):**\r\n- `\"NOT\"` - NOT gate (1 input, 1 output)\r\n- `\"AND\"` - AND gate (2 inputs, 1 output) \r\n- `\"OR\"` - OR gate (2 inputs, 1 output)\r\n- `\"NAND\"` - NAND gate (2 inputs, 1 output)\r\n- `\"NOR\"` - NOR gate (2 inputs, 1 output)\r\n- `\"XOR\"` - XOR gate (2 inputs, 1 output)\r\n- `\"XNOR\"` - XNOR gate (2 inputs, 1 output)\r\n- `\"INPUT\"` - Input source (0 inputs, 1 output)\r\n- `\"OUTPUT\"` - Output display (1 input, 0 outputs)\r\n- `\"SPLITTER\"` - Signal splitter (1 input, 2 outputs)\r\n\r\n**Coordinates:** Pixel positions relative to workspace origin (top-left), including \"px\" suffix\r\n\r\n**Example:** `\"0|INPUT|50px|100px,1|AND|200px|100px,2|OUTPUT|350px|100px\"`\r\n\r\n### reflectCons Format\r\nConnections are serialized as comma-separated pairs: `\"startConnectorID|endConnectorID,...\"`\r\n\r\n**Connector ID Structure:** `{gateType}Gate{gateID}{portType}{portNumber?}`\r\n- `gateType`: Lowercase gate type (e.g., \"input\", \"and\", \"output\")\r\n- `gateID`: Numeric gate identifier  \r\n- `portType`: \"In1\", \"In2\", \"Out\", \"Out2\", \"Out3\"\r\n\r\n**Port Mappings by Gate Type:**\r\n- **INPUT:** `Out` (single output)\r\n- **OUTPUT:** `In1` (single input)\r\n- **NOT:** `In1` (input), `Out` (output)\r\n- **AND/OR/NAND/NOR/XOR/XNOR:** `In1`, `In2` (inputs), `Out` (output)\r\n- **SPLITTER:** `In1` (input), `Out2`, `Out3` (two outputs)\r\n\r\n**Example:** `\"inputGate0Out|andGate1In1,inputGate0Out|andGate1In2,andGate1Out|outputGate2In1\"`\r\n\r\n## Workspace Coordinate System\r\n- **Canvas Size:** 3000px wide × 2000px high (total workspace area)\r\n- **Origin:** Top-left corner of the workspace (0,0)\r\n- **Units:** Pixels (CSS pixels)\r\n- **Initial View:** Viewport starts centered at (-1500px, -1000px), showing the middle of the canvas\r\n\r\n### Recommended Coordinate Ranges\r\n**For gates to be immediately visible on load:**\r\n- **X coordinates:** 1200px - 1800px (center area, horizontally)\r\n- **Y coordinates:** 800px - 1200px (center area, vertically)\r\n- **Example good position:** `1500px|1000px` (exact center of canvas)\r\n\r\n**Full valid ranges:**\r\n- **X coordinates:** 0px - 3000px (left edge to right edge)\r\n- **Y coordinates:** 0px - 2000px (top edge to bottom edge)\r\n\r\n**⚠️ Avoid very small coordinates (< 500px) as they will be outside the initial viewport!**\r\n\r\n@example\r\n```html\r\n<!-- Basic usage -->\r\n<webwriter-logic-circuit></webwriter-logic-circuit>\r\n\r\n<!-- Pre-loaded circuit with gates and connections (center positioned) -->\r\n<webwriter-logic-circuit \r\n  reflectgates=\"0|INPUT|1300px|1000px,1|AND|1500px|1000px,2|OUTPUT|1700px|1000px\"\r\n  reflectcons=\"inputGate0Out|andGate1In1,andGate1Out|outputGate2In1\"\r\n  simulationdelay=\"1000\">\r\n</webwriter-logic-circuit>\r\n\r\n<!-- With gate restrictions and simulation settings -->\r\n<webwriter-logic-circuit \r\n  andgateallowed=\"5\"\r\n  orgateallowed=\"3\"\r\n  simulationdelay=\"500\"\r\n  allowsimulation=\"1\">\r\n</webwriter-logic-circuit>\r\n\r\n<!-- Disabled simulation with specific gate limits -->\r\n<webwriter-logic-circuit \r\n  allowsimulation=\"0\"\r\n  notgateallowed=\"2\"\r\n  andgateallowed=\"3\"\r\n  orgateallowed=\"0\">\r\n</webwriter-logic-circuit>\r\n```\r\n\r\n## AI Usage Examples\r\n\r\n### Simple AND Gate Circuit (well-positioned in viewport)\r\n```html\r\n<webwriter-logic-circuit \r\n  reflectgates=\"0|INPUT|1300px|900px,1|INPUT|1300px|1100px,2|AND|1500px|1000px,3|OUTPUT|1700px|1000px\"\r\n  reflectcons=\"inputGate0Out|andGate2In1,inputGate1Out|andGate2In2,andGate2Out|outputGate3In1\">\r\n</webwriter-logic-circuit>\r\n```\r\n\r\n### Half Adder Circuit (centered for immediate visibility)\r\n```html\r\n<webwriter-logic-circuit \r\n  reflectgates=\"0|INPUT|1300px|900px,1|INPUT|1300px|1100px,2|XOR|1500px|900px,3|AND|1500px|1100px,4|OUTPUT|1700px|900px,5|OUTPUT|1700px|1100px\"\r\n  reflectcons=\"inputGate0Out|xorGate2In1,inputGate1Out|xorGate2In2,inputGate0Out|andGate3In1,inputGate1Out|andGate3In2,xorGate2Out|outputGate4In1,andGate3Out|outputGate5In1\">\r\n</webwriter-logic-circuit>\r\n```\r\n\r\n## Input Gate Control\r\nInput gates can be toggled by clicking them during simulation. Initial values are always `false` (logic 0).\r\nTo programmatically set input values, access the gate element and set its `input1` property:\r\n```javascript\r\nconst circuit = document.querySelector('webwriter-logic-circuit');\r\nconst inputGate = circuit.gateElements.find(gate => gate.gatetype === 'INPUT' && gate.id === 'inputGate0');\r\ninputGate.input1 = true; // Set to logic 1\r\n```\r\n\r\n## Canvas Layout Tips\r\n**Problem:** Gates with very small coordinates (e.g., 50px, 100px) appear outside the initial viewport\r\n**Solution:** Use center-area coordinates for immediate visibility:\r\n- **Good coordinates:** `1400px|950px`, `1600px|1050px` (always visible on load)\r\n- **Avoid:** `50px|100px`, `200px|300px` (user must pan to find them)\r\n- **Tip:** Start with center coordinates (~1500px, ~1000px) and spread out from there\r\n\r\n## Attribute Name Schema\r\n- **Main data attributes:** Use camelCase without hyphens (e.g., `reflectgates`, `reflectcons`)\r\n- **Configuration attributes:** Use lowercase without hyphens (e.g., `simulationdelay`, `allowsimulation`, `andgateallowed`)\r\n- **Property names:** Use camelCase for JavaScript properties (e.g., `simulationDelay`, `andGateAllowed`)\r\n- **Reflection:** All gate limits and simulation settings reflect to attributes automatically\r\n\r\n## Workspace Control\r\n- **Pan:** Click and drag on empty workspace area\r\n- **Zoom:** Mouse wheel (0.5x to 2.5x range)\r\n- **Reset:** No automatic reset - use pan/zoom to navigate\r\n- **Grid:** No visible grid - free positioning\r\n\r\n## Programming Interface\r\n```javascript\r\n// Access the component\r\nconst circuit = document.querySelector('webwriter-logic-circuit');\r\n\r\n// Get current circuit state\r\nconst gates = circuit.getGateElements();\r\nconst connections = circuit.getLineElements();\r\n\r\n// Control simulation\r\ncircuit.simulate = true;  // Enable/disable simulation\r\ncircuit.simulationDelay = 1000;  // Set propagation delay\r\n\r\n// Modify input values\r\nconst inputGates = gates.filter(g => g.gatetype === 'INPUT');\r\ninputGates[0].input1 = true;  // Set input to logic 1\r\n\r\n// Access serialized state\r\nconsole.log(circuit.reflectGates);  // Current gate configuration\r\nconsole.log(circuit.reflectCons);   // Current connections\r\n```\r\n\r\n@fires circuit-changed - Dispatched when the circuit structure changes (gates added/removed/moved)\r\n@fires simulation-state-changed - Dispatched when simulation is started/stopped\r\n\r\n@slot - No slots available - content is generated programmatically\r\n\r\n@cssprop --logic-circuit-background - Background color of the workspace (default: #f5f5f5)\r\n@cssprop --logic-circuit-gate-color - Default color for logic gates (default: #ffffff)\r\n@cssprop --logic-circuit-connection-color - Color for connections between gates (default: #000000)\r\n\r\n@csspart workspace - The main workspace area where gates are placed\r\n@csspart sidebar - The sidebar containing available gates\r\n@csspart options - The options panel for controlling simulation and gate limits\r\n/\r\n@customElement('webwriter-logic-circuit')\r\n@localized()\r\nexport default class LogicCircuit extends LitElementWw {\r\n    static shadowRootOptions = {\r\n        ...LitElementWw.shadowRootOptions,\r\n        delegatesFocus: true,\r\n    };\r\n\r\n    public localize = LOCALIZE;\r\n\r\n    static styles = Styles;\r\n\r\n    public static get scopedElements() {\r\n        return {\r\n            'not-gate': NOTGate,\r\n            'and-gate': ANDGate,\r\n            'input-gate': Input,\r\n            'nand-gate': NANDGate,\r\n            'nor-gate': NORGate,\r\n            'or-gate': ORGate,\r\n            'output-gate': Output,\r\n            'xnor-gate': XNORGate,\r\n            'xor-gate': XORGate,\r\n            'splitter-gate': Splitter,\r\n            'connector-element': ConnectorElement,\r\n            'sl-button': SlButton,\r\n            'sl-button-group': SlButtonGroup,\r\n            'sl-icon-button': SlIconButton,\r\n            'sl-icon': SlIcon,\r\n            'sl-tooltip': SlTooltip,\r\n            'sl-popup': SlPopup,\r\n            'sl-switch': SlSwitch,\r\n            'sl-menu': SlMenu,\r\n            'sl-menu-item': SlMenuItem,\r\n            'sl-checkbox': SlCheckbox,\r\n            'sl-input': SlInput,\r\n        };\r\n    }\r\n\r\n    /**\r\nArray of line connection objects in the circuit.\r\n@description Stores all connections between gate connectors. Each line object contains start/end connectors and SVG path.\r\n@internal - Not intended for direct manipulation by consumers\r\n/\r\n    @property({ type: Array }) accessor lineElements = [];\r\n    \r\n    /**\r\nArray of gate objects currently placed in the circuit.\r\n@description Contains all logic gates (AND, OR, NOT, etc.) that have been added to the workspace.\r\n@internal - Not intended for direct manipulation by consumers\r\n/\r\n    @property({ type: Array }) accessor gateElements = [];\r\n    \r\n    /**\r\nSerialized representation of gates for persistence and initialization.\r\n\r\n@description Contains a comma-separated list of gate definitions for saving and restoring circuit state.\r\nEach gate entry follows the format: `\"gateID|gateType|xPosition|yPosition\"`\r\n\r\n**Format Details:**\r\n- **gateID:** Numeric identifier (0, 1, 2, ...) - automatically assigned during creation\r\n- **gateType:** Gate type string - must be one of: \"NOT\", \"AND\", \"OR\", \"NAND\", \"NOR\", \"XOR\", \"XNOR\", \"INPUT\", \"OUTPUT\", \"SPLITTER\"\r\n- **xPosition:** X coordinate in pixels with \"px\" suffix (e.g., \"150px\")\r\n- **yPosition:** Y coordinate in pixels with \"px\" suffix (e.g., \"200px\")\r\n- **Separator:** Pipe character \"|\" between fields, comma \",\" between gates\r\n\r\n**Coordinate System:**\r\n- Origin: Top-left of 3000×2000px workspace\r\n- Units: CSS pixels\r\n- Valid range: 0-3000px (X), 0-2000px (Y)\r\n\r\n@example \"0|INPUT|100px|150px,1|AND|300px|200px,2|OUTPUT|500px|200px\"\r\n\r\n@attribute reflectgates\r\n/\r\n    @property({type: String, reflect: true}) accessor reflectGates: String = \"\"\r\n    \r\n    /**\r\nSerialized representation of connections for persistence and initialization.\r\n\r\n@description Contains a comma-separated list of connection definitions linking gate ports.\r\nEach connection entry follows the format: `\"startConnectorID|endConnectorID\"`\r\n\r\n**Connector ID Structure:** `{gateType}Gate{gateID}{portType}`\r\n- **gateType:** Lowercase gate type (input, and, or, nand, nor, xor, xnor, output, splitter, not)\r\n- **gateID:** The numeric ID from reflectGates (0, 1, 2, ...)\r\n- **portType:** Port identifier specific to gate type\r\n\r\n**Port Types by Gate:**\r\n- **INPUT gates:** `Out` (single output port)\r\n- **OUTPUT gates:** `In1` (single input port)\r\n- **NOT gates:** `In1` (input), `Out` (output)\r\n- **2-input gates (AND/OR/NAND/NOR/XOR/XNOR):** `In1`, `In2` (inputs), `Out` (output)\r\n- **SPLITTER gates:** `In1` (input), `Out2`, `Out3` (two separate outputs)\r\n\r\n**Connection Rules:**\r\n- Only output→input connections allowed\r\n- Each input port accepts only one connection\r\n- Output ports can connect to multiple inputs\r\n- Separator: Pipe \"|\" between connector IDs, comma \",\" between connections\r\n\r\n@example \"inputGate0Out|andGate1In1,inputGate0Out|andGate1In2,andGate1Out|outputGate2In1\"\r\n\r\n@attribute reflectcons\r\n/\r\n    @property({type: String, reflect: true}) accessor reflectCons: String = \"\"\r\n    \r\n    /**\r\nInternal counter for generating unique gate IDs.\r\n@internal - Managed automatically by the component\r\n/\r\n    @property({ type: Number }) accessor gateID: number = 0;\r\n    \r\n    /**\r\nInternal counter for generating unique line IDs.\r\n@internal - Managed automatically by the component\r\n/\r\n    @property({ type: Number }) accessor lineID: number = 0;\r\n    \r\n    /**\r\nCurrent zoom level of the workspace.\r\n@description Controls the scaling of the workspace. 1.0 = 100%, 2.0 = 200%, etc.\r\n@default 1\r\n@minimum 0.1\r\n@maximum 5.0\r\n/\r\n    @property({ type: Number }) accessor zoom: number = 1;\r\n    \r\n    /**\r\nStarting X coordinate for drag operations.\r\n@internal - Used for drag and drop calculations\r\n/\r\n    @property({ type: Number }) accessor dragStartX: number = 0;\r\n    \r\n    /**\r\nStarting Y coordinate for drag operations.\r\n@internal - Used for drag and drop calculations\r\n/\r\n    @property({ type: Number }) accessor dragStartY: number = 0;\r\n    \r\n    /**\r\nWhether the circuit simulation is currently active.\r\n@description When true, the circuit will automatically calculate and display logic values.\r\n@default true\r\n/\r\n    @property({ type: Boolean }) accessor simulate: boolean = true;\r\n\r\n    /**\r\nDelay in milliseconds between simulation steps.\r\n@description Controls how fast the simulation propagates through the circuit.\r\nLower values = faster simulation, higher values = slower simulation for visualization.\r\n@default 500\r\n@minimum 0\r\n@maximum 5000\r\n@attribute simulationdelay\r\n/\r\n    @property({ type: Number, attribute: true, reflect: true }) accessor simulationDelay: number = 500;\r\n\r\n    /**\r\nWhether simulation controls are enabled.\r\n@description Controls visibility and functionality of the simulation checkbox.\r\n- **0:** Simulation disabled and hidden, circuit remains static\r\n- **1:** Simulation enabled and visible, allows interactive logic calculation\r\n\r\nWhen disabled, gates show no logic values and connections remain neutral.\r\nWhen enabled, users can toggle input gates and see logic propagation through the circuit.\r\n\r\n@default 1\r\n@minimum 0\r\n@maximum 1\r\n@attribute allowsimulation\r\n/\r\n    @property({ type: Number, attribute: true, reflect: true }) accessor allowSimulation: number = 1;\r\n    \r\n    /**\r\nMaximum number of NOT gates allowed in the circuit.\r\n@description Constrains the number of NOT gates that can be placed in the workspace.\r\nUseful for educational scenarios with specific requirements.\r\n\r\n**Value Meanings:**\r\n- **-1:** Unlimited gates allowed (default)\r\n- **0:** No gates of this type allowed (hides from sidebar)\r\n- **>0:** Specific maximum count (e.g., 3 allows up to 3 gates)\r\n\r\nWhen limit is reached, drag-and-drop from sidebar is disabled for this gate type.\r\n\r\n@default -1\r\n@minimum -1\r\n@attribute notgateallowed\r\n/\r\n    @property({ type: Number, attribute: true, reflect: true }) accessor notGateAllowed: number = -1;\r\n    \r\n    /**\r\nMaximum number of AND gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. AND gates perform logical conjunction (both inputs must be true).\r\n@default -1\r\n@minimum -1\r\n@attribute andgateallowed\r\n/\r\n    @property({ type: Number, attribute: true, reflect: true }) accessor andGateAllowed: number = -1;\r\n    \r\n    /**\r\nMaximum number of OR gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. OR gates perform logical disjunction (at least one input must be true).\r\n@default -1\r\n@minimum -1\r\n@attribute orgateallowed\r\n/\r\n    @property({ type: Number, attribute: true, reflect: true }) accessor orGateAllowed: number = -1;\r\n    \r\n    /**\r\nMaximum number of NAND gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. NAND gates are inverted AND gates (output true unless both inputs true).\r\n@default -1\r\n@minimum -1\r\n@attribute nandgateallowed\r\n/\r\n    @property({ type: Number, attribute: true, reflect: true }) accessor nandGateAllowed: number = -1;\r\n    \r\n    /**\r\nMaximum number of NOR gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. NOR gates are inverted OR gates (output true only when both inputs false).\r\n@default -1\r\n@minimum -1\r\n@attribute norgateallowed\r\n/\r\n    @property({ type: Number, attribute: true, reflect: true }) accessor norGateAllowed: number = -1;\r\n    \r\n    /**\r\nMaximum number of XNOR gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. XNOR gates output true when inputs are equal (both true or both false).\r\n@default -1\r\n@minimum -1\r\n@attribute xnorgateallowed\r\n/\r\n    @property({ type: Number, attribute: true, reflect: true }) accessor xnorGateAllowed: number = -1;\r\n    \r\n    /**\r\nMaximum number of XOR gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. XOR gates output true when inputs differ (exclusive or).\r\n@default -1\r\n@minimum -1\r\n@attribute xorgateallowed\r\n/\r\n    @property({ type: Number, attribute: true, reflect: true }) accessor xorGateAllowed: number = -1;\r\n    \r\n    /**\r\nMaximum number of splitter gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. Splitter gates duplicate input to two separate outputs.\r\n@default -1\r\n@minimum -1\r\n@attribute splitterallowed\r\n/\r\n    @property({ type: Number, attribute: true, reflect: true }) accessor splitterAllowed: number = -1;\r\n\r\n    /**\r\nWhether a drag operation is currently in progress.\r\n@internal - Used for tracking drag state\r\n/\r\n    @property({ type: Boolean }) accessor isDragging: boolean = false;\r\n    \r\n    /**\r\nWhether a line drawing operation is currently in progress.\r\n@internal - Used for tracking connection drawing state\r\n/\r\n    @state() accessor isDrawingLine: boolean = false;\r\n    \r\n    /**\r\nThe connector element where line drawing started.\r\n@internal - Used during connection creation\r\n/\r\n    @state() accessor startConnector: ConnectorElement = null;\r\n    \r\n    /**\r\nThe connector element where line drawing will end.\r\n@internal - Used during connection creation\r\n/\r\n    @state() accessor endConnector: ConnectorElement = null;\r\n\r\n    /**\r\nReference to the SVG canvas element for drawing connections.\r\n@internal - DOM element reference\r\n/\r\n    @query('#svgCanvas') accessor svgCanvas;\r\n    \r\n    /**\r\nReference to the main workspace container element.\r\n@internal - DOM element reference\r\n/\r\n    @query('#workspace') accessor workspaceContainer;\r\n    \r\n    /**\r\nReference to the draggable workspace area element.\r\n@internal - DOM element reference\r\n/\r\n    @query('#workspaceDraggable') accessor wsDrag;\r\n    \r\n    /**\r\nReference to the simulation checkbox element.\r\n@internal - DOM element reference\r\n/\r\n    @query('#simCheckbox') accessor simCheckbox;\r\n    \r\n    /**\r\nReference to the instructions container element.\r\n@internal - DOM element reference\r\n/\r\n    @query('#instructions') accessor instructionsContainer;\r\n    \r\n    /**\r\nPublic getter for accessing gate elements array.\r\n@description Provides access to all gate objects currently placed in the circuit workspace.\r\nEach gate object contains properties like `gatetype`, `input1`, `input2`, `output`, position, and connector references.\r\n\r\n**Common Gate Properties:**\r\n- `gatetype`: String - Gate type (\"AND\", \"OR\", \"NOT\", etc.)\r\n- `id`: String - Unique identifier (e.g., \"andGate1\", \"inputGate0\")\r\n- `input1`, `input2`: Boolean|null - Current input logic values\r\n- `output`, `output2`: Boolean - Current output logic values\r\n- `conIn1`, `conIn2`: ConnectorElement - Input connector references\r\n- `conOut`, `conOut2`: ConnectorElement - Output connector references\r\n- `style.left`, `style.top`: String - Position in pixels (e.g., \"150px\")\r\n\r\n@returns Array of gate elements currently in the circuit\r\n@example\r\n```javascript\r\nconst circuit = document.querySelector('webwriter-logic-circuit');\r\nconst gates = circuit.getGateElements();\r\nconst inputGates = gates.filter(gate => gate.gatetype === 'INPUT');\r\ninputGates[0].input1 = true; // Set first input to logic 1\r\n```\r\n/\r\n    public getGateElements = () => this.gateElements;\r\n    \r\n    /**\r\nPublic getter for accessing line elements array.\r\n@description Provides access to all connection objects currently linking gates in the circuit.\r\nEach line object contains start/end connector references and SVG path element.\r\n\r\n**Line Object Properties:**\r\n- `start`: ConnectorElement - Source connector (output)\r\n- `end`: ConnectorElement - Target connector (input) \r\n- `lineSVG`: SVGPathElement - Visual representation\r\n- `id`: String - Unique line identifier\r\n\r\n@returns Array of line elements currently in the circuit\r\n@example\r\n```javascript\r\nconst circuit = document.querySelector('webwriter-logic-circuit');\r\nconst connections = circuit.getLineElements();\r\nconnections.forEach(line => {\r\n  console.log(`Connection from ${line.start.id} to ${line.end.id}`);\r\n});\r\n```\r\n/\r\n    public getLineElements = () => this.lineElements;\r\n\r\n    svgPathToMouse: SVGPathElement | null = null;\r\n\r\n    render() {\r\n        return html`\r\n            <div class=\"container\">\r\n                <div class=\"sidebar\">\r\n                    <div style=${this.notGateAllowed === 0 ? 'display: none;' : ''} class=\"sidebar-item\">\r\n                        <not-gate></not-gate>\r\n                        <p class=\"sidebar-counter\">${gateCounter(this, 'NOT')}</p>\r\n                    </div>\r\n\r\n                    <div style=${this.andGateAllowed === 0 ? 'display: none;' : ''} class=\"sidebar-item\">\r\n                        <and-gate></and-gate>\r\n                        <p class=\"sidebar-counter\">${gateCounter(this, 'AND')}</p>\r\n                    </div>\r\n\r\n                    <div style=${this.orGateAllowed === 0 ? 'display: none;' : ''} class=\"sidebar-item\">\r\n                        <or-gate></or-gate>\r\n                        <p class=\"sidebar-counter\">${gateCounter(this, 'OR')}</p>\r\n                    </div>\r\n\r\n                    <div style=${this.nandGateAllowed === 0 ? 'display: none;' : ''} class=\"sidebar-item\">\r\n                        <nand-gate></nand-gate>\r\n                        <p class=\"sidebar-counter\">${gateCounter(this, 'NAND')}</p>\r\n                    </div>\r\n\r\n                    <div style=${this.norGateAllowed === 0 ? 'display: none;' : ''} class=\"sidebar-item\">\r\n                        <nor-gate></nor-gate>\r\n                        <p class=\"sidebar-counter\">${gateCounter(this, 'NOR')}</p>\r\n                    </div>\r\n\r\n                    <div style=${this.xnorGateAllowed === 0 ? 'display: none;' : ''} class=\"sidebar-item\">\r\n                        <xnor-gate></xnor-gate>\r\n                        <p class=\"sidebar-counter\">${gateCounter(this, 'XNOR')}</p>\r\n                    </div>\r\n\r\n                    <div style=${this.xorGateAllowed === 0 ? 'display: none;' : ''} class=\"sidebar-item\">\r\n                        <xor-gate></xor-gate>\r\n                        <p class=\"sidebar-counter\">${gateCounter(this, 'XOR')}</p>\r\n                    </div>\r\n\r\n                    <splitter-gate></splitter-gate>\r\n                    <input-gate></input-gate>\r\n                    <output-gate></output-gate>\r\n                </div>\r\n\r\n                <div class=\"workspaceContainer\" id=\"workspace\">\r\n                    <sl-checkbox id=\"simCheckbox\" class=\"simulateCheckbox\" @sl-change=${() => this.simulateCircuit()} checked\r\n                        >${msg(\"Simulate\")}</sl-checkbox\r\n                    >\r\n\r\n                    <sl-switch class=\"flipSwitch\" id=\"switch\" @sl-change=${() => this.handleFlipAllGates()}\r\n                        >${msg(\"Show all Truthtables\")}</sl-switch\r\n                    >\r\n\r\n                    <div class=\"trashCanIcon\" style=\"font-size: 35px;\" title=\"${msg(\"Drag items here to delete them\")}\">${trash}</div>\r\n                    \r\n                    <div id=\"instructions\" class=\"instructions\">\r\n                        <div class=\"instruction\">\r\n                        ${add}${msg(\"Drag and drop elements from the left sidebar to add them.\")}\r\n                        </div>\r\n                        <div class=\"instruction\">\r\n                        ${connect}${msg(\"Left click a connection endpoint to start a connection and then click another connection endpoint to add it.\")}\r\n                        </div>\r\n                        <div class=\"instruction\">\r\n                        ${remove}${msg(\"Right click on a connection to remove it.\")}\r\n                        </div>\r\n                    </div>\r\n\r\n                    <div class=\"infoButton\" @click=${() => this.toggleInstructions()}>${info}${msg(\"Instructions\")}</div>\r\n\r\n                    <div class=\"workspaceArea\" id=\"workspaceDraggable\">\r\n                        <svg class=\"svgArea\" id=\"svgCanvas\"></svg>\r\n                    </div>\r\n                </div>\r\n            </div>\r\n\r\n            <div part=\"options\" class=\"optionsMenu\">\r\n                <p>Simulation:</p>\r\n                <div class=\"optionsItem\">\r\n                    <sl-checkbox class=\"optionsCheckbox\" @sl-change=${() => this.handleAllowSimulation()} checked\r\n                        >${msg(\"Allow Simulation\")}</sl-checkbox\r\n                    >\r\n                </div>\r\n                <div class=\"optionsItem\">\r\n                    <sl-input\r\n                        class=\"optionsCheckbox\"\r\n                        type=\"number\"\r\n                        size=\"small\"\r\n                        @sl-change=${(e) => this.handleInputChange(e, 'simulationDelay')}\r\n                        .value=${this.simulationDelay}\r\n                        min=\"0\"\r\n                    ></sl-input>\r\n                    <p>${msg(\"Delay (in ms)\")}</p>\r\n                </div>\r\n                <p></p>\r\n                <p>${msg(\"Limit max. number of Gates:\")}</p>\r\n\r\n                <div class=\"optionsItem\">\r\n                    <sl-input\r\n                        class=\"optionsCheckbox\"\r\n                        type=\"number\"\r\n                        size=\"small\"\r\n                        @sl-change=${(e) => this.handleInputChange(e, 'notGateAllowed')}\r\n                        .value=${this.notGateAllowed >= 0 ? this.notGateAllowed : ''}\r\n                        min=\"0\"\r\n                    ></sl-input>\r\n                    <p>NOT-${msg(\"Gates\")}</p>\r\n                </div>\r\n                <div class=\"optionsItem\">\r\n                    <sl-input\r\n                        class=\"optionsCheckbox\"\r\n                        type=\"number\"\r\n                        size=\"small\"\r\n                        @sl-change=${(e) => this.handleInputChange(e, 'andGateAllowed')}\r\n                        .value=${this.andGateAllowed >= 0 ? this.andGateAllowed : ''}\r\n                        min=\"0\"\r\n                    ></sl-input>\r\n                    <p>AND-${msg(\"Gates\")}</p>\r\n                </div>\r\n                <div class=\"optionsItem\">\r\n                    <sl-input\r\n                        class=\"optionsCheckbox\"\r\n                        type=\"number\"\r\n                        size=\"small\"\r\n                        @sl-change=${(e) => this.handleInputChange(e, 'orGateAllowed')}\r\n                        .value=${this.orGateAllowed >= 0 ? this.orGateAllowed : ''}\r\n                        min=\"0\"\r\n                    ></sl-input>\r\n                    <p>OR-${msg(\"Gates\")}</p>\r\n                </div>\r\n                <div class=\"optionsItem\">\r\n                    <sl-input\r\n                        class=\"optionsCheckbox\"\r\n                        type=\"number\"\r\n                        size=\"small\"\r\n                        @sl-change=${(e) => this.handleInputChange(e, 'nandGateAllowed')}\r\n                        .value=${this.nandGateAllowed >= 0 ? this.nandGateAllowed : ''}\r\n                        min=\"0\"\r\n                    ></sl-input>\r\n                    <p>NAND-${msg(\"Gates\")}</p>\r\n                </div>\r\n                <div class=\"optionsItem\">\r\n                    <sl-input\r\n                        class=\"optionsCheckbox\"\r\n                        type=\"number\"\r\n                        size=\"small\"\r\n                        @sl-change=${(e) => this.handleInputChange(e, 'norGateAllowed')}\r\n                        .value=${this.norGateAllowed >= 0 ? this.norGateAllowed : ''}\r\n                        min=\"0\"\r\n                    ></sl-input>\r\n                    <p>NOR-${msg(\"Gates\")}</p>\r\n                </div>\r\n                <div class=\"optionsItem\">\r\n                    <sl-input\r\n                        class=\"optionsCheckbox\"\r\n                        type=\"number\"\r\n                        size=\"small\"\r\n                        @sl-change=${(e) => this.handleInputChange(e, 'xnorGateAllowed')}\r\n                        .value=${this.xnorGateAllowed >= 0 ? this.xnorGateAllowed : ''}\r\n                        min=\"0\"\r\n                    ></sl-input>\r\n                    <p>XNOR-${msg(\"Gates\")}</p>\r\n                </div>\r\n                <div class=\"optionsItem\">\r\n                    <sl-input\r\n                        class=\"optionsCheckbox\"\r\n                        type=\"number\"\r\n                        size=\"small\"\r\n                        @sl-change=${(e) => this.handleInputChange(e, 'xorGateAllowed')}\r\n                        .value=${this.xorGateAllowed >= 0 ? this.xorGateAllowed : ''}\r\n                        min=\"0\"\r\n                    ></sl-input>\r\n                    <p>XOR-${msg(\"Gates\")}</p>\r\n                </div>\r\n            </div>\r\n        `;\r\n    }\r\n\r\n    updated(changedProperties) {\r\n        super.updated(changedProperties);\r\n        if (changedProperties.has('allowSimulation')) {\r\n            if (this.allowSimulation === 1) {\r\n                this.simCheckbox.style.display = 'block';\r\n            } else {\r\n                this.simCheckbox.style.display = 'none';\r\n            }\r\n        }\r\n    }\r\n\r\n    connectedCallback() {\r\n        super.connectedCallback();\r\n        this.addEventListener('contextmenu', this.handleContextMenu);\r\n    }\r\n\r\n    disconnectedCallback() {\r\n        super.disconnectedCallback();\r\n        this.removeEventListener('mousedown', this.handleMouseDown);\r\n        this.removeEventListener('mousemove', this.handleMouseMove);\r\n        this.removeEventListener('mouseup', this.handleMouseUp);\r\n    }\r\n\r\n    /**\r\nToggles the visibility of the instruction panel.\r\n@description Shows or hides the help instructions that explain how to use the circuit builder.\r\nThe instructions explain drag-and-drop, connection creation, and connection removal."
             },
             {
               "kind": "method",
@@ -314,7 +336,7 @@
                   }
                 }
               ],
-              "description": "Handles drop events when gates are dropped on the workspace or trash can."
+              "description": "Handles drop events when gates are dropped on the workspace or trash can.\r\n@description Processes both adding new gates from the sidebar and moving existing gates.\r\nHandles deletion when items are dropped on the trash can area.\r\n\r\n**Processing Logic:**\r\n1. New gates (from sidebar): Creates new gate element and adds to workspace\r\n2. Existing gates (movable): Updates position or deletes if dropped in trash\r\n3. Updates reflectGates string for persistence\r\n4. Respects gate limits set by *GateAllowed properties\r\n\r\n**Data Transfer Contents:**\r\n- `type`: Gate type string (e.g., \"AND\", \"OR\")\r\n- `movable`: \"true\" for existing gates, \"false\" for new gates\r\n- `id`: Gate ID for existing gates\r\n- `offsetX`, `offsetY`: Mouse grab position relative to gate\r\n\r\n@param {DragEvent} event - The drop event containing drag data\r\n@fires circuit-changed - Dispatched when the circuit structure changes"
             },
             {
               "kind": "method",
@@ -328,7 +350,7 @@
                   }
                 }
               ],
-              "description": "Handles deletion of gates when dropped on the trash can."
+              "description": "Handles deletion of gates when dropped on the trash can.\r\n@description Finds and removes the gate that was dropped on the trash area.\r\n@param {DragEvent} event - The drop event containing the gate ID to delete"
             },
             {
               "kind": "method",
@@ -349,17 +371,17 @@
                   }
                 }
               ],
-              "description": "Handles changes to input fields in the options panel."
+              "description": "Handles changes to input fields in the options panel.\r\n@description Updates component properties when users modify gate limits or simulation settings.\r\nValidates input values and sets to -1 (unlimited) if invalid.\r\n@param {Event} event - The input change event from the form element\r\n@param {string} propertyName - The name of the property to update (e.g., 'andGateAllowed', 'simulationDelay')"
             },
             {
               "kind": "method",
               "name": "simulateCircuit",
-              "description": "Starts or stops circuit simulation based on the simulation checkbox state."
+              "description": "Starts or stops circuit simulation based on the simulation checkbox state.\r\n@description When simulation is enabled, calculates logic values starting from input gates \r\nand propagates them through the circuit with the configured delay. When disabled, \r\nresets all gates to their default state.\r\n\r\n**Simulation Process:**\r\n1. Reset all gates to neutral state\r\n2. Find all INPUT gates in the circuit\r\n3. Calculate their output values (based on user toggling)\r\n4. Propagate signals through connected gates with simulationDelay\r\n5. Update visual indicators (connector colors, gate states)\r\n6. Continue until all outputs are calculated\r\n\r\n**Visual Feedback:**\r\n- True values: Highlighted connectors and gates\r\n- False values: Normal appearance\r\n- OUTPUT gates: Entire gate highlights when receiving true\r\n\r\n@fires simulation-state-changed - Custom event dispatched when simulation state changes"
             },
             {
               "kind": "method",
               "name": "resetCircuit",
-              "description": "Resets all gates and connections to their default non-simulated state."
+              "description": "Resets all gates and connections to their default non-simulated state.\r\n@description Clears all logic values and visual indicators from gates and connections.\r\nUsed when simulation is disabled or before starting a new simulation cycle."
             }
           ],
           "events": [
@@ -368,100 +390,138 @@
               "name": "circuit-changed"
             },
             {
-              "description": "Dispatched when simulation is started/stopped",
+              "description": "Custom event dispatched when simulation state changes",
               "name": "simulation-state-changed"
             }
           ],
           "attributes": [
             {
-              "name": "simulation-delay",
+              "name": "reflectgates",
+              "type": {
+                "text": "String"
+              },
+              "default": "\"\"",
+              "description": "Serialized representation of gates for persistence and initialization.\r\n\r\n@description Contains a comma-separated list of gate definitions for saving and restoring circuit state.\r\nEach gate entry follows the format: `\"gateID|gateType|xPosition|yPosition\"`\r\n\r\n**Format Details:**\r\n- **gateID:** Numeric identifier (0, 1, 2, ...) - automatically assigned during creation\r\n- **gateType:** Gate type string - must be one of: \"NOT\", \"AND\", \"OR\", \"NAND\", \"NOR\", \"XOR\", \"XNOR\", \"INPUT\", \"OUTPUT\", \"SPLITTER\"\r\n- **xPosition:** X coordinate in pixels with \"px\" suffix (e.g., \"150px\")\r\n- **yPosition:** Y coordinate in pixels with \"px\" suffix (e.g., \"200px\")\r\n- **Separator:** Pipe character \"|\" between fields, comma \",\" between gates\r\n\r\n**Coordinate System:**\r\n- Origin: Top-left of 3000×2000px workspace\r\n- Units: CSS pixels\r\n- Valid range: 0-3000px (X), 0-2000px (Y)\r\n\r\n@example \"0|INPUT|100px|150px,1|AND|300px|200px,2|OUTPUT|500px|200px\"\r\n\r\n@attribute reflectgates",
+              "fieldName": "reflectGates"
+            },
+            {
+              "name": "reflectcons",
+              "type": {
+                "text": "String"
+              },
+              "default": "\"\"",
+              "description": "Serialized representation of connections for persistence and initialization.\r\n\r\n@description Contains a comma-separated list of connection definitions linking gate ports.\r\nEach connection entry follows the format: `\"startConnectorID|endConnectorID\"`\r\n\r\n**Connector ID Structure:** `{gateType}Gate{gateID}{portType}`\r\n- **gateType:** Lowercase gate type (input, and, or, nand, nor, xor, xnor, output, splitter, not)\r\n- **gateID:** The numeric ID from reflectGates (0, 1, 2, ...)\r\n- **portType:** Port identifier specific to gate type\r\n\r\n**Port Types by Gate:**\r\n- **INPUT gates:** `Out` (single output port)\r\n- **OUTPUT gates:** `In1` (single input port)\r\n- **NOT gates:** `In1` (input), `Out` (output)\r\n- **2-input gates (AND/OR/NAND/NOR/XOR/XNOR):** `In1`, `In2` (inputs), `Out` (output)\r\n- **SPLITTER gates:** `In1` (input), `Out2`, `Out3` (two separate outputs)\r\n\r\n**Connection Rules:**\r\n- Only output→input connections allowed\r\n- Each input port accepts only one connection\r\n- Output ports can connect to multiple inputs\r\n- Separator: Pipe \"|\" between connector IDs, comma \",\" between connections\r\n\r\n@example \"inputGate0Out|andGate1In1,inputGate0Out|andGate1In2,andGate1Out|outputGate2In1\"\r\n\r\n@attribute reflectcons",
+              "fieldName": "reflectCons"
+            },
+            {
+              "name": "simulationdelay",
               "type": {
                 "text": "number"
               },
               "default": "500",
-              "description": "Delay in milliseconds between simulation steps.",
+              "description": "Delay in milliseconds between simulation steps.\r\n@description Controls how fast the simulation propagates through the circuit.\r\nLower values = faster simulation, higher values = slower simulation for visualization.\r\n@default 500\r\n@minimum 0\r\n@maximum 5000\r\n@attribute simulationdelay",
               "fieldName": "simulationDelay"
             },
             {
-              "name": "allow-simulation",
+              "name": "allowsimulation",
               "type": {
                 "text": "number"
               },
               "default": "1",
-              "description": "Whether simulation controls are enabled.",
+              "description": "Whether simulation controls are enabled.\r\n@description Controls visibility and functionality of the simulation checkbox.\r\n- **0:** Simulation disabled and hidden, circuit remains static\r\n- **1:** Simulation enabled and visible, allows interactive logic calculation\r\n\r\nWhen disabled, gates show no logic values and connections remain neutral.\r\nWhen enabled, users can toggle input gates and see logic propagation through the circuit.\r\n\r\n@default 1\r\n@minimum 0\r\n@maximum 1\r\n@attribute allowsimulation",
               "fieldName": "allowSimulation"
             },
             {
-              "name": "not-gate-allowed",
+              "name": "notgateallowed",
               "type": {
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of NOT gates allowed in the circuit.",
+              "description": "Maximum number of NOT gates allowed in the circuit.\r\n@description Constrains the number of NOT gates that can be placed in the workspace.\r\nUseful for educational scenarios with specific requirements.\r\n\r\n**Value Meanings:**\r\n- **-1:** Unlimited gates allowed (default)\r\n- **0:** No gates of this type allowed (hides from sidebar)\r\n- **>0:** Specific maximum count (e.g., 3 allows up to 3 gates)\r\n\r\nWhen limit is reached, drag-and-drop from sidebar is disabled for this gate type.\r\n\r\n@default -1\r\n@minimum -1\r\n@attribute notgateallowed",
               "fieldName": "notGateAllowed"
             },
             {
-              "name": "and-gate-allowed",
+              "name": "andgateallowed",
               "type": {
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of AND gates allowed in the circuit.",
+              "description": "Maximum number of AND gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. AND gates perform logical conjunction (both inputs must be true).\r\n@default -1\r\n@minimum -1\r\n@attribute andgateallowed",
               "fieldName": "andGateAllowed"
             },
             {
-              "name": "or-gate-allowed",
+              "name": "orgateallowed",
               "type": {
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of OR gates allowed in the circuit.",
+              "description": "Maximum number of OR gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. OR gates perform logical disjunction (at least one input must be true).\r\n@default -1\r\n@minimum -1\r\n@attribute orgateallowed",
               "fieldName": "orGateAllowed"
             },
             {
-              "name": "nand-gate-allowed",
+              "name": "nandgateallowed",
               "type": {
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of NAND gates allowed in the circuit.",
+              "description": "Maximum number of NAND gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. NAND gates are inverted AND gates (output true unless both inputs true).\r\n@default -1\r\n@minimum -1\r\n@attribute nandgateallowed",
               "fieldName": "nandGateAllowed"
             },
             {
-              "name": "nor-gate-allowed",
+              "name": "norgateallowed",
               "type": {
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of NOR gates allowed in the circuit.",
+              "description": "Maximum number of NOR gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. NOR gates are inverted OR gates (output true only when both inputs false).\r\n@default -1\r\n@minimum -1\r\n@attribute norgateallowed",
               "fieldName": "norGateAllowed"
             },
             {
-              "name": "xnor-gate-allowed",
+              "name": "xnorgateallowed",
               "type": {
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of XNOR gates allowed in the circuit.",
+              "description": "Maximum number of XNOR gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. XNOR gates output true when inputs are equal (both true or both false).\r\n@default -1\r\n@minimum -1\r\n@attribute xnorgateallowed",
               "fieldName": "xnorGateAllowed"
             },
             {
-              "name": "xor-gate-allowed",
+              "name": "xorgateallowed",
               "type": {
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of XOR gates allowed in the circuit.",
+              "description": "Maximum number of XOR gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. XOR gates output true when inputs differ (exclusive or).\r\n@default -1\r\n@minimum -1\r\n@attribute xorgateallowed",
               "fieldName": "xorGateAllowed"
             },
             {
-              "name": "splitter-allowed",
+              "name": "splitterallowed",
               "type": {
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of splitter gates allowed in the circuit.",
+              "description": "Maximum number of splitter gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. Splitter gates duplicate input to two separate outputs.\r\n@default -1\r\n@minimum -1\r\n@attribute splitterallowed",
               "fieldName": "splitterAllowed"
+            },
+            {
+              "name": "reflectGates",
+              "type": {
+                "text": "String"
+              },
+              "default": "\"\"",
+              "description": "Serialized representation of gates for persistence and initialization.\r\n\r\n@description Contains a comma-separated list of gate definitions for saving and restoring circuit state.\r\nEach gate entry follows the format: `\"gateID|gateType|xPosition|yPosition\"`\r\n\r\n**Format Details:**\r\n- **gateID:** Numeric identifier (0, 1, 2, ...) - automatically assigned during creation\r\n- **gateType:** Gate type string - must be one of: \"NOT\", \"AND\", \"OR\", \"NAND\", \"NOR\", \"XOR\", \"XNOR\", \"INPUT\", \"OUTPUT\", \"SPLITTER\"\r\n- **xPosition:** X coordinate in pixels with \"px\" suffix (e.g., \"150px\")\r\n- **yPosition:** Y coordinate in pixels with \"px\" suffix (e.g., \"200px\")\r\n- **Separator:** Pipe character \"|\" between fields, comma \",\" between gates\r\n\r\n**Coordinate System:**\r\n- Origin: Top-left of 3000×2000px workspace\r\n- Units: CSS pixels\r\n- Valid range: 0-3000px (X), 0-2000px (Y)\r\n\r\n@example \"0|INPUT|100px|150px,1|AND|300px|200px,2|OUTPUT|500px|200px\"\r\n\r\n@attribute reflectgates",
+              "attribute": "reflectgates",
+              "fieldName": "reflectGates"
+            },
+            {
+              "name": "reflectCons",
+              "type": {
+                "text": "String"
+              },
+              "default": "\"\"",
+              "description": "Serialized representation of connections for persistence and initialization.\r\n\r\n@description Contains a comma-separated list of connection definitions linking gate ports.\r\nEach connection entry follows the format: `\"startConnectorID|endConnectorID\"`\r\n\r\n**Connector ID Structure:** `{gateType}Gate{gateID}{portType}`\r\n- **gateType:** Lowercase gate type (input, and, or, nand, nor, xor, xnor, output, splitter, not)\r\n- **gateID:** The numeric ID from reflectGates (0, 1, 2, ...)\r\n- **portType:** Port identifier specific to gate type\r\n\r\n**Port Types by Gate:**\r\n- **INPUT gates:** `Out` (single output port)\r\n- **OUTPUT gates:** `In1` (single input port)\r\n- **NOT gates:** `In1` (input), `Out` (output)\r\n- **2-input gates (AND/OR/NAND/NOR/XOR/XNOR):** `In1`, `In2` (inputs), `Out` (output)\r\n- **SPLITTER gates:** `In1` (input), `Out2`, `Out3` (two separate outputs)\r\n\r\n**Connection Rules:**\r\n- Only output→input connections allowed\r\n- Each input port accepts only one connection\r\n- Output ports can connect to multiple inputs\r\n- Separator: Pipe \"|\" between connector IDs, comma \",\" between connections\r\n\r\n@example \"inputGate0Out|andGate1In1,inputGate0Out|andGate1In2,andGate1Out|outputGate2In1\"\r\n\r\n@attribute reflectcons",
+              "attribute": "reflectcons",
+              "fieldName": "reflectCons"
             },
             {
               "name": "zoom",
@@ -469,7 +529,7 @@
                 "text": "number"
               },
               "default": "1",
-              "description": "Current zoom level of the workspace.",
+              "description": "Current zoom level of the workspace.\r\n@description Controls the scaling of the workspace. 1.0 = 100%, 2.0 = 200%, etc.\r\n@default 1\r\n@minimum 0.1\r\n@maximum 5.0",
               "fieldName": "zoom"
             },
             {
@@ -478,7 +538,7 @@
                 "text": "boolean"
               },
               "default": "true",
-              "description": "Whether the circuit simulation is currently active.",
+              "description": "Whether the circuit simulation is currently active.\r\n@description When true, the circuit will automatically calculate and display logic values.\r\n@default true",
               "fieldName": "simulate"
             },
             {
@@ -487,8 +547,8 @@
                 "text": "number"
               },
               "default": "500",
-              "description": "Delay in milliseconds between simulation steps.",
-              "attribute": "simulation-delay",
+              "description": "Delay in milliseconds between simulation steps.\r\n@description Controls how fast the simulation propagates through the circuit.\r\nLower values = faster simulation, higher values = slower simulation for visualization.\r\n@default 500\r\n@minimum 0\r\n@maximum 5000\r\n@attribute simulationdelay",
+              "attribute": "simulationdelay",
               "fieldName": "simulationDelay"
             },
             {
@@ -497,8 +557,8 @@
                 "text": "number"
               },
               "default": "1",
-              "description": "Whether simulation controls are enabled.",
-              "attribute": "allow-simulation",
+              "description": "Whether simulation controls are enabled.\r\n@description Controls visibility and functionality of the simulation checkbox.\r\n- **0:** Simulation disabled and hidden, circuit remains static\r\n- **1:** Simulation enabled and visible, allows interactive logic calculation\r\n\r\nWhen disabled, gates show no logic values and connections remain neutral.\r\nWhen enabled, users can toggle input gates and see logic propagation through the circuit.\r\n\r\n@default 1\r\n@minimum 0\r\n@maximum 1\r\n@attribute allowsimulation",
+              "attribute": "allowsimulation",
               "fieldName": "allowSimulation"
             },
             {
@@ -507,8 +567,8 @@
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of NOT gates allowed in the circuit.",
-              "attribute": "not-gate-allowed",
+              "description": "Maximum number of NOT gates allowed in the circuit.\r\n@description Constrains the number of NOT gates that can be placed in the workspace.\r\nUseful for educational scenarios with specific requirements.\r\n\r\n**Value Meanings:**\r\n- **-1:** Unlimited gates allowed (default)\r\n- **0:** No gates of this type allowed (hides from sidebar)\r\n- **>0:** Specific maximum count (e.g., 3 allows up to 3 gates)\r\n\r\nWhen limit is reached, drag-and-drop from sidebar is disabled for this gate type.\r\n\r\n@default -1\r\n@minimum -1\r\n@attribute notgateallowed",
+              "attribute": "notgateallowed",
               "fieldName": "notGateAllowed"
             },
             {
@@ -517,8 +577,8 @@
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of AND gates allowed in the circuit.",
-              "attribute": "and-gate-allowed",
+              "description": "Maximum number of AND gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. AND gates perform logical conjunction (both inputs must be true).\r\n@default -1\r\n@minimum -1\r\n@attribute andgateallowed",
+              "attribute": "andgateallowed",
               "fieldName": "andGateAllowed"
             },
             {
@@ -527,8 +587,8 @@
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of OR gates allowed in the circuit.",
-              "attribute": "or-gate-allowed",
+              "description": "Maximum number of OR gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. OR gates perform logical disjunction (at least one input must be true).\r\n@default -1\r\n@minimum -1\r\n@attribute orgateallowed",
+              "attribute": "orgateallowed",
               "fieldName": "orGateAllowed"
             },
             {
@@ -537,8 +597,8 @@
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of NAND gates allowed in the circuit.",
-              "attribute": "nand-gate-allowed",
+              "description": "Maximum number of NAND gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. NAND gates are inverted AND gates (output true unless both inputs true).\r\n@default -1\r\n@minimum -1\r\n@attribute nandgateallowed",
+              "attribute": "nandgateallowed",
               "fieldName": "nandGateAllowed"
             },
             {
@@ -547,8 +607,8 @@
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of NOR gates allowed in the circuit.",
-              "attribute": "nor-gate-allowed",
+              "description": "Maximum number of NOR gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. NOR gates are inverted OR gates (output true only when both inputs false).\r\n@default -1\r\n@minimum -1\r\n@attribute norgateallowed",
+              "attribute": "norgateallowed",
               "fieldName": "norGateAllowed"
             },
             {
@@ -557,8 +617,8 @@
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of XNOR gates allowed in the circuit.",
-              "attribute": "xnor-gate-allowed",
+              "description": "Maximum number of XNOR gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. XNOR gates output true when inputs are equal (both true or both false).\r\n@default -1\r\n@minimum -1\r\n@attribute xnorgateallowed",
+              "attribute": "xnorgateallowed",
               "fieldName": "xnorGateAllowed"
             },
             {
@@ -567,8 +627,8 @@
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of XOR gates allowed in the circuit.",
-              "attribute": "xor-gate-allowed",
+              "description": "Maximum number of XOR gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. XOR gates output true when inputs differ (exclusive or).\r\n@default -1\r\n@minimum -1\r\n@attribute xorgateallowed",
+              "attribute": "xorgateallowed",
               "fieldName": "xorGateAllowed"
             },
             {
@@ -577,8 +637,8 @@
                 "text": "number"
               },
               "default": "-1",
-              "description": "Maximum number of splitter gates allowed in the circuit.",
-              "attribute": "splitter-allowed",
+              "description": "Maximum number of splitter gates allowed in the circuit.\r\n@description See notGateAllowed for detailed value meanings. Splitter gates duplicate input to two separate outputs.\r\n@default -1\r\n@minimum -1\r\n@attribute splitterallowed",
+              "attribute": "splitterallowed",
               "fieldName": "splitterAllowed"
             }
           ],

@@ -43,6 +43,8 @@ npm install @webwriter/logic-circuit
 | `LogicCircuit.shadowRootOptions` | `object` | - | `{ ...LitElementWw.shadowRootOptions, delegatesFocus: true, }` | ✗ |
 | `localize` | - | - | `LOCALIZE` | ✗ |
 | `LogicCircuit.scopedElements` | - | - | - | ✗ |
+| `reflectGates` (`reflectGates`) | `String` | Serialized representation of gates for persistence and initialization. | `""` | ✓ |
+| `reflectCons` (`reflectCons`) | `String` | Serialized representation of connections for persistence and initialization. | `""` | ✓ |
 | `zoom` (`zoom`) | `number` | Current zoom level of the workspace. | `1` | ✗ |
 | `simulate` (`simulate`) | `boolean` | Whether the circuit simulation is currently active. | `true` | ✗ |
 | `simulationDelay` (`simulationDelay`) | `number` | Delay in milliseconds between simulation steps. | `500` | ✓ |
@@ -93,7 +95,7 @@ npm install @webwriter/logic-circuit
 ## Events
 | Name | Description |
 | :--: | :---------: |
-| circuit-changed | Dispatched when the circuit structure changes |
+| circuit-changed | Dispatched when the circuit structure changes (gates added/removed/moved) |
 | simulation-state-changed | Dispatched when simulation is started/stopped |
 
 *[Events](https://developer.mozilla.org/en-US/docs/Web/Events) are dispatched by the widget after certain triggers.*
