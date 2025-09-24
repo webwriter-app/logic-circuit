@@ -668,12 +668,21 @@ export default class LogicCircuit extends LitElementWw {
 
     /**
      * Handles mouse leaving the workspace area while dragging.
-     * Updates line positions.
+     * Updates line positions to initial position.
      *
      * @param {MouseEvent} event
      */
-    handleDragLeave(event) {
-        updateLines(this, Gate.movedGate);
+    handleDragLeave(event: MouseEvent) {
+        const bounds = this.workspaceContainer.getBoundingClientRect();
+        const { clientX: x, clientY: y } = event;
+
+        // Only update lines if mouse is actually outside the workspace container
+        const isOutside =
+            x < bounds.left || x > bounds.right || y < bounds.top || y > bounds.bottom;
+
+        if (isOutside) {
+            updateLines(this, Gate.movedGate);
+        }
     }
 
     /**
