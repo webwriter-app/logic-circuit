@@ -15,7 +15,7 @@ export default class XORGate extends Gate {
     }
 
     calculateOutput() {
-        this.output = this.input1 !== this.input2;
+        this.output = (!!this.input1) !== (!!this.input2);
     }
 
     render() {
