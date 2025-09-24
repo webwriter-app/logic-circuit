@@ -465,41 +465,61 @@ export default class LogicCircuit extends LitElementWw {
             })
         }
         if(this.reflectCons.length>0){
-            this.reflectCons.split(",").forEach(con=>{
+            // Split the reflectCons string by commas to get individual connection strings
+            this.reflectCons.split(",").forEach(con => {
+                // Extract start and end connector IDs from the connection string
                 let startID: string = con.split("|")[0]
                 let endID: string = con.split("|")[1]
+
+                // Variables to store references to the start and end connector elements
                 let start: any, end: any
+
+                // Flag to ensure the line is only added once
                 let added: boolean = false;
-                this.shadowRoot.querySelector(".workspaceArea").childNodes.forEach(node=>{
-                    if(node.nodeName.includes("GATE")){
-                        setTimeout(()=>{
-                            const el = node as Element
-                            if(startID.includes(el.shadowRoot.querySelector("div").id)){
-                                let gate: any = el.shadowRoot.querySelector("div")
-                                let connectorArr: any = gate.querySelectorAll("slot")
-                                connectorArr.forEach(slot=>{
-                                    if(slot.children[0].id === startID){
-                                        start = (slot.childNodes as NodeList).item(0)
+
+                // Iterate over all child nodes in the .workspaceArea container
+                this.shadowRoot.querySelector(".workspaceArea").childNodes.forEach(node => {
+                    // Only process nodes that are gates
+                    if (node.nodeName.includes("GATE")) {
+                        // Use setTimeout to ensure that shadow DOM is ready
+                        setTimeout(() => {
+                            const el = node as Element;
+
+                            // Check if this gate contains the start connector ID
+                            if (startID.includes(el.shadowRoot.querySelector("div").id)) {
+                                let gate: any = el.shadowRoot.querySelector("div");
+                                let connectorArr: any = gate.querySelectorAll("slot");
+
+                                // Search all slots for the start connector
+                                connectorArr.forEach(slot => {
+                                    if (slot.children[0].id === startID) {
+                                        start = (slot.childNodes as NodeList).item(0);
                                     }
-                                })
+                                });
                             }
-                            if(endID.includes(el.shadowRoot.querySelector("div").id)){
-                                let gate: any = el.shadowRoot.querySelector("div")
-                                let connectorArr: any = gate.querySelectorAll("slot")
-                                connectorArr.forEach(slot=>{
-                                    if(slot.children[0].id === endID){
-                                        end = (slot.childNodes as NodeList).item(0)
+
+                            // Check if this gate contains the end connector ID
+                            if (endID.includes(el.shadowRoot.querySelector("div").id)) {
+                                let gate: any = el.shadowRoot.querySelector("div");
+                                let connectorArr: any = gate.querySelectorAll("slot");
+
+                                // Search all slots for the end connector
+                                connectorArr.forEach(slot => {
+                                    if (slot.children[0].id === endID) {
+                                        end = (slot.childNodes as NodeList).item(0);
                                     }
-                                })
+                                });
                             }
-                            if(!added && start && end) {
-                                added = true
-                                createLine(this,start,end)
+
+                            // If both start and end connectors are found and the line hasn't been added yet
+                            if (!added && start && end) {
+                                added = true; // prevent duplicate creation
+                                createLine(this, start, end); // create the connection line
                             }
-                        }, 1)
+                        }, 1); // Delay by 1ms to ensure the gate is fully rendered
                     }
-                })
-            })
+                });
+            });
         }
     }
 
