@@ -96,6 +96,8 @@ export default class ConnectorElement extends LitElement {
             widget.isDrawingLine = false;
             widget.svgPathToMouse.setAttribute('d', '');
         }
+
+        this.widget.simulateCircuit();
     }
 
     render() {

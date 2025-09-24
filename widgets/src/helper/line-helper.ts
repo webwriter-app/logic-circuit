@@ -423,6 +423,8 @@ export function createLine(widget, startCon, endCon) {
                 widget.reflectCons = consArr.toString();
             }
         });
+
+        widget.simulateCircuit();
     });
 
     widget.svgCanvas.appendChild(svgPath);
