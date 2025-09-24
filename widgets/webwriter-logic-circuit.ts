@@ -472,8 +472,9 @@ export default class LogicCircuit extends LitElementWw {
                 this.shadowRoot.querySelector(".workspaceArea").childNodes.forEach(node=>{
                     if(node.nodeName.includes("GATE")){
                         setTimeout(()=>{
-                            if(startID.includes(node.shadowRoot.querySelector("div").id)){
-                                let gate: any = node.shadowRoot.querySelector("div")
+                            const el = node as Element
+                            if(startID.includes(el.shadowRoot.querySelector("div").id)){
+                                let gate: any = el.shadowRoot.querySelector("div")
                                 let connectorArr: any = gate.querySelectorAll("slot")
                                 connectorArr.forEach(slot=>{
                                     if(slot.children[0].id === startID){
@@ -481,8 +482,8 @@ export default class LogicCircuit extends LitElementWw {
                                     }
                                 })
                             }
-                            if(endID.includes(node.shadowRoot.querySelector("div").id)){
-                                let gate: any = node.shadowRoot.querySelector("div")
+                            if(endID.includes(el.shadowRoot.querySelector("div").id)){
+                                let gate: any = el.shadowRoot.querySelector("div")
                                 let connectorArr: any = gate.querySelectorAll("slot")
                                 connectorArr.forEach(slot=>{
                                     if(slot.children[0].id === endID){

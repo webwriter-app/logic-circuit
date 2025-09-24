@@ -386,7 +386,8 @@ export default class Gate extends LitElementWw {
      */ 
     createConnectors(slot, n) {
         if (this.movable) {
-            const connector = this.widget.shadowRoot.createElement('connector-element') as ConnectorElement;
+            const connector = document.createElement('connector-element') as ConnectorElement;
+            this.widget.shadowRoot.appendChild(connector);
             connector.style.position = 'absolute';
             connector.widget = this.widget
 
