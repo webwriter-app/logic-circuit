@@ -1,7 +1,13 @@
 import { html } from 'lit';
 import Gate from './gate.js';
-import { customElement } from 'lit/decorators.js';
 
+/**
+ * Represents a Splitter in the logic circuit.
+ *
+ * This gate distributes a single input signal to two outputs.
+ *
+ * @extends Gate
+ */
 export default class Splitter extends Gate {
     constructor() {
         super();

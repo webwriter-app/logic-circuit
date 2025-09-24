@@ -1,7 +1,13 @@
 import { html } from 'lit';
 import Gate from './gate.js';
-import { customElement } from 'lit/decorators.js';
 
+/**
+ * Represents an XOR gate in the logic circuit.
+ *
+ * This gate performs a logical XOR operation on two inputs.
+ *
+ * @extends Gate
+ */
 export default class XORGate extends Gate {
     constructor() {
         super();

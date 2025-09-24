@@ -2,6 +2,13 @@ import LogicCircuit from '../../webwriter-logic-circuit';
 import ConnectorElement from '../connector';
 import { updateLines } from '../helper/line-helper';
 
+/**
+ * Adds a gate to the circuit workspace based on the specified event or loaded data.
+ *
+ * @param {*} widget - The widget instance representing the current circuit workspace.
+ * @param {*} event - The drag-and-drop event containing data about the gate being added.
+ * @param {string[]} [load] - Optional array containing loaded gate type and position data.
+ */
 export function addGate(widget: any, event: any, load?: string[]) {
     const gateType = load != undefined ? load[0] : event.dataTransfer.getData('type');
     let newGate;
@@ -93,6 +100,12 @@ export function addGate(widget: any, event: any, load?: string[]) {
 
 }
 
+/**
+ * Moves an existing gate within the circuit workspace based on drag-and-drop events.
+ *
+ * @param {*} widget - The current circuit workspace instance.
+ * @param {*} event - The drag-and-drop event containing information about the movement.
+ */
 export function moveGate(widget, event) {
     const id = event.dataTransfer.getData('id');
 
@@ -130,6 +143,14 @@ export function moveGate(widget, event) {
     widget.reflectGates = gatesArr.toString()
 }
 
+/**
+ * Transfers output values from one gate to connected subsequent gates in the circuit.
+ *
+ * This method updates inputs of next gates based on outputs of specified source gate connections.
+ *
+ * @param {*} widget - The current circuit workspace instance containing line elements and gates.
+ * @param {*} gate - The source gate whose output needs to be transferred to connected gates.
+ */
 export function transferOutputToNextGate(widget: any, gate: any) {
 
     const nextLineArray = widget.lineElements.filter(
@@ -170,6 +191,14 @@ export function transferOutputToNextGate(widget: any, gate: any) {
     });
 }
 
+/**
+ * Checks whether adding a specific type of gate is allowed based on the limits in the circuit configuration.
+ *
+ * @param {*} widget - The current circuit workspace instance holding configurations for allowed gates.
+ * @param {*} gateType - Type of the gate being checked against allowance rules defined in configurations. 
+ *
+ * @returns {boolean} Returns true if adding this type of Gate is allowed, otherwise returns false .
+ */
 export function checkIfGateAllowed(widget: any, gateType: any) {
     const gatesOfSameType = widget.gateElements.filter((gate) => gate.gatetype === gateType);
     switch (gateType) {
@@ -235,6 +264,16 @@ export function checkIfGateAllowed(widget: any, gateType: any) {
     return false;
 }
 
+/**
+ * Counts how many instances of each type of Gate currently exist within this Circuit Workspace.
+ *
+ * It also provides feedback regarding how many more instances can be added according limits set up earlier. 
+ *
+ * @param {*} Widget –The Current Circuit Workspace Instance Holding All Gates Information.                                                                                                                                                                                                                                                                                                      
+ * @param {string} GATETYPE –The Specific Type Of Gate Being Counted For Allowance Feedback.
+ *           
+ * @returns {(string|null)} A formatted string indicating count/allowed limit or null when no limit exists.         
+ */
 export function gateCounter(widget, gateType) {
     const gatesOfSameType = widget.gateElements.filter((gate) => gate.gatetype === gateType);
     switch (gateType) {
@@ -285,6 +324,16 @@ export function gateCounter(widget, gateType) {
     }
 }
 
+/**
+ * Determines whether dropped items are over the trash icon area while dragging them around within this interface.
+ *
+ * This helps manage deletion actions when users try to remove components by dropping them into designated areas like trash cans.
+ *
+ * @param {*} widget - The current circuit workspace instance holding all components information.
+ * @param {Event} event - Mouse event triggered during the dragging process providing coordinates needed for checking overlap with trash area.
+ * 
+ * @returns {boolean} True if currently dropped over the trash icon area, false otherwise.
+ */
 export function isDropOverTrashIcon(widget: any, event: any) {
     const trashCanRect = widget.workspaceContainer.querySelector('.trashCanIcon').getBoundingClientRect();
     const mouseX = event.clientX;
@@ -298,6 +347,12 @@ export function isDropOverTrashIcon(widget: any, event: any) {
     );
 }
 
+/**
+ * Resets all non-input gates in the circuit by clearing their outputs and inputs,
+ * and also resets visual indicators related to their state.
+ *
+ * @param {*} widget - The current circuit workspace instance holding all gates information.
+ */
 export function resetGates(widget) {
     widget.gateElements.forEach((gate) => {
         if (gate.gatetype !== 'INPUT') {

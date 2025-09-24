@@ -1,7 +1,13 @@
 import { html } from 'lit';
 import Gate from './gate.js';
-import { customElement } from 'lit/decorators.js';
 
+/**
+ * Represents an Input gate in the logic circuit.
+ *
+ * This gate represents an input signal to the logic circuit, allowing the user to change its value by clicking on it.
+ *
+ * @extends Gate
+ */
 export default class Input extends Gate {
     constructor() {
         super();

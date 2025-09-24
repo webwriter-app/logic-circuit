@@ -44,6 +44,30 @@ const workspaceHeight: number = 2000;
 let workspaceOffsetX: number = -workspaceWidth / 2;
 let workspaceOffsetY: number = -workspaceHeight / 2;
 
+/**
+ * @summary Logic circuit simulator widget for composing and simulating digital circuits with logic gates.
+ *
+ * @tag webwriter-logic-circuit
+ *
+ * @cssprop --circuit-background - Background color of the workspace
+ * @csspart gate - Styles individual gate components
+ * @csspart line - Styles the connecting lines between gates
+ *
+ * @slot - The default slot (currently unused in this widget)
+ *
+ * @attr {number} simulation-delay - Delay (in ms) between simulation ticks
+ * @attr {number} allow-simulation - Whether simulation is enabled (1 = enabled, 0 = disabled)
+ * @attr {number} not-gate-allowed - Whether NOT gates are allowed (-1 = unlimited, 0+ = limited)
+ * @attr {number} and-gate-allowed - Whether AND gates are allowed
+ * @attr {number} or-gate-allowed - Whether OR gates are allowed
+ * @attr {number} nand-gate-allowed - Whether NAND gates are allowed
+ * @attr {number} nor-gate-allowed - Whether NOR gates are allowed
+ * @attr {number} xor-gate-allowed - Whether XOR gates are allowed
+ * @attr {number} xnor-gate-allowed - Whether XNOR gates are allowed
+ * @attr {number} splitter-allowed - Whether splitters are allowed
+ * @attr {string} reflect-gates - Stringified representation of gates (for syncing or reflecting state)
+ * @attr {string} reflect-cons - Stringified representation of connections (for syncing or reflecting state)
+ */
 @customElement('webwriter-logic-circuit')
 @localized()
 export default class LogicCircuit extends LitElementWw {
@@ -52,10 +76,13 @@ export default class LogicCircuit extends LitElementWw {
         delegatesFocus: true,
     };
 
+    /** i18n handler for the widget. */
     public localize = LOCALIZE;
 
+    /** Styles for the widget. */
     static styles = Styles;
 
+    /** Registers scoped custom elements used within the logic circuit widget. */
     public static get scopedElements() {
         return {
             'not-gate': NOTGate,
@@ -83,42 +110,100 @@ export default class LogicCircuit extends LitElementWw {
         };
     }
 
+    /** The list of all current wire (line) elements. */
     @property({ type: Array }) accessor lineElements = [];
+
+    /** The list of all current gate elements. */
     @property({ type: Array }) accessor gateElements = [];
-    @property({type: String, reflect: true}) accessor reflectGates: String = ""
-    @property({type: String, reflect: true}) accessor reflectCons: String = ""
+
+    /** Stringified representation of gate state, synced via attribute. */
+    @property({ type: String, reflect: true }) accessor reflectGates: String = "";
+
+    /** Stringified representation of connector state, synced via attribute. */
+    @property({ type: String, reflect: true }) accessor reflectCons: String = "";
+
+    /** Internal gate ID counter for uniquely identifying gates. */
     @property({ type: Number }) accessor gateID: number = 0;
+
+    /** Internal line ID counter for uniquely identifying wires. */
     @property({ type: Number }) accessor lineID: number = 0;
+
+    /** Current zoom level of the circuit canvas. */
     @property({ type: Number }) accessor zoom: number = 1;
+
+    /** X coordinate where the drag operation started. */
     @property({ type: Number }) accessor dragStartX: number = 0;
+
+    /** Y coordinate where the drag operation started. */
     @property({ type: Number }) accessor dragStartY: number = 0;
+
+    /** Whether the simulation is running. */
     @property({ type: Boolean }) accessor simulate: boolean = true;
 
+    /** Delay in milliseconds between simulation steps. */
     @property({ type: Number, attribute: true, reflect: true }) accessor simulationDelay: number = 500;
 
+    /** Whether simulation is allowed (1 = allowed, 0 = disallowed). */
     @property({ type: Number, attribute: true, reflect: true }) accessor allowSimulation: number = 1;
+
+    /** Limit or enable state for NOT gates (-1 = unlimited, 0+ = limited). */
     @property({ type: Number, attribute: true, reflect: true }) accessor notGateAllowed: number = -1;
+
+    /** Limit or enable state for AND gates. */
     @property({ type: Number, attribute: true, reflect: true }) accessor andGateAllowed: number = -1;
+
+    /** Limit or enable state for OR gates. */
     @property({ type: Number, attribute: true, reflect: true }) accessor orGateAllowed: number = -1;
+
+    /** Limit or enable state for NAND gates. */
     @property({ type: Number, attribute: true, reflect: true }) accessor nandGateAllowed: number = -1;
+
+    /** Limit or enable state for NOR gates. */
     @property({ type: Number, attribute: true, reflect: true }) accessor norGateAllowed: number = -1;
+
+    /** Limit or enable state for XNOR gates. */
     @property({ type: Number, attribute: true, reflect: true }) accessor xnorGateAllowed: number = -1;
+
+    /** Limit or enable state for XOR gates. */
     @property({ type: Number, attribute: true, reflect: true }) accessor xorGateAllowed: number = -1;
+
+    /** Limit or enable state for splitter gates. */
     @property({ type: Number, attribute: true, reflect: true }) accessor splitterAllowed: number = -1;
 
+    /** Whether the user is currently dragging the canvas or an element. */
     @property({ type: Boolean }) accessor isDragging: boolean = false;
+
+    /** Whether a connection line is currently being drawn. */
     @state() accessor isDrawingLine: boolean = false;
+
+    /** Reference to the starting connector for a wire being drawn. */
     @state() accessor startConnector: ConnectorElement = null;
+
+    /** Reference to the ending connector for a wire being drawn. */
     @state() accessor endConnector: ConnectorElement = null;
 
+    /** Reference to the SVG canvas element. */
     @query('#svgCanvas') accessor svgCanvas;
+
+    /** Reference to the overall workspace container. */
     @query('#workspace') accessor workspaceContainer;
+
+    /** Reference to the draggable inner workspace. */
     @query('#workspaceDraggable') accessor wsDrag;
+
+    /** Reference to the simulation checkbox toggle. */
     @query('#simCheckbox') accessor simCheckbox;
+
+    /** Reference to the instructions container. */
     @query('#instructions') accessor instructionsContainer;
+
+    /** Get the current list of gate elements. */
     public getGateElements = () => this.gateElements;
+
+    /** Get the current list of line elements. */
     public getLineElements = () => this.lineElements;
 
+    /** The temporary path element used when drawing a wire to follow the mouse. */
     svgPathToMouse: SVGPathElement | null = null;
 
     render() {
@@ -298,6 +383,12 @@ export default class LogicCircuit extends LitElementWw {
         `;
     }
 
+    /**
+     * Called when the component is updated.
+     * Handles toggling the visibility of the simulation checkbox based on `allowSimulation`.
+     *
+     * @param {Map<string, unknown>} changedProperties - A map of changed properties and their previous values
+     */
     updated(changedProperties) {
         super.updated(changedProperties);
         if (changedProperties.has('allowSimulation')) {
@@ -309,11 +400,19 @@ export default class LogicCircuit extends LitElementWw {
         }
     }
 
+    /**
+     * Lifecycle method called when the element is added to the DOM.
+     * Registers a context menu event listener.
+     */
     connectedCallback() {
         super.connectedCallback();
         this.addEventListener('contextmenu', this.handleContextMenu);
     }
 
+    /**
+     * Lifecycle method called when the element is removed from the DOM.
+     * Cleans up mouse-related event listeners to avoid memory leaks.
+     */
     disconnectedCallback() {
         super.disconnectedCallback();
         this.removeEventListener('mousedown', this.handleMouseDown);
@@ -321,6 +420,9 @@ export default class LogicCircuit extends LitElementWw {
         this.removeEventListener('mouseup', this.handleMouseUp);
     }
 
+    /**
+     * Toggles the visibility of the instructions container in the UI.
+     */
     toggleInstructions() {
         if (this.instructionsContainer.style.display == "block") {
             this.instructionsContainer.style.display = 'none';
@@ -329,6 +431,13 @@ export default class LogicCircuit extends LitElementWw {
         }
     }
 
+    /**
+     * Called once after the component’s initial render.
+     * - Registers all workspace event listeners (drag, drop, mouse, wheel).
+     * - Sets up the workspace size and initial transform.
+     * - Adds an SVG path element for live line drawing.
+     * - Reconstructs gates and connections from `reflectGates` and `reflectCons`, if provided.
+     */
     firstUpdated() {
         this.workspaceContainer.addEventListener('drop', this.handleDrop.bind(this));
         this.workspaceContainer.addEventListener('dragover', this.handleDragOver.bind(this));
@@ -389,8 +498,10 @@ export default class LogicCircuit extends LitElementWw {
         }
     }
 
-
-
+    /**
+     * Toggles simulation mode on or off.
+     * Resets the circuit and updates the simulation checkbox and internal flag.
+     */
     handleAllowSimulation() {
         if (this.allowSimulation === 0) {
             this.resetCircuit();
@@ -403,6 +514,10 @@ export default class LogicCircuit extends LitElementWw {
         }
     }
 
+    /**
+     * Enables or disables the "truth table" display on all gates,
+     * depending on the state of the main switch.
+     */
     handleFlipAllGates() {
         if ((this.shadowRoot.getElementById('switch') as SlSwitch).checked === false) {
             this.gateElements.forEach((gate) => {
@@ -421,6 +536,14 @@ export default class LogicCircuit extends LitElementWw {
         }
     }
 
+    /**
+     * Handles mouse down interactions on the workspace.
+     * - Starts dragging the canvas if the background is clicked.
+     * - Cancels in-progress line drawing.
+     * - Hides any open gate context menus.
+     *
+     * @param {MouseEvent} event
+     */
     handleMouseDown(event) {
         if (event.target === this.svgCanvas) {
             this.isDragging = true;
@@ -437,6 +560,12 @@ export default class LogicCircuit extends LitElementWw {
         }
     }
 
+    /**
+     * Handles mouse move events during dragging or line drawing.
+     * Updates canvas position or live line path accordingly.
+     *
+     * @param {MouseEvent} event
+     */
     handleMouseMove(event) {
         if (this.isDragging) {
             const deltaX = event.clientX - this.dragStartX;
@@ -475,15 +604,27 @@ export default class LogicCircuit extends LitElementWw {
         }
     }
 
+    /**
+     * Applies the current workspace offset and zoom transform to the container.
+     */
     transformWorkspace() {
         const workspace = this.wsDrag;
         workspace.style.transform = `translate(${workspaceOffsetX}px,${workspaceOffsetY}px) scale(${this.zoom})`;
     }
 
+    /**
+     * Stops dragging behavior.
+     */
     handleMouseUp() {
         this.isDragging = false;
     }
 
+    /**
+     * Handles zooming the workspace with the mouse wheel.
+     * Clamps zoom between 0.5 and 2.5, and recalculates boundaries.
+     *
+     * @param {WheelEvent} event
+     */
     handleWheel(event) {
         event.preventDefault();
 
@@ -500,15 +641,33 @@ export default class LogicCircuit extends LitElementWw {
         this.transformWorkspace();
     }
 
+    /**
+     * Handles mouse leaving the workspace area.
+     * Updates line positions and cancels dragging.
+     *
+     * @param {MouseEvent} event
+     */
     handleMouseOut(event) {
         updateLines(this, Gate.movedGate);
         this.isDragging = false;
     }
 
+    /**
+     * Prevents the default browser context menu.
+     *
+     * @param {MouseEvent} event
+     */
     handleContextMenu(event) {
         event.preventDefault();
     }
 
+    /**
+     * Called when a gate is dragged over the workspace.
+     * - Moves any connected lines dynamically.
+     * - Highlights the trash can icon if hovering over it.
+     *
+     * @param {DragEvent} event
+     */
     handleDragOver(event) {
         event.preventDefault();
         const draggedGate = Gate.movedGate;
@@ -573,6 +732,13 @@ export default class LogicCircuit extends LitElementWw {
         }
     }
 
+    /**
+     * Handles a drop event on the workspace.
+     * - Adds new gates or moves existing ones.
+     * - Deletes gates if dropped over the trash icon.
+     *
+     * @param {DragEvent} event
+     */
     handleDrop(event) {
         event.preventDefault();
         const isOverTrash = isDropOverTrashIcon(this, event);
@@ -595,6 +761,11 @@ export default class LogicCircuit extends LitElementWw {
         this.workspaceContainer.querySelector('.trashCanIcon').classList.remove('trashCanIconDragOver');
     }
 
+    /**
+     * Deletes a gate when it is dropped over the trash can.
+     *
+     * @param {DragEvent} event
+     */
     handleDropTrashCan(event) {
         event.preventDefault();
 
@@ -603,6 +774,13 @@ export default class LogicCircuit extends LitElementWw {
         trashGate.deleteGate();
     }
 
+    /**
+     * Parses a numeric input field and sets the corresponding property.
+     * Defaults to -1 if the value is invalid.
+     *
+     * @param {InputEvent} event
+     * @param {string} propertyName - The name of the property to update
+     */
     handleInputChange(event, propertyName) {
         const inputValue = parseInt(event.target.value);
 
@@ -613,6 +791,11 @@ export default class LogicCircuit extends LitElementWw {
         }
     }
 
+    /**
+     * Starts circuit simulation.
+     * Calculates outputs from all input gates and propagates through the circuit.
+     * Stops simulation if the checkbox is unchecked.
+     */
     simulateCircuit() {
         const simCheckbox = this.simCheckbox;
         if (simCheckbox.checked) {
@@ -632,12 +815,19 @@ export default class LogicCircuit extends LitElementWw {
         }
     }
 
+    /**
+     * Resets all gates and lines in the circuit to their initial state.
+     */
     resetCircuit() {
         resetGates(this);
         resetLines(this);
         this.requestUpdate();
     }
-
+    
+    /**
+     * Ensures the workspace stays within bounds during dragging or zooming.
+     * Clamps `workspaceOffsetX` and `workspaceOffsetY` based on viewport and canvas size.
+     */
     calculateBoundaries() {
         if (workspaceOffsetX > (this.wsDrag.getBoundingClientRect().width - workspaceWidth) / 2 + 2) {
             workspaceOffsetX = (this.wsDrag.getBoundingClientRect().width - workspaceWidth) / 2 + 2;

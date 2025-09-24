@@ -17,13 +17,27 @@ import '@shoelace-style/shoelace/dist/themes/light.css';
 import { Styles } from '../styles';
 import LogicCircuit from '../../webwriter-logic-circuit';
 
+/**
+ * Represents a generic gate in the logic circuit.
+ *
+ * This class serves as a base for specific gate types (e.g., AND, OR, NOT) and provides common functionality
+ * for all gates in the logic circuit.
+ *
+ * @extends LitElementWw
+ */
 export default class Gate extends LitElementWw {
     static movedGate;
     static x;
     static y;
 
-    widget: LogicCircuit
+    /** Reference to the LogicCircuit instance associated with this gate. */
+    widget: LogicCircuit;
 
+    /**
+     * Returns an object mapping scoped elements used within this component.
+     *
+     * @returns {{ [key: string]: any }} Scoped elements.
+     */
     public static get scopedElements() {
         return {
             'sl-tooltip': SlTooltip,
@@ -37,21 +51,51 @@ export default class Gate extends LitElementWw {
 
     static styles = Styles;
 
+    /** Input value for connector 1. */
     @property({ type: Boolean }) accessor input1: boolean = null;
+
+    /** Input value for connector 2. */
     @property({ type: Boolean }) accessor input2: boolean = null;
+
+    /** Output value of the gate. */
     @property({ type: Boolean }) accessor output: boolean = null;
+
+    /** Second output value of the gate (if applicable). */
     @property({ type: Boolean }) accessor output2: boolean = null;
+
+    /** Type of the gate (e.g., AND, OR). */
     @property({ type: String }) accessor gatetype: string = null;
+
+    /** Indicates if the gate can be moved by user interaction. */
     @property({ type: Boolean }) accessor movable: boolean = false;
+
+    /** Unique identifier for the gate instance. */ 
     @property({ type: String }) accessor id: string = null;
+
+    /** Connector element for input 1. */ 
     @property({ type: Object }) accessor conIn1: ConnectorElement = null;
+
+    /** Connector element for input 2. */ 
     @property({ type: Object }) accessor conIn2: ConnectorElement = null;
+
+    /** Connector element for output 1. */ 
     @property({ type: Object }) accessor conOut: Object = null;
+
+    /** Connector element for output 2 (if applicable). */ 
     @property({ type: Object }) accessor conOut2: Object = null;
+
+    /** Indicates whether to show the truth table representation of this gate. */ 
     @property({ type: Boolean }) accessor showTruthTable: boolean = false;
 
+    // Querying context menu element
     @query('#contextMenu') accessor contextMenu: SlMenu;
 
+
+    /**
+     * Creates an instance of the Gate class.
+     *
+     * Initializes event listeners for drag and context menu interactions.
+     */
     constructor() {
         super();
         this.addEventListener('dragstart', this.handleDragStart);
@@ -66,6 +110,11 @@ export default class Gate extends LitElementWw {
         this.showTruthTable = false;
     }
 
+    /**
+     * Called after the element is first updated. Sets up connectors based on gate types.
+     *
+     * @param {Map<string | number, any>} changedProperties - A map of properties that have changed since last update.
+     */
     firstUpdated(changedProperties) {
         super.firstUpdated(changedProperties);
 
@@ -103,7 +152,11 @@ export default class Gate extends LitElementWw {
             }
         }
     }
-
+    /**
+     * Called when the element's properties have been updated. Handles updates to outputs and connector colors.
+     *
+     * @param {Map<string | number, any>} changedProperties - A map of properties that have changed since last update.
+     */
     updated(changedProperties) {
         super.updated(changedProperties);
         const widget = this.widget
@@ -137,6 +190,11 @@ export default class Gate extends LitElementWw {
         }
     }
 
+    /**
+     * Handles drag start events to initiate dragging behavior.
+     *
+     * @param {DragEvent} event - The drag event triggered by starting a drag action.
+     */
     handleDragStart(event) {
         Gate.movedGate = event.target;
         Gate.x = event.clientX;
@@ -163,6 +221,11 @@ export default class Gate extends LitElementWw {
         }
     }
 
+    /**
+     * Handles drag end events to finalize dragging behavior.
+     *
+     * @param {DragEvent} event - The drag event triggered by ending a drag action.
+     */
     handleDragEnd(event) {
         event.preventDefault();
         if (this.movable) {
@@ -170,6 +233,11 @@ export default class Gate extends LitElementWw {
         }
     }
 
+    /**
+     * Handles context menu events to show or hide context menu options related to gates.
+     *
+     * @param {MouseEvent} event - The mouse event triggered by right-clicking on a gate element.
+     */
     handleContextMenu(event) {
         event.preventDefault();
         if (this.movable) {
@@ -181,16 +249,29 @@ export default class Gate extends LitElementWw {
         }
     }
 
+    /**
+     * Calculates the output of the gate based on its inputs. This method should be implemented by derived classes. 
+     */
     calculateOutput() {}
 
+    /**
+     * Toggles the value of input1 when called. Used for user interaction with input gates.	
+     */
     changeInput1() {
         this.input1 = !this.input1;
     }
 
+    /**
+     * Toggles the value of input2 when called. Used for user interaction with input gates.	
+     */
     changeInput2() {
         this.input2 = !this.input2;
     }
 
+    /**
+     * Displays context menu at mouse position when invoked while hiding other menus before displaying current one.
+     * @param {*} Event – Mouse Event Triggered During Right Click Action.                                                                                                                                                                                                      
+     */    
     showContextMenu(event) {
         const gateElements = this.widget.getGateElements();
         gateElements.forEach((gate) => {
@@ -218,6 +299,9 @@ export default class Gate extends LitElementWw {
         }
     }
 
+    /**    
+     * Hides currently displayed context menu.    
+     */  
     hideContextMenu() {
         if (this.contextMenu) {
             this.contextMenu.style.display = 'none';
@@ -225,6 +309,9 @@ export default class Gate extends LitElementWw {
         }
     }
 
+    /**    
+     * Deletes current gate instance along with connected lines associated with it.    
+     */   
     deleteGate() {
         const workspace = document.querySelector('webwriter-logic-circuit') as LukaswwLogicgates;
         const gateElements = workspace.getGateElements();
@@ -294,6 +381,9 @@ export default class Gate extends LitElementWw {
         this.hideContextMenu();
     }
 
+    /**    
+     * Creates connector elements based on specified parameters and attaches them to relevant slots within rendered HTML structure.     
+     */ 
     createConnectors(slot, n) {
         if (this.movable) {
             const connector = this.widget.shadowRoot.createElement('connector-element') as ConnectorElement;
@@ -347,6 +437,9 @@ export default class Gate extends LitElementWw {
         }
     }
 
+    /**    
+     * Updates color states of connectors associated with inputs/outputs depending upon their logical states during simulation phase.     
+     */  
     updateConnectorColor() {
         let connectorDot;
         let con;
@@ -417,6 +510,10 @@ export default class Gate extends LitElementWw {
             }
         }
     }
+
+    /**    
+     * Resets color states back down removing active visual indicators previously set.     
+     */  
     resetConnectorColor() {
         let connector;
         let con;
@@ -466,8 +563,14 @@ export default class Gate extends LitElementWw {
         }
     }
 
+    /**     
+     * Generates HTML representation of truth table corresponding to specific logic operation performed by derived classes.      
+     */  
     truthTableHTML() {}
 
+    /**     
+     * Flips visibility state regarding whether truth table should be shown or hidden according to toggle action made via UI checkbox.      
+     */  
     flipGate() {
         if ((this.shadowRoot.getElementById('flipCheckbox') as SlMenuItem).checked) {
             this.showTruthTable = false;
@@ -477,6 +580,9 @@ export default class Gate extends LitElementWw {
         this.hideContextMenu();
     }
 
+    /**
+     * Renders truth table display within component layout whenever called upon during simulation phases, highlighting relevant rows accordingly.
+     */ 
     renderTruthTable() {
         const truthTable = this.truthTableHTML();
         const rows = this.shadowRoot.querySelectorAll('tr');

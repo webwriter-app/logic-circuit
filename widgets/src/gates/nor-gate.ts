@@ -1,7 +1,13 @@
 import { html } from 'lit';
 import Gate from './gate.js';
-import { customElement } from 'lit/decorators.js';
 
+/**
+ * Represents an NOR gate in the logic circuit.
+ *
+ * This gate performs a logical NOR operation on two inputs.
+ *
+ * @extends Gate
+ */
 export default class NORGate extends Gate {
     constructor() {
         super();

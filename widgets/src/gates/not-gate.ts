@@ -1,8 +1,14 @@
 import { html } from 'lit';
 import Gate from './gate.js';
-import { customElement } from 'lit/decorators.js';
 import LukaswwLogicgates from '../../webwriter-logic-circuit.js';
 
+/**
+ * Represents a NOT gate in the logic circuit.
+ *
+ * This gate performs a logical NOT operation on a single input.
+ *
+ * @extends Gate
+ */
 export default class NOTGate extends Gate {
     constructor() {
         super();

@@ -1,7 +1,13 @@
 import { html } from 'lit';
 import Gate from './gate.js';
-import { customElement } from 'lit/decorators.js';
 
+/**
+ * Represents an AND gate in the logic circuit.
+ *
+ * This gate performs a logical AND operation on two inputs.
+ *
+ * @extends Gate
+ */
 export default class ANDGate extends Gate {
     constructor() {
         super();
