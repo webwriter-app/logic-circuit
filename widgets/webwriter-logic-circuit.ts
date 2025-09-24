@@ -444,7 +444,7 @@ export default class LogicCircuit extends LitElementWw {
         this.workspaceContainer.addEventListener('mousedown', this.handleMouseDown.bind(this));
         this.workspaceContainer.addEventListener('mousemove', this.handleMouseMove.bind(this));
         this.workspaceContainer.addEventListener('mouseup', this.handleMouseUp.bind(this));
-        this.workspaceContainer.addEventListener('mouseout', this.handleMouseOut.bind(this));
+        this.workspaceContainer.addEventListener('dragleave', this.handleDragLeave.bind(this));
         this.workspaceContainer.addEventListener('wheel', this.handleWheel.bind(this));
 
         this.wsDrag.style.width = workspaceWidth + 'px';
@@ -643,14 +643,13 @@ export default class LogicCircuit extends LitElementWw {
     }
 
     /**
-     * Handles mouse leaving the workspace area.
-     * Updates line positions and cancels dragging.
+     * Handles mouse leaving the workspace area while dragging.
+     * Updates line positions.
      *
      * @param {MouseEvent} event
      */
-    handleMouseOut(event) {
+    handleDragLeave(event) {
         updateLines(this, Gate.movedGate);
-        this.isDragging = false;
     }
 
     /**
