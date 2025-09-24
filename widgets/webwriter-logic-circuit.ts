@@ -461,7 +461,7 @@ export default class LogicCircuit extends LitElementWw {
 
         if(this.reflectGates.length>0){
             this.reflectGates.split(",").forEach(gate=>{
-                addGate(this, null, gate.split("|").splice(1))
+                addGate(this, null, gate.split("|"))
             })
         }
         if(this.reflectCons.length>0){

@@ -7,10 +7,21 @@ import { updateLines } from '../helper/line-helper';
  *
  * @param {*} widget - The widget instance representing the current circuit workspace.
  * @param {*} event - The drag-and-drop event containing data about the gate being added.
- * @param {string[]} [load] - Optional array containing loaded gate type and position data.
+ * @param {string[]} [load] - Optional array containing loaded id, gate type and position data.
  */
 export function addGate(widget: any, event: any, load?: string[]) {
-    const gateType = load != undefined ? load[0] : event.dataTransfer.getData('type');
+    // Extract loaded gate ID or choose new gate ID
+    const id = load != undefined ? load[0] : widget.gateID;
+
+    if(load == undefined) {
+        // If new gate ID was chosen, increment gate ID counter for next gate
+        widget.gateID++;
+    }else {
+        // If loaded gate ID was chosen, set the ID counter to higher value than current ID
+        widget.gateId = Math.max(widget.gateID, id + 1)
+    }
+
+    const gateType = load != undefined ? load[1] : event.dataTransfer.getData('type');
     let newGate;
 
     if (gateType !== 'INPUT' && gateType !== 'OUTPUT' && gateType !== 'SPLITTER') {
@@ -21,44 +32,44 @@ export function addGate(widget: any, event: any, load?: string[]) {
     switch (gateType) {
         case 'NOT':
             newGate = widget.shadowRoot.createElement('not-gate');
-            newGate.id = 'notGate' + widget.gateID;
+            newGate.id = 'notGate' + id;
             break;
         case 'AND':
             newGate = widget.shadowRoot.createElement('and-gate');
-            newGate.id = 'andGate' + widget.gateID;
+            newGate.id = 'andGate' + id;
             break;
         case 'OR':
             newGate = widget.shadowRoot.createElement('or-gate');
-            newGate.id = 'orGate' + widget.gateID;
+            newGate.id = 'orGate' + id;
             break;
         case 'NAND':
             newGate = widget.shadowRoot.createElement('nand-gate');
-            newGate.id = 'nandGate' + widget.gateID;
+            newGate.id = 'nandGate' + id;
             break;
         case 'NOR':
             newGate = widget.shadowRoot.createElement('nor-gate');
-            newGate.id = 'norGate' + widget.gateID;
+            newGate.id = 'norGate' + id;
             break;
         case 'XNOR':
             newGate = widget.shadowRoot.createElement('xnor-gate');
-            newGate.id = 'xnorGate' + widget.gateID;
+            newGate.id = 'xnorGate' + id;
             break;
         case 'XOR':
             newGate = widget.shadowRoot.createElement('xor-gate');
-            newGate.id = 'xorGate' + widget.gateID;
+            newGate.id = 'xorGate' + id;
             break;
         case 'INPUT':
             newGate = widget.shadowRoot.createElement('input-gate');
-            newGate.id = 'inputGate' + widget.gateID;
+            newGate.id = 'inputGate' + id;
             newGate.input1 = false;
             break;
         case 'OUTPUT':
             newGate = widget.shadowRoot.createElement('output-gate');
-            newGate.id = 'outputGate' + widget.gateID;
+            newGate.id = 'outputGate' + id;
             break;
         case 'SPLITTER':
             newGate = widget.shadowRoot.createElement('splitter-gate');
-            newGate.id = 'splitterGate' + widget.gateID;
+            newGate.id = 'splitterGate' + id;
             break;
     }
 
@@ -83,10 +94,8 @@ export function addGate(widget: any, event: any, load?: string[]) {
     const scaledRelativeX = relativeX / widget.zoom;
     const scaledRelativeY = relativeY / widget.zoom;
 
-    newGate.style.left = load != undefined ? load[1] : scaledRelativeX - grabPosX + 'px';
-    newGate.style.top = load != undefined ? load[2] : scaledRelativeY - grabPosY + 'px';
-
-    widget.gateID++;
+    newGate.style.left = load != undefined ? load[2] : scaledRelativeX - grabPosX + 'px';
+    newGate.style.top = load != undefined ? load[3] : scaledRelativeY - grabPosY + 'px';
 
     newGate.movable = true;
     newGate.widget = widget
@@ -95,7 +104,7 @@ export function addGate(widget: any, event: any, load?: string[]) {
     widget.gateElements = [...widget.gateElements, newGate];
     if(load == undefined){
         widget.reflectGates+= widget.reflectGates != "" ? "," : ""
-        widget.reflectGates+=  (widget.gateID-1)+"|"+gateType+"|"+newGate.style.left+"|"+newGate.style.top
+        widget.reflectGates+=  id+"|"+gateType+"|"+newGate.style.left+"|"+newGate.style.top
     }
 
 }
