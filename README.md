@@ -1,5 +1,5 @@
-# Logic,Circuit (`@webwriter/logic-circuit@1.1.3`)
-[License: MIT](LICENSE) | Version: 1.1.3
+# Logic,Circuit (`@webwriter/logic-circuit@1.2.0`)
+[License: MIT](LICENSE) | Version: 1.2.0
 
 Create and simulate circuits with logic gates (AND, OR, XOR, etc.).
 
@@ -89,7 +89,7 @@ npm install @webwriter/logic-circuit
 | `transformWorkspace` | Applies the current workspace offset and zoom transform to the container. | -
 | `handleMouseUp` | Stops dragging behavior. | -
 | `handleWheel` | Handles zooming the workspace with the mouse wheel.<br>Clamps zoom between 0.5 and 2.5, and recalculates boundaries. | `event: WheelEvent`
-| `handleMouseOut` | Handles mouse leaving the workspace area.<br>Updates line positions and cancels dragging. | `event: MouseEvent`
+| `handleDragLeave` | Handles mouse leaving the workspace area while dragging.<br>Updates line positions to initial position. | `event: MouseEvent`
 | `handleContextMenu` | Prevents the default browser context menu. | `event: MouseEvent`
 | `handleDragOver` | Called when a gate is dragged over the workspace.<br>- Moves any connected lines dynamically.<br>- Highlights the trash can icon if hovering over it. | `event: DragEvent`
 | `handleDrop` | Handles a drop event on the workspace.<br>- Adds new gates or moves existing ones.<br>- Deletes gates if dropped over the trash icon. | `event: DragEvent`

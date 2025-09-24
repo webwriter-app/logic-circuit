@@ -418,7 +418,7 @@
             },
             {
               "kind": "method",
-              "name": "handleMouseOut",
+              "name": "handleDragLeave",
               "parameters": [
                 {
                   "name": "event",
@@ -427,7 +427,7 @@
                   }
                 }
               ],
-              "description": "Handles mouse leaving the workspace area.\nUpdates line positions and cancels dragging."
+              "description": "Handles mouse leaving the workspace area while dragging.\nUpdates line positions to initial position."
             },
             {
               "kind": "method",
