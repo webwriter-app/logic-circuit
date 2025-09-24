@@ -11,7 +11,7 @@
       </trans-unit>
       <trans-unit id="s6aa6cfde13238a46">
         <source>Drag and drop elements from the left sidebar to add them.</source>
-        <target>Ziehen Sie Elemente per Drag &amp; Drop aus der linken Seitenleiste, um sie hinzuzufügen.</target>
+        <target>Ziehen Sie Elemente per Drag and Drop aus der linken Seitenleiste, um sie hinzuzufügen.</target>
       </trans-unit>
       <trans-unit id="s2b77630e54db68e1">
         <source>Left click a connection endpoint to start a connection and then click another connection endpoint to add it.</source>

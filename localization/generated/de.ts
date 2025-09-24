@@ -17,7 +17,7 @@
 's34bc4cc9fb5b7aa4': `Anweisungen`,
 's4635f32ac7e5b41b': `Ziehen Sie Elemente hierher, um sie zu löschen`,
 's582cc89defd16fdf': `Alle Wahrheitstabellen anzeigen`,
-'s6aa6cfde13238a46': `Ziehen Sie Elemente per Drag &amp; Drop aus der linken Seitenleiste, um sie hinzuzufügen.`,
+'s6aa6cfde13238a46': `Ziehen Sie Elemente per Drag and Drop aus der linken Seitenleiste, um sie hinzuzufügen.`,
 'sb4a640f8347f726c': `Begrenzung der maximalen Anzahl von Gates:`,
 'sb785914856ab26c5': `Nur eine Verbindung erlaubt`,
 'sc49c6f9b07b93aec': `Steckverbinder sind vom gleichen Typ`,

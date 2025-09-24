@@ -1,1 +1,6 @@
-﻿<?xml version="1.0" encoding="utf-8"?><xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.1" srcLang="en" trgLang="id"><file id="." original="."><unit id="description"><segment><source>Create and simulate circuits with logic gates (AND, OR, XOR, etc.).</source><target>Membuat dan mensimulasikan sirkuit dengan gerbang logika (AND, OR, XOR, dll.).</target></segment></unit></file></xliff>
+<?xml version="1.0" encoding="utf-8" ?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.1" srcLang="en" trgLang="id">
+<file id="." original=".">
+<unit id="description"><segment><source>Create and simulate circuits with logic gates (AND, OR, XOR, etc.).</source><target>Membuat dan mensimulasikan sirkuit dengan gerbang logika (AND, OR, XOR, dll.).</target></segment></unit>
+</file>
+</xliff>
