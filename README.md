@@ -118,15 +118,8 @@ npm install @webwriter/logic-circuit
 
 *[CSS parts](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_shadow_parts) allow freely styling internals of the widget with CSS.*
 
-## Editing config
-| Name | Value |
-| :--: | :---------: |
-
-
-*The [editing config](https://webwriter.app/docs/packages/configuring/#editingconfig) defines how explorable authoring tools such as [WebWriter](https://webwriter.app) treat the widget.*
-
-
+*No public editing config.*
 
 
 ---
-*Generated with @webwriter/build@1.8.1*
+*Generated with @webwriter/build@1.6.0*
