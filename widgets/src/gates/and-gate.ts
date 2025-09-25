@@ -2,12 +2,28 @@ import { html } from 'lit';
 import Gate from './gate.js';
 import { customElement } from 'lit/decorators.js';
 
+/**
+ * AND logic gate component.
+ * 
+ * @description The AND gate outputs true only when both inputs are true.
+ * This implements the logical AND operation where output = input1 AND input2.
+ * Truth table: (0,0)→0, (0,1)→0, (1,0)→0, (1,1)→1
+ * 
+ * @example
+ * ```html
+ * <and-gate></and-gate>
+ * ```
+ */
 export default class ANDGate extends Gate {
     constructor() {
         super();
         this.gatetype = 'AND';
     }
 
+    /**
+     * Calculates the AND gate output based on both inputs.
+     * @description Output is true only when both input1 AND input2 are true.
+     */
     calculateOutput() {
         this.output = this.input1 && this.input2;
     }
