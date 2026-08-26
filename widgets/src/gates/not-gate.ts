@@ -1,7 +1,6 @@
 import { html } from 'lit';
 import Gate from './gate.js';
 import { localized, msg } from "@lit/localize";
-import LukaswwLogicgates from '../../webwriter-logic-circuit.js';
 
 /**
  * Represents a NOT gate in the logic circuit.
@@ -104,7 +103,7 @@ export default class NOTGate extends Gate {
                 td.classList.remove('highlight');
             });
         });
-        const widget = document.querySelector('lukasww-logicgates') as LukaswwLogicgates;
+        const widget = this.widget;
         const highlightedRow = this.input1 ? 1 : 0;
         if (widget.simulate === true) {
             if (rows[highlightedRow]) {
