@@ -123,6 +123,7 @@ export const Styles = css`
         width: 3000px;
         height: 2000px;
         background: #ffffff;
+        touch-action: none;
     }
 
     .trashCanIcon {
@@ -203,6 +204,7 @@ export const Styles = css`
         width: 100%;
         height: 100%;
         cursor: default;
+        touch-action: none;
     }
 
     .svgLine {

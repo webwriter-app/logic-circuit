@@ -228,6 +228,10 @@ export default class LogicCircuit extends LitElementWw {
     private connectionPointerStartX = 0;
     private connectionPointerStartY = 0;
     private connectionDidDrag = false;
+    private panPointerId: number | null = null;
+    private preventCanvasTouchScroll = (event: TouchEvent) => {
+        if (this.isDragging) event.preventDefault();
+    };
 
     render() {
         return html`
@@ -447,10 +451,14 @@ export default class LogicCircuit extends LitElementWw {
     disconnectedCallback() {
         this.cleanupGateDrag();
         this.cancelConnection();
+        this.isDragging = false;
+        this.panPointerId = null;
         super.disconnectedCallback();
-        this.removeEventListener('mousedown', this.handleMouseDown);
+        this.removeEventListener('pointerdown', this.handleCanvasPointerDown);
         this.removeEventListener('pointermove', this.handlePointerMove);
-        this.removeEventListener('mouseup', this.handleMouseUp);
+        this.removeEventListener('pointerup', this.handleCanvasPointerEnd);
+        this.removeEventListener('pointercancel', this.handleCanvasPointerEnd);
+        this.workspaceContainer?.removeEventListener('touchmove', this.preventCanvasTouchScroll);
     }
 
     /**
@@ -466,15 +474,17 @@ export default class LogicCircuit extends LitElementWw {
 
     /**
      * Called once after the component’s initial render.
-     * - Registers workspace event listeners (mouse and wheel).
+     * - Registers workspace event listeners (pointer and wheel).
      * - Sets up the workspace size and initial transform.
      * - Adds an SVG path element for live line drawing.
      * - Reconstructs gates and connections from `reflectGates` and `reflectCons`, if provided.
      */
     firstUpdated() {
-        this.workspaceContainer.addEventListener('mousedown', this.handleMouseDown.bind(this));
+        this.workspaceContainer.addEventListener('pointerdown', this.handleCanvasPointerDown.bind(this));
         this.workspaceContainer.addEventListener('pointermove', this.handlePointerMove.bind(this));
-        this.workspaceContainer.addEventListener('mouseup', this.handleMouseUp.bind(this));
+        this.workspaceContainer.addEventListener('pointerup', this.handleCanvasPointerEnd.bind(this));
+        this.workspaceContainer.addEventListener('pointercancel', this.handleCanvasPointerEnd.bind(this));
+        this.workspaceContainer.addEventListener('touchmove', this.preventCanvasTouchScroll, { passive: false });
         this.workspaceContainer.addEventListener('wheel', this.handleWheel.bind(this));
 
         this.wsDrag.style.width = workspaceWidth + 'px';
@@ -592,18 +602,21 @@ export default class LogicCircuit extends LitElementWw {
     }
 
     /**
-     * Handles mouse down interactions on the workspace.
+     * Handles pointer down interactions on the workspace.
      * - Starts dragging the canvas if the background is clicked.
      * - Cancels in-progress line drawing.
      * - Hides any open gate context menus.
      *
-     * @param {MouseEvent} event
+     * @param {PointerEvent} event
      */
-    handleMouseDown(event) {
-        if (event.target === this.svgCanvas) {
+    handleCanvasPointerDown(event: PointerEvent) {
+        if (event.target === this.svgCanvas && event.isPrimary && event.button === 0) {
+            event.preventDefault();
             this.isDragging = true;
+            this.panPointerId = event.pointerId;
             this.dragStartX = event.clientX;
             this.dragStartY = event.clientY;
+            this.workspaceContainer.setPointerCapture(event.pointerId);
             if (this.isDrawingLine) {
                 this.cancelConnection();
             }
@@ -620,7 +633,8 @@ export default class LogicCircuit extends LitElementWw {
      * @param {PointerEvent} event
      */
     handlePointerMove(event: PointerEvent) {
-        if (this.isDragging) {
+        if (this.isDragging && event.pointerId === this.panPointerId) {
+            event.preventDefault();
             const deltaX = event.clientX - this.dragStartX;
             const deltaY = event.clientY - this.dragStartY;
 
@@ -665,10 +679,15 @@ export default class LogicCircuit extends LitElementWw {
     }
 
     /**
-     * Stops dragging behavior.
+     * Stops canvas panning.
      */
-    handleMouseUp() {
+    handleCanvasPointerEnd(event: PointerEvent) {
+        if (event.pointerId !== this.panPointerId) return;
         this.isDragging = false;
+        this.panPointerId = null;
+        if (this.workspaceContainer.hasPointerCapture(event.pointerId)) {
+            this.workspaceContainer.releasePointerCapture(event.pointerId);
+        }
     }
 
     /**
