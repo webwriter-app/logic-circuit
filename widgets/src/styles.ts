@@ -377,7 +377,6 @@ export const Styles = css`
         cursor: pointer;
         z-index: 5;
         text-align: left;
-        line-height: 13px;
     }
     .dot{
         height: 7.5px;
