@@ -1,5 +1,5 @@
-# Logic,Circuit (`@webwriter/logic-circuit@1.2.0`)
-[License: MIT](LICENSE) | Version: 1.2.0
+# Logic Circuit (`@webwriter/logic-circuit@1.2.1`)
+[License: MIT](LICENSE) | Version: 1.2.1
 
 Create and simulate circuits with logic gates (AND, OR, XOR, etc.).
 
@@ -8,8 +8,8 @@ Create and simulate circuits with logic gates (AND, OR, XOR, etc.).
 
 | Name | Import Path |
 | :--: | :---------: |
-| Halfadder | @webwriter/logic-circuit/snippets/halfadder.html |
-| RS FlipFlop | @webwriter/logic-circuit/snippets/RS-FlipFlop.html |
+| Halfadder | `@webwriter/logic-circuit/snippets/halfadder.html` |
+| RS FlipFlop | `@webwriter/logic-circuit/snippets/RS-FlipFlop.html` |
 
 
 
@@ -70,6 +70,7 @@ npm install @webwriter/logic-circuit
 | `svgCanvas` | - | Reference to the SVG canvas element. | - | ✗ |
 | `workspaceContainer` | - | Reference to the overall workspace container. | - | ✗ |
 | `wsDrag` | - | Reference to the draggable inner workspace. | - | ✗ |
+| `dragOverlay` | `HTMLElement` | Overlay containing the fixed drag preview. | - | ✗ |
 | `simCheckbox` | - | Reference to the simulation checkbox toggle. | - | ✗ |
 | `instructionsContainer` | - | Reference to the instructions container. | - | ✗ |
 | `getGateElements` | - | Get the current list of gate elements. | - | ✗ |
@@ -84,16 +85,12 @@ npm install @webwriter/logic-circuit
 | `toggleInstructions` | Toggles the visibility of the instructions container in the UI. | -
 | `handleAllowSimulation` | Toggles simulation mode on or off.<br>Resets the circuit and updates the simulation checkbox and internal flag. | -
 | `handleFlipAllGates` | Enables or disables the "truth table" display on all gates,<br>depending on the state of the main switch. | -
-| `handleMouseDown` | Handles mouse down interactions on the workspace.<br>- Starts dragging the canvas if the background is clicked.<br>- Cancels in-progress line drawing.<br>- Hides any open gate context menus. | `event: MouseEvent`
-| `handleMouseMove` | Handles mouse move events during dragging or line drawing.<br>Updates canvas position or live line path accordingly. | `event: MouseEvent`
+| `handleCanvasPointerDown` | Handles pointer down interactions on the workspace.<br>- Starts dragging the canvas if the background is clicked.<br>- Cancels in-progress line drawing.<br>- Hides any open gate context menus. | `event: PointerEvent`
+| `handlePointerMove` | Handles pointer movement during canvas dragging or line drawing.<br>Updates canvas position or live line path accordingly. | `event: PointerEvent`
 | `transformWorkspace` | Applies the current workspace offset and zoom transform to the container. | -
-| `handleMouseUp` | Stops dragging behavior. | -
+| `handleCanvasPointerEnd` | Stops canvas panning. | `event: PointerEvent`
 | `handleWheel` | Handles zooming the workspace with the mouse wheel.<br>Clamps zoom between 0.5 and 2.5, and recalculates boundaries. | `event: WheelEvent`
-| `handleDragLeave` | Handles mouse leaving the workspace area while dragging.<br>Updates line positions to initial position. | `event: MouseEvent`
 | `handleContextMenu` | Prevents the default browser context menu. | `event: MouseEvent`
-| `handleDragOver` | Called when a gate is dragged over the workspace.<br>- Moves any connected lines dynamically.<br>- Highlights the trash can icon if hovering over it. | `event: DragEvent`
-| `handleDrop` | Handles a drop event on the workspace.<br>- Adds new gates or moves existing ones.<br>- Deletes gates if dropped over the trash icon. | `event: DragEvent`
-| `handleDropTrashCan` | Deletes a gate when it is dropped over the trash can. | `event: DragEvent`
 | `handleInputChange` | Parses a numeric input field and sets the corresponding property.<br>Defaults to -1 if the value is invalid. | `event: InputEvent`, `propertyName: string`
 | `simulateCircuit` | Starts circuit simulation.<br>Calculates outputs from all input gates and propagates through the circuit.<br>Stops simulation if the checkbox is unchecked. | -
 | `resetCircuit` | Resets all gates and lines in the circuit to their initial state. | -
@@ -134,4 +131,4 @@ npm install @webwriter/logic-circuit
 
 
 ---
-*Generated with @webwriter/build@1.8.1*
+*Generated with @webwriter/build@1.9.1*
