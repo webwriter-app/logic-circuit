@@ -342,6 +342,7 @@ export function updateLines(widget, movedGate) {
         }
 
         svgPath.setAttribute("d", path);
+        line.hitSVG?.setAttribute("d", path);
     });
 }
 
@@ -388,45 +389,92 @@ export function createLine(widget, startCon, endCon) {
     svgPath.setAttribute("id", "line" + widget.lineID);
     svgPath.classList.add("svgLine");
 
+    const hitPath = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "path"
+    );
+    hitPath.setAttribute("d", path);
+    hitPath.classList.add("svgLineHit");
+
     widget.lineID++;
 
     const lineObject = {
         start: startConnector,
         end: endConnector,
         lineSVG: svgPath,
+        hitSVG: hitPath,
     };
 
     widget.lineElements = [...widget.lineElements, lineObject];
 
-    svgPath.addEventListener("contextmenu", (event) => {
-        event.preventDefault();
-        const deletePathID = svgPath.getAttribute("id");
-
-        widget.lineElements.forEach((line, index) => {
-            if (line.lineSVG.id === deletePathID) {
-                const deletePath = svgPath;
-                deletePath.remove();
-                widget.lineElements.splice(index, 1);
-
-                // Remove the connection from the widget state
-                let consArr: string[] = widget.reflectCons.split(",");
-                let reflectIndex: number = -1;
-                for (let i = 0; i < consArr.length; i++) {
-                    if (
-                        consArr[i].includes(line.start.id) &&
-                        consArr[i].includes(line.end.id)
-                    ) {
-                        reflectIndex = i;
-                    }
-                }
-                consArr.splice(reflectIndex, 1);
-                widget.reflectCons = consArr.toString();
-            }
-        });
-
+    const deleteLine = () => {
+        svgPath.remove();
+        hitPath.remove();
+        widget.lineElements = widget.lineElements.filter((line) => line !== lineObject);
+        widget.reflectCons = widget.reflectCons
+            .split(",")
+            .filter((entry) => {
+                const [startID, endID] = entry.split("|");
+                return !(
+                    (startID === lineObject.start.id && endID === lineObject.end.id) ||
+                    (startID === lineObject.end.id && endID === lineObject.start.id)
+                );
+            })
+            .join(",");
         widget.simulateCircuit();
+    };
+
+    hitPath.addEventListener("contextmenu", (event) => {
+        event.preventDefault();
+        deleteLine();
     });
 
+    let pressTimer: ReturnType<typeof setTimeout> | null = null;
+    let pressPointerId: number | null = null;
+    let pressX = 0;
+    let pressY = 0;
+
+    const cancelLongPress = () => {
+        if (pressTimer !== null) clearTimeout(pressTimer);
+        pressTimer = null;
+        pressPointerId = null;
+        svgPath.classList.remove("svgLinePendingDelete");
+    };
+
+    hitPath.addEventListener("pointerdown", (event) => {
+        if (!event.isPrimary || (event.pointerType === "mouse" && event.button !== 0)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        hitPath.setPointerCapture(event.pointerId);
+        pressPointerId = event.pointerId;
+        pressX = event.clientX;
+        pressY = event.clientY;
+        svgPath.classList.add("svgLinePendingDelete");
+        pressTimer = setTimeout(() => {
+            pressTimer = null;
+            pressPointerId = null;
+            deleteLine();
+        }, 600);
+    });
+
+    hitPath.addEventListener("pointermove", (event) => {
+        if (event.pointerId !== pressPointerId) return;
+        event.stopPropagation();
+        if (Math.hypot(event.clientX - pressX, event.clientY - pressY) > 10) {
+            cancelLongPress();
+        }
+    });
+    hitPath.addEventListener("pointerup", (event) => {
+        if (event.pointerId === pressPointerId) event.stopPropagation();
+        cancelLongPress();
+    });
+    hitPath.addEventListener("pointercancel", (event) => {
+        if (event.pointerId === pressPointerId) event.stopPropagation();
+        cancelLongPress();
+    });
+    hitPath.addEventListener("lostpointercapture", cancelLongPress);
+
+    widget.svgCanvas.appendChild(hitPath);
     widget.svgCanvas.appendChild(svgPath);
 
     let entry: string = startCon.id + "|" + endCon.id;

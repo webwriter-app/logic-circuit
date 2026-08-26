@@ -302,6 +302,7 @@ export default class Gate extends LitElementWw {
         workspace.lineElements.forEach((line) => {
             if (pathsToDelete.includes(line)) {
                 line.lineSVG.remove();
+                line.hitSVG?.remove();
 
                 let consArr: string[] = this.widget.reflectCons.split(",")
                 let index: number = -1

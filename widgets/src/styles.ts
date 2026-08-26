@@ -210,14 +210,29 @@ export const Styles = css`
         fill: none;
         stroke-width: 2;
         transition: stroke-width 0.1s;
+        pointer-events: none;
     }
 
-    .svgLine:hover {
+    .svgLineHit {
+        stroke: transparent;
+        fill: none;
+        stroke-width: 24;
+        pointer-events: stroke;
+        touch-action: none;
+        cursor: pointer;
+    }
+
+    .svgLineHit:hover + .svgLine {
         stroke-width: 4;
     }
 
     .svgLineTrue {
         stroke: green;
+    }
+
+    .svgLinePendingDelete {
+        stroke: #de2b2b;
+        stroke-width: 5;
     }
 
     .gate {
