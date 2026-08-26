@@ -6,6 +6,14 @@ export const Styles = css`
         font-family: Arial, sans-serif;
     }
 
+    :host(.drag-source) {
+        opacity: 0.35;
+    }
+
+    :host(.drag-preview-gate) .tooltip-button {
+        display: none;
+    }
+
     .allowSimButton {
         top: 10px;
         left: 100px;
@@ -76,6 +84,28 @@ export const Styles = css`
         position: relative;
         overflow: hidden;
         z-index: 1;
+    }
+
+    .workspaceContainer.drag-over {
+        box-shadow: inset 0 0 0 3px #5176e8;
+    }
+
+    .drag-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        pointer-events: none;
+    }
+
+    .drag-preview {
+        position: fixed;
+        top: 0;
+        left: 0;
+        box-sizing: border-box;
+        opacity: 0.8;
+        pointer-events: none;
+        user-select: none;
+        will-change: transform;
     }
 
     .workspaceArea {
@@ -195,6 +225,7 @@ export const Styles = css`
         background: white;
         position: relative;
         cursor: grab;
+        touch-action: none;
     }
     .gateDisabled {
         border: 1px groove #da0d0d;

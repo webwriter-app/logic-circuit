@@ -32,9 +32,9 @@ import SlInput from '@shoelace-style/shoelace/dist/components/input/input.compon
 import { Styles } from './src/styles.js';
 import { add, connect, info, remove, trash } from './src/assets/icons.js';
 
-import { calculatePath, updateLines, resetLines, createLine} from './src/helper/line-helper.js';
+import { resetLines, createLine} from './src/helper/line-helper.js';
 import { addGate, moveGate, transferOutputToNextGate } from './src/helper/gate-helper.js';
-import { gateCounter, isDropOverTrashIcon, resetGates } from './src/helper/gate-helper.js';
+import { gateCounter, resetGates } from './src/helper/gate-helper.js';
 import LOCALIZE from "../localization/generated";
 import { localized, msg } from "@lit/localize";
 
@@ -43,6 +43,18 @@ const workspaceHeight: number = 2000;
 
 let workspaceOffsetX: number = -workspaceWidth / 2;
 let workspaceOffsetY: number = -workspaceHeight / 2;
+
+type GateDragState = {
+    pointerId: number;
+    source: Gate;
+    preview: HTMLElement;
+    previewOffsetX: number;
+    previewOffsetY: number;
+    gateOffsetX: number;
+    gateOffsetY: number;
+    clientX: number;
+    clientY: number;
+};
 
 /**
  * @summary Logic circuit simulator widget for composing and simulating digital circuits with logic gates.
@@ -191,6 +203,9 @@ export default class LogicCircuit extends LitElementWw {
     /** Reference to the draggable inner workspace. */
     @query('#workspaceDraggable') accessor wsDrag;
 
+    /** Overlay containing the fixed drag preview. */
+    @query('#dragOverlay') accessor dragOverlay: HTMLElement;
+
     /** Reference to the simulation checkbox toggle. */
     @query('#simCheckbox') accessor simCheckbox;
 
@@ -206,9 +221,18 @@ export default class LogicCircuit extends LitElementWw {
     /** The temporary path element used when drawing a wire to follow the mouse. */
     svgPathToMouse: SVGPathElement | null = null;
 
+    private gateDragState: GateDragState | null = null;
+    private gateDragFrame: number | null = null;
+
     render() {
         return html`
-            <div class="container">
+            <div
+                class="container"
+                @pointerdown=${this.handleGatePointerDown}
+                @pointermove=${this.handleGatePointerMove}
+                @pointerup=${this.handleGatePointerEnd}
+                @pointercancel=${this.handleGatePointerEnd}
+            >
                 <div class="sidebar">
                     <div style=${this.notGateAllowed === 0 ? 'display: none;' : ''} class="sidebar-item">
                         <not-gate></not-gate>
@@ -280,6 +304,8 @@ export default class LogicCircuit extends LitElementWw {
                     </div>
                 </div>
             </div>
+
+            <div class="drag-overlay" id="dragOverlay"></div>
 
             <div part="options" class="optionsMenu">
                 <p>Simulation:</p>
@@ -414,6 +440,7 @@ export default class LogicCircuit extends LitElementWw {
      * Cleans up mouse-related event listeners to avoid memory leaks.
      */
     disconnectedCallback() {
+        this.cleanupGateDrag();
         super.disconnectedCallback();
         this.removeEventListener('mousedown', this.handleMouseDown);
         this.removeEventListener('mousemove', this.handleMouseMove);
@@ -433,18 +460,15 @@ export default class LogicCircuit extends LitElementWw {
 
     /**
      * Called once after the component’s initial render.
-     * - Registers all workspace event listeners (drag, drop, mouse, wheel).
+     * - Registers workspace event listeners (mouse and wheel).
      * - Sets up the workspace size and initial transform.
      * - Adds an SVG path element for live line drawing.
      * - Reconstructs gates and connections from `reflectGates` and `reflectCons`, if provided.
      */
     firstUpdated() {
-        this.workspaceContainer.addEventListener('drop', this.handleDrop.bind(this));
-        this.workspaceContainer.addEventListener('dragover', this.handleDragOver.bind(this));
         this.workspaceContainer.addEventListener('mousedown', this.handleMouseDown.bind(this));
         this.workspaceContainer.addEventListener('mousemove', this.handleMouseMove.bind(this));
         this.workspaceContainer.addEventListener('mouseup', this.handleMouseUp.bind(this));
-        this.workspaceContainer.addEventListener('dragleave', this.handleDragLeave.bind(this));
         this.workspaceContainer.addEventListener('wheel', this.handleWheel.bind(this));
 
         this.wsDrag.style.width = workspaceWidth + 'px';
@@ -461,7 +485,7 @@ export default class LogicCircuit extends LitElementWw {
 
         if(this.reflectGates.length>0){
             this.reflectGates.split(",").forEach(gate=>{
-                addGate(this, null, gate.split("|"))
+                addGate(this, undefined, gate.split("|"))
             })
         }
         if(this.reflectCons.length>0){
@@ -667,25 +691,6 @@ export default class LogicCircuit extends LitElementWw {
     }
 
     /**
-     * Handles mouse leaving the workspace area while dragging.
-     * Updates line positions to initial position.
-     *
-     * @param {MouseEvent} event
-     */
-    handleDragLeave(event: MouseEvent) {
-        const bounds = this.workspaceContainer.getBoundingClientRect();
-        const { clientX: x, clientY: y } = event;
-
-        // Only update lines if mouse is actually outside the workspace container
-        const isOutside =
-            x < bounds.left || x > bounds.right || y < bounds.top || y > bounds.bottom;
-
-        if (isOutside) {
-            updateLines(this, Gate.movedGate);
-        }
-    }
-
-    /**
      * Prevents the default browser context menu.
      *
      * @param {MouseEvent} event
@@ -694,121 +699,171 @@ export default class LogicCircuit extends LitElementWw {
         event.preventDefault();
     }
 
-    /**
-     * Called when a gate is dragged over the workspace.
-     * - Moves any connected lines dynamically.
-     * - Highlights the trash can icon if hovering over it.
-     *
-     * @param {DragEvent} event
-     */
-    handleDragOver(event) {
+    private handleGatePointerDown(event: PointerEvent) {
+        if (this.gateDragState || event.button !== 0) return;
+
+        const path = event.composedPath();
+        const source = path.find((element): element is Gate => element instanceof Gate);
+        if (!source) return;
+
+        const isConnector = path.some((element) => element instanceof ConnectorElement);
+        const isInputControl = source.gatetype === 'INPUT' && path.some(
+            (element) => element instanceof Element && element.classList.contains('gatepointer')
+        );
+        const isMenuControl = path.some(
+            (element) => element instanceof Element &&
+                element.matches('sl-button, sl-menu, sl-menu-item, .tooltip-button')
+        );
+        if (isConnector || isInputControl || isMenuControl) return;
+
         event.preventDefault();
-        const draggedGate = Gate.movedGate;
-        const mouseStartX = Gate.x;
-        const mouseStartY = Gate.y;
+        source.setPointerCapture(event.pointerId);
+        source.hideContextMenu();
 
-        let deltaX = (event.clientX - mouseStartX) / this.zoom;
-        let deltaY = (event.clientY - mouseStartY) / this.zoom;
+        const rect = source.getBoundingClientRect();
+        const preview = document.createElement('div');
+        const previewGate = this.shadowRoot.createElement(source.localName) as Gate;
+        preview.className = 'drag-preview';
+        preview.style.width = `${rect.width}px`;
+        preview.style.height = `${rect.height}px`;
+        previewGate.input1 = source.input1;
+        previewGate.input2 = source.input2;
+        previewGate.output = source.output;
+        previewGate.output2 = source.output2;
+        previewGate.classList.add('drag-preview-gate');
+        previewGate.style.display = 'block';
+        previewGate.style.transform = `scale(${source.movable ? this.zoom : 1})`;
+        previewGate.style.transformOrigin = 'top left';
+        preview.append(previewGate);
+        this.dragOverlay.append(preview);
 
-        const moveLines = [];
+        this.gateDragState = {
+            pointerId: event.pointerId,
+            source,
+            preview,
+            previewOffsetX: event.clientX - rect.left,
+            previewOffsetY: event.clientY - rect.top,
+            gateOffsetX: (event.clientX - rect.left) / (source.movable ? this.zoom : 1),
+            gateOffsetY: (event.clientY - rect.top) / (source.movable ? this.zoom : 1),
+            clientX: event.clientX,
+            clientY: event.clientY,
+        };
 
-        this.lineElements.forEach((lineObject) => {
-            const startConnector = lineObject.start;
-            const endConnector = lineObject.end;
+        source.classList.add('drag-source');
+        this.requestGateDragFrame();
+    }
 
-            if (
-                startConnector.id === draggedGate.conIn1?.id ||
-                startConnector.id === draggedGate.conIn2?.id ||
-                startConnector.id === draggedGate.conOut?.id ||
-                startConnector.id === draggedGate.conOut2?.id ||
-                endConnector.id === draggedGate.conIn1?.id ||
-                endConnector.id === draggedGate.conIn2?.id ||
-                endConnector.id === draggedGate.conOut?.id ||
-                endConnector.id === draggedGate.conOut2?.id
-            ) {
-                moveLines.push(lineObject);
-            }
-        });
+    private handleGatePointerMove(event: PointerEvent) {
+        if (event.pointerId !== this.gateDragState?.pointerId) return;
 
-        moveLines.forEach((line) => {
-            const startConnector = line.start;
-            const endConnector = line.end;
-            const svgPath = line.lineSVG;
+        event.preventDefault();
+        this.gateDragState.clientX = event.clientX;
+        this.gateDragState.clientY = event.clientY;
+        this.requestGateDragFrame();
+    }
 
-            let points: { x: number; y: number }[];
-            if (
-                startConnector.id === draggedGate.conIn1?.id ||
-                startConnector.id === draggedGate.conIn2?.id ||
-                startConnector.id === draggedGate.conOut?.id ||
-                startConnector.id === draggedGate.conOut2?.id
-            ) {
-                points = calculatePath(this.svgCanvas, startConnector, endConnector, this.zoom, deltaX, deltaY, 0, 0);
+    private handleGatePointerEnd(event: PointerEvent) {
+        const state = this.gateDragState;
+        if (!state || event.pointerId !== state.pointerId) return;
+
+        const isDrop = event.type === 'pointerup';
+        const overTrash = isDrop && state.source.movable && this.isPointInside(
+            event.clientX,
+            event.clientY,
+            this.workspaceContainer.querySelector('.trashCanIcon')
+        );
+        const overWorkspace = isDrop && this.isPointInside(
+            event.clientX,
+            event.clientY,
+            this.workspaceContainer
+        );
+
+        this.cleanupGateDrag();
+
+        if (overTrash) {
+            state.source.deleteGate();
+        } else if (overWorkspace) {
+            const drop = {
+                type: state.source.gatetype,
+                clientX: event.clientX,
+                clientY: event.clientY,
+                grabOffsetX: state.gateOffsetX,
+                grabOffsetY: state.gateOffsetY,
+            };
+
+            if (state.source.movable) {
+                moveGate(this, state.source, drop);
             } else {
-                points = calculatePath(this.svgCanvas, startConnector, endConnector, this.zoom, 0, 0, deltaX, deltaY);
+                addGate(this, drop);
+                setTimeout(() => this.handleFlipAllGates(), 100);
             }
-
-            let path = `M ${points[0].x} ${points[0].y}`;
-
-            for (let i = 1; i < points.length; i++) {
-                path += ` L ${points[i].x} ${points[i].y}`;
-            }
-
-            svgPath.setAttribute('d', path);
-        });
-
-        const isOverTrash = isDropOverTrashIcon(this, event);
-
-        if (isOverTrash) {
-            this.workspaceContainer.querySelector('.trashCanIcon').classList.add('trashCanIconDragOver');
-        } else {
-            this.workspaceContainer.querySelector('.trashCanIcon').classList.remove('trashCanIconDragOver');
         }
     }
 
-    /**
-     * Handles a drop event on the workspace.
-     * - Adds new gates or moves existing ones.
-     * - Deletes gates if dropped over the trash icon.
-     *
-     * @param {DragEvent} event
-     */
-    handleDrop(event) {
-        event.preventDefault();
-        const isOverTrash = isDropOverTrashIcon(this, event);
-
-        if (event.dataTransfer.getData('movable') === 'false') {
-            if (!isOverTrash) {
-                addGate(this, event);
-                // Refresh truthtable states of gates after gate is probably loaded
-                setTimeout(() => {
-                    this.handleFlipAllGates();
-                }, 100)
-            }
-        } else if (event.dataTransfer.getData('movable') === 'true') {
-            const id = event.dataTransfer.getData('id');
-            const gateToMove = this.gateElements.find((gate) => gate.id === id) as Gate;
-
-            if (isOverTrash) {
-                this.handleDropTrashCan(event);
-            } else {
-                moveGate(this, event);
-            }
-        }
-
-        this.workspaceContainer.querySelector('.trashCanIcon').classList.remove('trashCanIconDragOver');
+    private requestGateDragFrame() {
+        if (this.gateDragFrame !== null) return;
+        this.gateDragFrame = requestAnimationFrame(() => this.runGateDragFrame());
     }
 
-    /**
-     * Deletes a gate when it is dropped over the trash can.
-     *
-     * @param {DragEvent} event
-     */
-    handleDropTrashCan(event) {
-        event.preventDefault();
+    private runGateDragFrame() {
+        this.gateDragFrame = null;
+        const state = this.gateDragState;
+        if (!state) return;
 
-        const id = event.dataTransfer.getData('id');
-        const trashGate = this.gateElements.find((gate) => gate.id === id);
-        trashGate.deleteGate();
+        const didPan = this.autoPanWorkspace(state.clientX, state.clientY);
+        state.preview.style.transform = `translate3d(${state.clientX - state.previewOffsetX}px, ${state.clientY - state.previewOffsetY}px, 0)`;
+
+        const trash = this.workspaceContainer.querySelector('.trashCanIcon');
+        const overTrash = state.source.movable && this.isPointInside(state.clientX, state.clientY, trash);
+        const overWorkspace = this.isPointInside(state.clientX, state.clientY, this.workspaceContainer);
+        trash.classList.toggle('trashCanIconDragOver', overTrash);
+        this.workspaceContainer.classList.toggle('drag-over', overWorkspace && !overTrash);
+
+        if (didPan) this.requestGateDragFrame();
+    }
+
+    private autoPanWorkspace(clientX: number, clientY: number) {
+        const rect = this.workspaceContainer.getBoundingClientRect();
+        if (!this.isPointInside(clientX, clientY, this.workspaceContainer)) return false;
+
+        const edge = Math.min(64, rect.width / 2, rect.height / 2);
+        const edgeStep = (position: number, start: number, end: number) => {
+            if (position < start + edge) return -16 * (start + edge - position) / edge;
+            if (position > end - edge) return 16 * (position - end + edge) / edge;
+            return 0;
+        };
+
+        const beforeX = workspaceOffsetX;
+        const beforeY = workspaceOffsetY;
+        workspaceOffsetX -= edgeStep(clientX, rect.left, rect.right);
+        workspaceOffsetY -= edgeStep(clientY, rect.top, rect.bottom);
+        this.calculateBoundaries();
+
+        if (workspaceOffsetX === beforeX && workspaceOffsetY === beforeY) return false;
+        this.transformWorkspace();
+        return true;
+    }
+
+    private isPointInside(clientX: number, clientY: number, element: Element) {
+        const rect = element.getBoundingClientRect();
+        return clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom;
+    }
+
+    private cleanupGateDrag() {
+        const state = this.gateDragState;
+        this.gateDragState = null;
+
+        if (this.gateDragFrame !== null) cancelAnimationFrame(this.gateDragFrame);
+        this.gateDragFrame = null;
+        if (!state) return;
+
+        this.workspaceContainer?.classList.remove('drag-over');
+        this.workspaceContainer?.querySelector('.trashCanIcon')?.classList.remove('trashCanIconDragOver');
+        state.source.classList.remove('drag-source');
+        if (state.source.hasPointerCapture(state.pointerId)) {
+            state.source.releasePointerCapture(state.pointerId);
+        }
+        state.preview.remove();
     }
 
     /**

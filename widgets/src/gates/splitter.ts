@@ -26,7 +26,7 @@ export default class Splitter extends Gate {
         const content = this.showTruthTable && this.movable ? this.renderTruthTable() : this.renderSVG();
 
         return html`
-            <div class="gate" draggable="true" id="${this.id}" tabindex="-1">
+            <div class="gate" id="${this.id}" tabindex="-1">
                 ${content}
                 <p class="gateText">Splitter</p>
 

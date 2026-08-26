@@ -27,7 +27,7 @@ export default class Input extends Gate {
 
     render() {
         return html`
-            <div class="gate" draggable="true" id="${this.id}" tabindex="-1">
+            <div class="gate" id="${this.id}" tabindex="-1">
                 <p class="gateText">Input</p>
                 <svg width="100%" height="100%" viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg"></svg>
                 <slot name="con3"></slot>

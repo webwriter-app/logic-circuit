@@ -2,14 +2,24 @@ import LogicCircuit from '../../webwriter-logic-circuit';
 import ConnectorElement from '../connector';
 import { updateLines } from '../helper/line-helper';
 
+type GateDrop = {
+    type: string;
+    clientX: number;
+    clientY: number;
+    grabOffsetX: number;
+    grabOffsetY: number;
+};
+
 /**
- * Adds a gate to the circuit workspace based on the specified event or loaded data.
+ * Adds a gate to the circuit workspace based on a pointer drop or loaded data.
  *
  * @param {*} widget - The widget instance representing the current circuit workspace.
- * @param {*} event - The drag-and-drop event containing data about the gate being added.
+ * @param {GateDrop} drop - Gate type and pointer position for a newly added gate.
  * @param {string[]} [load] - Optional array containing loaded id, gate type and position data.
  */
-export function addGate(widget: any, event: any, load?: string[]) {
+export function addGate(widget: any, drop?: GateDrop, load?: string[]) {
+    if (!drop && !load) return;
+
     // Extract loaded gate ID or choose new gate ID
     const id = load != undefined ? parseInt(load[0]) : widget.gateID;
 
@@ -21,7 +31,7 @@ export function addGate(widget: any, event: any, load?: string[]) {
         widget.gateID = Math.max(widget.gateID, id + 1)
     }
 
-    const gateType = load != undefined ? load[1] : event.dataTransfer.getData('type');
+    const gateType = load != undefined ? load[1] : drop.type;
     let newGate;
 
     if (gateType !== 'INPUT' && gateType !== 'OUTPUT' && gateType !== 'SPLITTER') {
@@ -75,27 +85,14 @@ export function addGate(widget: any, event: any, load?: string[]) {
 
     newGate.style.position = 'absolute';
 
-    if(load == undefined){
-        var grabPosX = parseFloat(event.dataTransfer.getData('offsetX'));
-        var grabPosY = parseFloat(event.dataTransfer.getData('offsetY'));
-
-        var mouseX = event.clientX;
-        var mouseY = event.clientY;
+    if (load != undefined) {
+        newGate.style.left = load[2];
+        newGate.style.top = load[3];
+    } else {
+        const workspaceRect = widget.wsDrag.getBoundingClientRect();
+        newGate.style.left = (drop.clientX - workspaceRect.left) / widget.zoom - drop.grabOffsetX + 'px';
+        newGate.style.top = (drop.clientY - workspaceRect.top) / widget.zoom - drop.grabOffsetY + 'px';
     }
-
-    const offsetX = widget.wsDrag.getBoundingClientRect().left;
-
-    const workspaceX = widget.wsDrag.getBoundingClientRect().left;
-    const workspaceY = widget.wsDrag.getBoundingClientRect().top;
-
-    const relativeX = mouseX - workspaceX;
-    const relativeY = mouseY - workspaceY;
-
-    const scaledRelativeX = relativeX / widget.zoom;
-    const scaledRelativeY = relativeY / widget.zoom;
-
-    newGate.style.left = load != undefined ? load[2] : scaledRelativeX - grabPosX + 'px';
-    newGate.style.top = load != undefined ? load[3] : scaledRelativeY - grabPosY + 'px';
 
     newGate.movable = true;
     newGate.widget = widget
@@ -110,36 +107,28 @@ export function addGate(widget: any, event: any, load?: string[]) {
 }
 
 /**
- * Moves an existing gate within the circuit workspace based on drag-and-drop events.
+ * Moves an existing gate to a pointer drop position in the circuit workspace.
  *
  * @param {*} widget - The current circuit workspace instance.
- * @param {*} event - The drag-and-drop event containing information about the movement.
+ * @param {*} draggedGate - The gate being moved.
+ * @param {GateDrop} drop - Final pointer position and local grab offset.
  */
-export function moveGate(widget, event) {
-    const id = event.dataTransfer.getData('id');
-
-    const draggedGate = widget.gateElements.find((gate) => gate.id === id);
-
-    const grabPosX = parseFloat(event.dataTransfer.getData('offsetX')) / widget.zoom;
-    const grabPosY = parseFloat(event.dataTransfer.getData('offsetY')) / widget.zoom;
-
-    const mouseX = event.clientX;
-    const mouseY = event.clientY;
-
+export function moveGate(widget, draggedGate, drop: GateDrop) {
     const workspaceX = widget.wsDrag.getBoundingClientRect().left;
     const workspaceY = widget.wsDrag.getBoundingClientRect().top;
 
-    const relativeX = mouseX - workspaceX;
-    const relativeY = mouseY - workspaceY;
+    const relativeX = drop.clientX - workspaceX;
+    const relativeY = drop.clientY - workspaceY;
 
     const scaledRelativeX = relativeX / widget.zoom;
     const scaledRelativeY = relativeY / widget.zoom;
 
-    draggedGate.style.left = scaledRelativeX - grabPosX + 'px';
-    draggedGate.style.top = scaledRelativeY - grabPosY + 'px';
+    draggedGate.style.left = scaledRelativeX - drop.grabOffsetX + 'px';
+    draggedGate.style.top = scaledRelativeY - drop.grabOffsetY + 'px';
 
     updateLines(widget, draggedGate);
 
+    const id = draggedGate.id;
     let gatesArr = widget.reflectGates.split(",")
     for(let i = 0; i<gatesArr.length; i++){
         if(Number.parseInt(gatesArr[i][0]) === Number.parseInt(id.match(/^([a-zA-Z]+)(\d+)$/)[2])){
@@ -331,29 +320,6 @@ export function gateCounter(widget, gateType) {
         default:
             break;
     }
-}
-
-/**
- * Determines whether dropped items are over the trash icon area while dragging them around within this interface.
- *
- * This helps manage deletion actions when users try to remove components by dropping them into designated areas like trash cans.
- *
- * @param {*} widget - The current circuit workspace instance holding all components information.
- * @param {Event} event - Mouse event triggered during the dragging process providing coordinates needed for checking overlap with trash area.
- * 
- * @returns {boolean} True if currently dropped over the trash icon area, false otherwise.
- */
-export function isDropOverTrashIcon(widget: any, event: any) {
-    const trashCanRect = widget.workspaceContainer.querySelector('.trashCanIcon').getBoundingClientRect();
-    const mouseX = event.clientX;
-    const mouseY = event.clientY;
-
-    return (
-        mouseX >= trashCanRect.left &&
-        mouseX <= trashCanRect.right &&
-        mouseY >= trashCanRect.top &&
-        mouseY <= trashCanRect.bottom
-    );
 }
 
 /**

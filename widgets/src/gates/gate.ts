@@ -26,10 +26,6 @@ import LogicCircuit from '../../webwriter-logic-circuit';
  * @extends LitElementWw
  */
 export default class Gate extends LitElementWw {
-    static movedGate;
-    static x;
-    static y;
-
     /** Reference to the LogicCircuit instance associated with this gate. */
     widget: LogicCircuit;
 
@@ -94,12 +90,10 @@ export default class Gate extends LitElementWw {
     /**
      * Creates an instance of the Gate class.
      *
-     * Initializes event listeners for drag and context menu interactions.
+     * Initializes the gate and its context-menu interaction.
      */
     constructor() {
         super();
-        this.addEventListener('dragstart', this.handleDragStart);
-        this.addEventListener('dragend', this.handleDragEnd);
         this.addEventListener('contextmenu', this.handleContextMenu);
 
         this.input1 = null;
@@ -187,49 +181,6 @@ export default class Gate extends LitElementWw {
                 }
             }
             updateLineColor(widget);
-        }
-    }
-
-    /**
-     * Handles drag start events to initiate dragging behavior.
-     *
-     * @param {DragEvent} event - The drag event triggered by starting a drag action.
-     */
-    handleDragStart(event) {
-        Gate.movedGate = event.target;
-        Gate.x = event.clientX;
-        Gate.y = event.clientY;
-        const tooltip = this.shadowRoot.querySelector('.tooltip') as SlTooltip;
-        if (tooltip) {
-            if (tooltip.open) {
-                event.preventDefault();
-                tooltip.hide();
-            }
-        }
-        event.dataTransfer.setData('type', this.gatetype);
-        const offsetX = event.clientX - this.getBoundingClientRect().left;
-        const offsetY = event.clientY - this.getBoundingClientRect().top;
-        event.dataTransfer.setData('offsetX', offsetX);
-        event.dataTransfer.setData('offsetY', offsetY);
-        event.dataTransfer.setData('movable', this.movable);
-
-        event.dataTransfer.setData('id', this.id);
-
-        this.hideContextMenu();
-        if (this.movable) {
-            this.style.opacity = '0.001';
-        }
-    }
-
-    /**
-     * Handles drag end events to finalize dragging behavior.
-     *
-     * @param {DragEvent} event - The drag event triggered by ending a drag action.
-     */
-    handleDragEnd(event) {
-        event.preventDefault();
-        if (this.movable) {
-            this.style.opacity = '';
         }
     }
 
