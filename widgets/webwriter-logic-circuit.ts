@@ -223,6 +223,11 @@ export default class LogicCircuit extends LitElementWw {
 
     private gateDragState: GateDragState | null = null;
     private gateDragFrame: number | null = null;
+    private connectionSnapTarget: ConnectorElement | null = null;
+    private connectionPointerId: number | null = null;
+    private connectionPointerStartX = 0;
+    private connectionPointerStartY = 0;
+    private connectionDidDrag = false;
 
     render() {
         return html`
@@ -441,9 +446,10 @@ export default class LogicCircuit extends LitElementWw {
      */
     disconnectedCallback() {
         this.cleanupGateDrag();
+        this.cancelConnection();
         super.disconnectedCallback();
         this.removeEventListener('mousedown', this.handleMouseDown);
-        this.removeEventListener('mousemove', this.handleMouseMove);
+        this.removeEventListener('pointermove', this.handlePointerMove);
         this.removeEventListener('mouseup', this.handleMouseUp);
     }
 
@@ -467,7 +473,7 @@ export default class LogicCircuit extends LitElementWw {
      */
     firstUpdated() {
         this.workspaceContainer.addEventListener('mousedown', this.handleMouseDown.bind(this));
-        this.workspaceContainer.addEventListener('mousemove', this.handleMouseMove.bind(this));
+        this.workspaceContainer.addEventListener('pointermove', this.handlePointerMove.bind(this));
         this.workspaceContainer.addEventListener('mouseup', this.handleMouseUp.bind(this));
         this.workspaceContainer.addEventListener('wheel', this.handleWheel.bind(this));
 
@@ -599,9 +605,7 @@ export default class LogicCircuit extends LitElementWw {
             this.dragStartX = event.clientX;
             this.dragStartY = event.clientY;
             if (this.isDrawingLine) {
-                this.isDrawingLine = false;
-                this.startConnector = null;
-                this.svgPathToMouse.setAttribute('d', '');
+                this.cancelConnection();
             }
             this.gateElements.forEach((gate) => {
                 gate.hideContextMenu();
@@ -610,12 +614,12 @@ export default class LogicCircuit extends LitElementWw {
     }
 
     /**
-     * Handles mouse move events during dragging or line drawing.
+     * Handles pointer movement during canvas dragging or line drawing.
      * Updates canvas position or live line path accordingly.
      *
-     * @param {MouseEvent} event
+     * @param {PointerEvent} event
      */
-    handleMouseMove(event) {
+    handlePointerMove(event: PointerEvent) {
         if (this.isDragging) {
             const deltaX = event.clientX - this.dragStartX;
             const deltaY = event.clientY - this.dragStartY;
@@ -632,12 +636,11 @@ export default class LogicCircuit extends LitElementWw {
 
         if (this.isDrawingLine) {
             const { x: startX, y: startY } = getConnectorCoordinates(this.svgCanvas, this.startConnector, this.zoom);
-            const { x: endX, y: endY } = getMouseCoordinates(
-                this.svgCanvas,
-                event.clientX,
-                event.clientY - 4,
-                this.zoom
-            );
+            const snapTarget = this.findConnectionSnapTarget(event.clientX, event.clientY);
+            this.setConnectionSnapTarget(snapTarget);
+            const { x: endX, y: endY } = snapTarget
+                ? getConnectorCoordinates(this.svgCanvas, snapTarget, this.zoom)
+                : getMouseCoordinates(this.svgCanvas, event.clientX, event.clientY - 4, this.zoom);
             let path;
 
             if (this.startConnector.type === 'output') {
@@ -703,10 +706,36 @@ export default class LogicCircuit extends LitElementWw {
         if (this.gateDragState || event.button !== 0) return;
 
         const path = event.composedPath();
+        const connector = path.find((element): element is ConnectorElement => element instanceof ConnectorElement);
+        if (connector) {
+            if (!this.isDrawingLine) {
+                this.setConnectionSnapTarget(null);
+                this.connectionPointerId = null;
+                this.connectionDidDrag = false;
+            } else if (this.startConnector === connector) {
+                this.connectionPointerId = event.pointerId;
+                this.connectionPointerStartX = event.clientX;
+                this.connectionPointerStartY = event.clientY;
+                this.connectionDidDrag = false;
+            }
+            return;
+        }
+
+        if (this.isDrawingLine) {
+            event.preventDefault();
+            const snapTarget = this.findConnectionSnapTarget(event.clientX, event.clientY);
+            if (snapTarget) {
+                this.setConnectionSnapTarget(null);
+                snapTarget.selectForConnection();
+            } else {
+                this.cancelConnection();
+            }
+            return;
+        }
+
         const source = path.find((element): element is Gate => element instanceof Gate);
         if (!source) return;
 
-        const isConnector = path.some((element) => element instanceof ConnectorElement);
         const isInputControl = source.gatetype === 'INPUT' && path.some(
             (element) => element instanceof Element && element.classList.contains('gatepointer')
         );
@@ -714,7 +743,7 @@ export default class LogicCircuit extends LitElementWw {
             (element) => element instanceof Element &&
                 element.matches('sl-button, sl-menu, sl-menu-item, .tooltip-button')
         );
-        if (isConnector || isInputControl || isMenuControl) return;
+        if (isInputControl || isMenuControl) return;
 
         event.preventDefault();
         source.setPointerCapture(event.pointerId);
@@ -754,6 +783,13 @@ export default class LogicCircuit extends LitElementWw {
     }
 
     private handleGatePointerMove(event: PointerEvent) {
+        if (event.pointerId === this.connectionPointerId && !this.connectionDidDrag) {
+            this.connectionDidDrag = Math.hypot(
+                event.clientX - this.connectionPointerStartX,
+                event.clientY - this.connectionPointerStartY
+            ) > 6;
+        }
+
         if (event.pointerId !== this.gateDragState?.pointerId) return;
 
         event.preventDefault();
@@ -763,6 +799,21 @@ export default class LogicCircuit extends LitElementWw {
     }
 
     private handleGatePointerEnd(event: PointerEvent) {
+        if (event.pointerId === this.connectionPointerId) {
+            const snapTarget = this.connectionSnapTarget;
+            const didDrag = this.connectionDidDrag;
+            this.connectionPointerId = null;
+            this.connectionDidDrag = false;
+
+            if (event.type === 'pointercancel' || (didDrag && !snapTarget)) {
+                this.cancelConnection();
+            } else {
+                this.setConnectionSnapTarget(null);
+                if (didDrag && snapTarget) snapTarget.selectForConnection();
+            }
+            return;
+        }
+
         const state = this.gateDragState;
         if (!state || event.pointerId !== state.pointerId) return;
 
@@ -798,6 +849,59 @@ export default class LogicCircuit extends LitElementWw {
                 setTimeout(() => this.handleFlipAllGates(), 100);
             }
         }
+    }
+
+    private findConnectionSnapTarget(clientX: number, clientY: number) {
+        const start = this.startConnector;
+        if (!start) return null;
+
+        let nearest: ConnectorElement | null = null;
+        let nearestDistance = 36;
+        const startGate = this.gateElements.find((gate) =>
+            [gate.conIn1, gate.conIn2, gate.conOut, gate.conOut2].includes(start)
+        );
+
+        for (const gate of this.gateElements) {
+            if (gate === startGate) continue;
+
+            for (const candidate of [gate.conIn1, gate.conIn2, gate.conOut, gate.conOut2]) {
+                if (!(candidate instanceof ConnectorElement) || candidate.type === start.type) continue;
+                if (this.lineElements.some((line) => line.start === candidate || line.end === candidate)) continue;
+
+                const dot = candidate.shadowRoot?.querySelector<HTMLElement>('.dot');
+                const rect = (dot ?? candidate).getBoundingClientRect();
+                const distance = Math.hypot(
+                    clientX - (rect.left + rect.width / 2),
+                    clientY - (rect.top + rect.height / 2)
+                );
+                if (distance < nearestDistance) {
+                    nearest = candidate;
+                    nearestDistance = distance;
+                }
+            }
+        }
+
+        return nearest;
+    }
+
+    private setConnectionSnapTarget(target: ConnectorElement | null) {
+        if (target === this.connectionSnapTarget) return;
+        this.connectionSnapTarget?.classList.remove('connector-snap-target');
+        target?.classList.add('connector-snap-target');
+        this.connectionSnapTarget = target;
+        this.svgPathToMouse?.setAttribute('stroke', target ? '#2e8b57' : 'black');
+        this.svgPathToMouse?.setAttribute('stroke-width', target ? '4' : '3');
+    }
+
+    private cancelConnection() {
+        this.startConnector?.classList.remove('connector-selected');
+        this.setConnectionSnapTarget(null);
+        this.connectionPointerId = null;
+        this.connectionDidDrag = false;
+        this.isDrawingLine = false;
+        this.startConnector = null;
+        this.endConnector = null;
+        this.svgPathToMouse?.setAttribute('d', '');
     }
 
     private requestGateDragFrame() {

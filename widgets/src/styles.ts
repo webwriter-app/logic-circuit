@@ -14,6 +14,15 @@ export const Styles = css`
         display: none;
     }
 
+    :host(.connector-selected) .dot {
+        transform: scale(1.6);
+    }
+
+    :host(.connector-snap-target) .dot {
+        transform: scale(1.6);
+        box-shadow: 0 0 0 4px rgb(46 139 87 / 25%);
+    }
+
     .allowSimButton {
         top: 10px;
         left: 100px;
@@ -377,13 +386,16 @@ export const Styles = css`
         cursor: pointer;
         z-index: 5;
         text-align: left;
+        touch-action: none;
     }
     .dot{
         height: 7.5px;
         width: 7.5px;
         background-color: #000000;
         border-radius: 50%;
-        display: inline-block;
+        display: block;
+        transform-origin: center;
+        transition: transform 100ms ease, box-shadow 100ms ease;
 
     }
     .dotTrue {
@@ -391,7 +403,7 @@ export const Styles = css`
         width: 7.5px;
         background-color: green;
         border-radius: 50%;
-        display: inline-block;
+        display: block;
     }
 
     .dotError {
@@ -399,7 +411,7 @@ export const Styles = css`
         width: 7.5px;
         background-color: red;
         border-radius: 50%;
-        display: inline-block;
+        display: block;
     }
 
     .optionsMenu {

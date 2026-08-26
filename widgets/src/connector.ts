@@ -42,26 +42,33 @@ export default class ConnectorElement extends LitElement {
 
     constructor() {
         super();
-        this.addEventListener('mousedown', this.handleMouseDown);
+        this.addEventListener('pointerdown', this.handlePointerDown);
     }
 
     /**
-     * Handles mouse down events on the connector element.
+     * Handles pointer input on the connector element.
      *
      * This method manages connections between connectors by determining if a valid connection can be made,
      * and creates a line if applicable. It also handles error logging for invalid connection attempts.
      *
-     * @param {MouseEvent} event - The mouse event triggered on mousedown.
+     * @param {PointerEvent} event - The pointer event triggered on mouse, pen, or touch input.
      */
-    handleMouseDown(event) {
+    handlePointerDown(event: PointerEvent) {
+        if (!event.isPrimary || (event.pointerType === 'mouse' && event.button !== 0)) return;
+
         event.preventDefault();
-        const clickedElement = event.target;
-        
+        this.setPointerCapture(event.pointerId);
+        this.selectForConnection();
+    }
+
+    selectForConnection() {
+        const clickedElement = this;
         const widget = this.widget;
 
         // Check if clicked element is already connected
         for (const line of widget.lineElements) {
             if (clickedElement === line.start || clickedElement === line.end) {
+                widget.startConnector?.classList.remove('connector-selected');
                 widget.startConnector = null;
                 widget.endConnector = null;
                 widget.isDrawingLine = false;
@@ -76,6 +83,7 @@ export default class ConnectorElement extends LitElement {
         // Handle starting and ending connections
         if (widget.startConnector === null) {
             widget.startConnector = clickedElement;
+            clickedElement.classList.add('connector-selected');
             widget.isDrawingLine = true;
         } else if (widget.endConnector === null) {
             widget.endConnector = clickedElement;
@@ -91,6 +99,7 @@ export default class ConnectorElement extends LitElement {
             }
             
             // Reset connectors after processing
+            widget.startConnector.classList.remove('connector-selected');
             widget.startConnector = null;
             widget.endConnector = null;
             widget.isDrawingLine = false;
