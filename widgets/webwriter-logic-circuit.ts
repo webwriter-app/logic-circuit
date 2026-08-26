@@ -783,7 +783,7 @@ export default class LogicCircuit extends LitElementWw {
         const source = path.find((element): element is Gate => element instanceof Gate);
         if (!source) return;
 
-        const isInputControl = source.gatetype === 'INPUT' && path.some(
+        const isInputControl = source.movable && source.gatetype === 'INPUT' && path.some(
             (element) => element instanceof Element && element.classList.contains('gatepointer')
         );
         const isMenuControl = path.some(
