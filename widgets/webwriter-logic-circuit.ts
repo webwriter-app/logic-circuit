@@ -229,8 +229,28 @@ export default class LogicCircuit extends LitElementWw {
     private connectionPointerStartY = 0;
     private connectionDidDrag = false;
     private panPointerId: number | null = null;
+    private openSidebarTooltip: SlTooltip | null = null;
     private preventCanvasTouchScroll = (event: TouchEvent) => {
         if (this.isDragging) event.preventDefault();
+    };
+    private handleDocumentPointerDown = (event: PointerEvent) => {
+        if (this.openSidebarTooltip && !event.composedPath().includes(this.openSidebarTooltip)) {
+            this.openSidebarTooltip.hide();
+        }
+    };
+    private handleSidebarTooltipShow = (event: Event) => {
+        const path = event.composedPath();
+        const tooltip = path.find((element): element is SlTooltip => element instanceof SlTooltip);
+        const gate = path.find((element): element is Gate => element instanceof Gate);
+        if (!tooltip || !gate || gate.movable) return;
+
+        if (this.openSidebarTooltip !== tooltip) this.openSidebarTooltip?.hide();
+        this.openSidebarTooltip = tooltip;
+    };
+    private handleSidebarTooltipHide = (event: Event) => {
+        if (this.openSidebarTooltip && event.composedPath().includes(this.openSidebarTooltip)) {
+            this.openSidebarTooltip = null;
+        }
     };
 
     render() {
@@ -442,6 +462,9 @@ export default class LogicCircuit extends LitElementWw {
     connectedCallback() {
         super.connectedCallback();
         this.addEventListener('contextmenu', this.handleContextMenu);
+        this.addEventListener('sl-show', this.handleSidebarTooltipShow);
+        this.addEventListener('sl-hide', this.handleSidebarTooltipHide);
+        document.addEventListener('pointerdown', this.handleDocumentPointerDown, true);
     }
 
     /**
@@ -453,6 +476,11 @@ export default class LogicCircuit extends LitElementWw {
         this.cancelConnection();
         this.isDragging = false;
         this.panPointerId = null;
+        this.openSidebarTooltip?.hide();
+        this.openSidebarTooltip = null;
+        this.removeEventListener('sl-show', this.handleSidebarTooltipShow);
+        this.removeEventListener('sl-hide', this.handleSidebarTooltipHide);
+        document.removeEventListener('pointerdown', this.handleDocumentPointerDown, true);
         super.disconnectedCallback();
         this.removeEventListener('pointerdown', this.handleCanvasPointerDown);
         this.removeEventListener('pointermove', this.handlePointerMove);
