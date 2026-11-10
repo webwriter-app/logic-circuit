@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+<file target-language="sr-ijekavsk" source-language="en" original="lit-localize-inputs" datatype="plaintext">
+<body>
+<trans-unit id="sb785914856ab26c5">
+  <source>Only one connection allowed</source>
+<target>Dozvoljena je samo jedna veza</target></trans-unit>
+<trans-unit id="sc49c6f9b07b93aec">
+  <source>Connectors are from the same type</source>
+<target>Priključci su istog tipa</target></trans-unit>
+<trans-unit id="s21ab242e1b149ec7">
+  <source>Show Truthtable</source>
+<target>Prikaži tablicu istinitosti</target></trans-unit>
+<trans-unit id="sdc673e73b5c13aea">
+  <source>Delete</source>
+<target>Obriši</target></trans-unit>
+<trans-unit id="s125d2fd8e606e489">
+  <source>Show truth table</source>
+<target>Prikaži tablicu istinitosti</target></trans-unit>
+<trans-unit id="sb71b7e740dffbb49">
+  <source>Allow simulation</source>
+<target>Dozvoli simulaciju</target></trans-unit>
+<trans-unit id="s62137ccc921db4d5">
+  <source>Simulation delay</source>
+<target>Kašnjenje simulacije</target></trans-unit>
+<trans-unit id="sd46f5029be767c7e">
+  <source>NOT gate limit</source>
+<target>Ograničenje broja NOT kola</target></trans-unit>
+<trans-unit id="s65a3495a4e7fe612">
+  <source>AND gate limit</source>
+<target>Ograničenje broja AND kola</target></trans-unit>
+<trans-unit id="sf0f0ca29ba5fb310">
+  <source>OR gate limit</source>
+<target>Ograničenje broja OR kola</target></trans-unit>
+<trans-unit id="s314ad64e38e4f66e">
+  <source>NAND gate limit</source>
+<target>Ograničenje broja NAND kola</target></trans-unit>
+<trans-unit id="s2ecba74fb1b4d50c">
+  <source>NOR gate limit</source>
+<target>Ograničenje broja NOR kola</target></trans-unit>
+<trans-unit id="s303b4df3f2a7be8e">
+  <source>XNOR gate limit</source>
+<target>Ograničenje broja XNOR kola</target></trans-unit>
+<trans-unit id="s3d706ad4635cf53a">
+  <source>XOR gate limit</source>
+<target>Ograničenje broja XOR kola</target></trans-unit>
+<trans-unit id="sb4f06f05b6904651">
+  <source>Splitter limit</source>
+<target>Ograničenje broja razdelnika</target></trans-unit>
+<trans-unit id="scfcffcf35292bc6f">
+  <source>Simulate</source>
+<target>Simuliraj</target></trans-unit>
+<trans-unit id="s582cc89defd16fdf">
+  <source>Show all truth tables</source>
+<target>Prikaži sve tablice istinitosti</target></trans-unit>
+<trans-unit id="s4635f32ac7e5b41b">
+  <source>Drag items here to delete them</source>
+<target>Prevucite stavke ovde da biste ih obrisali</target></trans-unit>
+<trans-unit id="s6aa6cfde13238a46">
+  <source>Drag and drop elements from the left sidebar to add them.</source>
+<target>Prevucite elemente s lijeve bočne trake i pustite ih ovdje da biste ih dodali.</target></trans-unit>
+<trans-unit id="s2b77630e54db68e1">
+  <source>Left click a connection endpoint to start a connection and then click another connection endpoint to add it.</source>
+<target>Kliknite levim tasterom na kraj veze da započnete povezivanje, pa kliknite na drugi kraj da dodate vezu.</target></trans-unit>
+<trans-unit id="sfc8aedc3e52543e9">
+  <source>Right click on a connection to remove it.</source>
+<target>Kliknite desnim tasterom na vezu da je uklonite.</target></trans-unit>
+<trans-unit id="s34bc4cc9fb5b7aa4">
+  <source>Instructions</source>
+<target>Uputstva</target></trans-unit>
+</body>
+</file>
+</xliff>
