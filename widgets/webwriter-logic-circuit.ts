@@ -146,11 +146,18 @@ export default class LogicCircuit extends LitElementWw {
     /** Stringified representation of connector state, synced via attribute. */
     @property({ type: String, attribute: false }) accessor reflectCons: string = "";
 
-    private dataObserver = new MutationObserver(() => {
+    private skipDataWrite = false;
+    private dataObserver = new MutationObserver(() => this.restoreData());
+
+    private restoreData() {
         const data = restoreData(this);
-        this.reflectGates = data.gates;
-        this.reflectCons = data.connections;
-    });
+        const changed = data.gates !== this.reflectGates || data.connections !== this.reflectCons;
+        if (changed) {
+            this.reflectGates = data.gates;
+            this.reflectCons = data.connections;
+            this.skipDataWrite = true;
+        }
+    }
 
     /** Internal gate ID counter for uniquely identifying gates. */
     @property({ type: Number }) accessor gateID: number = 0;
@@ -365,9 +372,11 @@ export default class LogicCircuit extends LitElementWw {
      */
     updated(changedProperties) {
         super.updated(changedProperties);
-        if (this.hasUpdated && (changedProperties.has('reflectGates') || changedProperties.has('reflectCons'))) {
+        const dataChanged = changedProperties.has('reflectGates') || changedProperties.has('reflectCons');
+        if (this.hasUpdated && dataChanged && !this.skipDataWrite) {
             writeData(this, this.reflectGates, this.reflectCons);
         }
+        if (dataChanged) this.skipDataWrite = false;
         if (changedProperties.has('allowSimulation')) {
             if (this.allowSimulation === 1) {
                 this.simCheckbox.style.display = 'block';
@@ -383,9 +392,7 @@ export default class LogicCircuit extends LitElementWw {
      */
     connectedCallback() {
         super.connectedCallback();
-        const data = restoreData(this);
-        this.reflectGates = data.gates;
-        this.reflectCons = data.connections;
+        this.restoreData();
         this.dataObserver.observe(this, { childList: true, subtree: true });
         this.addEventListener('contextmenu', this.handleContextMenu);
         this.addEventListener('sl-show', this.handleSidebarTooltipShow);
