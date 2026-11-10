@@ -1,3 +1,4 @@
+import { connectMessages } from "../../../localization/localizer";
 import { html, css } from 'lit';
 import { LitElementWw } from '@webwriter/lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -26,6 +27,7 @@ import LogicCircuit from '../../webwriter-logic-circuit';
  * @extends LitElementWw
  */
 export default class Gate extends LitElementWw {
+    protected readonly msg = connectMessages(this);
     /** Reference to the LogicCircuit instance associated with this gate. */
     widget: LogicCircuit;
 

@@ -35,8 +35,8 @@ import { add, connect, info, remove, trash } from './src/assets/icons.js';
 import { resetLines, createLine} from './src/helper/line-helper.js';
 import { addGate, moveGate, transferOutputToNextGate } from './src/helper/gate-helper.js';
 import { gateCounter, resetGates } from './src/helper/gate-helper.js';
-import LOCALIZE from "../localization/generated";
-import { localized, msg } from "@lit/localize";
+import type { MsgFn } from "@lit/localize";
+import { createLocalizer, effectiveLanguage, sourceMsg } from "../localization/localizer";
 import { restoreData, writeData } from './src/data-state.js';
 
 const workspaceWidth: number = 3000;
@@ -80,28 +80,38 @@ type GateDragState = {
  * @attr {number} splitter-allowed - Whether splitters are allowed
  */
 @customElement('webwriter-logic-circuit')
-@localized()
 export default class LogicCircuit extends LitElementWw {
-    static options: Record<string, OptionDeclaration> = {
-        allowSimulation: { type: "number", label: { _: "Allow simulation" }, min: 0, max: 1, step: 1 },
-        simulationDelay: { type: "number", label: { _: "Simulation delay" }, min: 0, unit: "ms" },
-        notGateAllowed: { type: "number", label: { _: "NOT gate limit" }, min: -1, step: 1 },
-        andGateAllowed: { type: "number", label: { _: "AND gate limit" }, min: -1, step: 1 },
-        orGateAllowed: { type: "number", label: { _: "OR gate limit" }, min: -1, step: 1 },
-        nandGateAllowed: { type: "number", label: { _: "NAND gate limit" }, min: -1, step: 1 },
-        norGateAllowed: { type: "number", label: { _: "NOR gate limit" }, min: -1, step: 1 },
-        xnorGateAllowed: { type: "number", label: { _: "XNOR gate limit" }, min: -1, step: 1 },
-        xorGateAllowed: { type: "number", label: { _: "XOR gate limit" }, min: -1, step: 1 },
-        splitterAllowed: { type: "number", label: { _: "Splitter limit" }, min: -1, step: 1 },
-    };
-    readonly options = LogicCircuit.options;
+    // Inherited language must not be reflected as an authored attribute.
+    static override properties = { lang: { attribute: false, noAccessor: true } };
+    override get lang(): string { return effectiveLanguage(this); }
+    override set lang(value: string) { this.setAttribute("lang", value); }
+
+    private static makeOptions(msg: MsgFn): Record<string, OptionDeclaration> {
+        return {
+            allowSimulation: { type: "number", label: { _: msg("Allow simulation") }, min: 0, max: 1, step: 1 },
+            simulationDelay: { type: "number", label: { _: msg("Simulation delay") }, min: 0, unit: "ms" },
+            notGateAllowed: { type: "number", label: { _: msg("NOT gate limit") }, min: -1, step: 1 },
+            andGateAllowed: { type: "number", label: { _: msg("AND gate limit") }, min: -1, step: 1 },
+            orGateAllowed: { type: "number", label: { _: msg("OR gate limit") }, min: -1, step: 1 },
+            nandGateAllowed: { type: "number", label: { _: msg("NAND gate limit") }, min: -1, step: 1 },
+            norGateAllowed: { type: "number", label: { _: msg("NOR gate limit") }, min: -1, step: 1 },
+            xnorGateAllowed: { type: "number", label: { _: msg("XNOR gate limit") }, min: -1, step: 1 },
+            xorGateAllowed: { type: "number", label: { _: msg("XOR gate limit") }, min: -1, step: 1 },
+            splitterAllowed: { type: "number", label: { _: msg("Splitter limit") }, min: -1, step: 1 },
+        };
+    }
+    static options = LogicCircuit.makeOptions(sourceMsg);
+    readonly options = LogicCircuit.makeOptions(sourceMsg);
     static shadowRootOptions = {
         ...LitElementWw.shadowRootOptions,
         delegatesFocus: true,
     };
 
     /** i18n handler for the widget. */
-    public localize = LOCALIZE;
+    public localize = createLocalizer(this, () => {
+        Object.assign(this.options, LogicCircuit.makeOptions(this.msg));
+    });
+    readonly msg = this.localize.msg;
 
     /** Styles for the widget. */
     static styles = Styles;
@@ -330,28 +340,28 @@ export default class LogicCircuit extends LitElementWw {
 
                 <div class="workspaceContainer" id="workspace">
                     <sl-checkbox id="simCheckbox" class="simulateCheckbox" @sl-change=${() => this.simulateCircuit()} checked
-                        >${msg("Simulate")}</sl-checkbox
+                        >${this.msg("Simulate")}</sl-checkbox
                     >
 
                     <sl-switch class="flipSwitch" id="switch" @sl-change=${() => this.handleFlipAllGates()}
-                        >${msg("Show all truth tables")}</sl-switch
+                        >${this.msg("Show all truth tables")}</sl-switch
                     >
 
-                    <div class="trashCanIcon" style="font-size: 35px;" title="${msg("Drag items here to delete them")}">${trash}</div>
+                    <div class="trashCanIcon" style="font-size: 35px;" title="${this.msg("Drag items here to delete them")}">${trash}</div>
                     
                     <div id="instructions" class="instructions">
                         <div class="instruction">
-                        ${add}${msg("Drag and drop elements from the left sidebar to add them.")}
+                        ${add}${this.msg("Drag and drop elements from the left sidebar to add them.")}
                         </div>
                         <div class="instruction">
-                        ${connect}${msg("Left click a connection endpoint to start a connection and then click another connection endpoint to add it.")}
+                        ${connect}${this.msg("Left click a connection endpoint to start a connection and then click another connection endpoint to add it.")}
                         </div>
                         <div class="instruction">
-                        ${remove}${msg("Right click on a connection to remove it.")}
+                        ${remove}${this.msg("Right click on a connection to remove it.")}
                         </div>
                     </div>
 
-                    <div class="infoButton" @click=${() => this.toggleInstructions()}>${info}${msg("Instructions")}</div>
+                    <div class="infoButton" @click=${() => this.toggleInstructions()}>${info}${this.msg("Instructions")}</div>
 
                     <div class="workspaceArea" id="workspaceDraggable">
                         <svg class="svgArea" id="svgCanvas"></svg>
