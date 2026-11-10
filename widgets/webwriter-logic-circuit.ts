@@ -1,5 +1,5 @@
 import { html } from 'lit';
-import { LitElementWw } from '@webwriter/lit';
+import { LitElementWw, type OptionDeclaration } from '@webwriter/lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import NOTGate from './src/gates/not-gate.js';
@@ -82,7 +82,7 @@ type GateDragState = {
 @customElement('webwriter-logic-circuit')
 @localized()
 export default class LogicCircuit extends LitElementWw {
-    static options = {
+    static options: Record<string, OptionDeclaration> = {
         allowSimulation: { type: "number", label: { _: "Allow simulation" }, min: 0, max: 1, step: 1 },
         simulationDelay: { type: "number", label: { _: "Simulation delay" }, min: 0, unit: "ms" },
         notGateAllowed: { type: "number", label: { _: "NOT gate limit" }, min: -1, step: 1 },
