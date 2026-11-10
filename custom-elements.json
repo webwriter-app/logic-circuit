@@ -84,9 +84,7 @@
                 "text": "String"
               },
               "default": "\"\"",
-              "description": "Stringified representation of gate state, synced via attribute.",
-              "attribute": "reflectGates",
-              "reflects": true
+              "description": "Runtime serialization of authored circuit state stored in the direct JSON data block."
             },
             {
               "kind": "field",
@@ -95,9 +93,7 @@
                 "text": "String"
               },
               "default": "\"\"",
-              "description": "Stringified representation of connector state, synced via attribute.",
-              "attribute": "reflectCons",
-              "reflects": true
+              "description": "Runtime serialization of authored circuit state stored in the direct JSON data block."
             },
             {
               "kind": "field",
@@ -819,24 +815,6 @@
               "default": "[]",
               "description": "The list of all current gate elements.",
               "fieldName": "gateElements"
-            },
-            {
-              "name": "reflectGates",
-              "type": {
-                "text": "String"
-              },
-              "default": "\"\"",
-              "description": "Stringified representation of gate state, synced via attribute.",
-              "fieldName": "reflectGates"
-            },
-            {
-              "name": "reflectCons",
-              "type": {
-                "text": "String"
-              },
-              "default": "\"\"",
-              "description": "Stringified representation of connector state, synced via attribute.",
-              "fieldName": "reflectCons"
             },
             {
               "name": "gateID",
