@@ -1,9 +1,9 @@
+import { connectMessages } from "../../localization/localizer";
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { createLine } from './helper/line-helper.js';
 import { Styles } from './styles.js';
 import LogicCircuit from '../webwriter-logic-circuit.js';
-import { localized, msg } from "@lit/localize";
 
 /**
  * @summary Represents a connection point in a logic circuit.
@@ -18,8 +18,9 @@ import { localized, msg } from "@lit/localize";
  * @property {*} value - Current value of the connector (can be null).
  */
 @customElement("connector-element")
-@localized()
+
 export default class ConnectorElement extends LitElement {
+  protected readonly msg = connectMessages(this);
     static styles = Styles;
 
     /** Reference to the LogicCircuit widget associated with this connector. */
@@ -74,7 +75,7 @@ export default class ConnectorElement extends LitElement {
                 widget.isDrawingLine = false;
                 widget.svgPathToMouse.setAttribute('d', '');
 
-                console.error(msg('Only one connection allowed'));
+                console.error(this.msg('Only one connection allowed'));
 
                 return;
             }
@@ -95,7 +96,7 @@ export default class ConnectorElement extends LitElement {
             ) {
                 createLine(widget, widget.startConnector, widget.endConnector);
             } else {
-                console.error(msg('Connectors are from the same type'));
+                console.error(this.msg('Connectors are from the same type'));
             }
             
             // Reset connectors after processing

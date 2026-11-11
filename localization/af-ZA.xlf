@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+<file target-language="af-ZA" source-language="en" original="lit-localize-inputs" datatype="plaintext">
+<body>
+<trans-unit id="sb785914856ab26c5">
+  <source>Only one connection allowed</source>
+<target>Slegs een verbinding word toegelaat</target></trans-unit>
+<trans-unit id="sc49c6f9b07b93aec">
+  <source>Connectors are from the same type</source>
+<target>Verbinders is van dieselfde tipe</target></trans-unit>
+<trans-unit id="s21ab242e1b149ec7">
+  <source>Show Truthtable</source>
+<target>Wys waarheidstabel</target></trans-unit>
+<trans-unit id="sdc673e73b5c13aea">
+  <source>Delete</source>
+<target>Vee uit</target></trans-unit>
+<trans-unit id="s125d2fd8e606e489">
+  <source>Show truth table</source>
+<target>Wys waarheidstabel</target></trans-unit>
+<trans-unit id="sb71b7e740dffbb49">
+  <source>Allow simulation</source>
+<target>Laat simulasie toe</target></trans-unit>
+<trans-unit id="s62137ccc921db4d5">
+  <source>Simulation delay</source>
+<target>Simulasievertraging</target></trans-unit>
+<trans-unit id="sd46f5029be767c7e">
+  <source>NOT gate limit</source>
+<target>Limiet vir NOT-hekke</target></trans-unit>
+<trans-unit id="s65a3495a4e7fe612">
+  <source>AND gate limit</source>
+<target>Limiet vir AND-hekke</target></trans-unit>
+<trans-unit id="sf0f0ca29ba5fb310">
+  <source>OR gate limit</source>
+<target>Limiet vir OR-hekke</target></trans-unit>
+<trans-unit id="s314ad64e38e4f66e">
+  <source>NAND gate limit</source>
+<target>Limiet vir NAND-hekke</target></trans-unit>
+<trans-unit id="s2ecba74fb1b4d50c">
+  <source>NOR gate limit</source>
+<target>Limiet vir NOR-hekke</target></trans-unit>
+<trans-unit id="s303b4df3f2a7be8e">
+  <source>XNOR gate limit</source>
+<target>Limiet vir XNOR-hekke</target></trans-unit>
+<trans-unit id="s3d706ad4635cf53a">
+  <source>XOR gate limit</source>
+<target>Limiet vir XOR-hekke</target></trans-unit>
+<trans-unit id="sb4f06f05b6904651">
+  <source>Splitter limit</source>
+<target>Limiet vir verdelers</target></trans-unit>
+<trans-unit id="scfcffcf35292bc6f">
+  <source>Simulate</source>
+<target>Simuleer</target></trans-unit>
+<trans-unit id="s582cc89defd16fdf">
+  <source>Show all truth tables</source>
+<target>Wys alle waarheidstabelle</target></trans-unit>
+<trans-unit id="s4635f32ac7e5b41b">
+  <source>Drag items here to delete them</source>
+<target>Sleep items hierheen om dit uit te vee</target></trans-unit>
+<trans-unit id="s6aa6cfde13238a46">
+  <source>Drag and drop elements from the left sidebar to add them.</source>
+<target>Sleep elemente uit die linkerkantbalk en laat hulle val om hulle by te voeg.</target></trans-unit>
+<trans-unit id="s2b77630e54db68e1">
+  <source>Left click a connection endpoint to start a connection and then click another connection endpoint to add it.</source>
+<target>Klik met links op ’n eindpunt om ’n verbinding te begin. Klik dan op ’n ander eindpunt om die verbinding by te voeg.</target></trans-unit>
+<trans-unit id="sfc8aedc3e52543e9">
+  <source>Right click on a connection to remove it.</source>
+<target>Klik met regs op ’n verbinding om dit te verwyder.</target></trans-unit>
+<trans-unit id="s34bc4cc9fb5b7aa4">
+  <source>Instructions</source>
+<target>Instruksies</target></trans-unit>
+</body>
+</file>
+</xliff>
