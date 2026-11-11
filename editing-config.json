@@ -105,7 +105,16 @@
       "lo": "ສ້າງ ແລະ ຈຳລອງວົງຈອນດ້ວຍປະຕູຕັກກະ (AND, OR, XOR ແລະອື່ນໆ).",
       "km": "បង្កើត និងសាកល្បងសៀគ្វីដោយប្រើច្រកតក្កវិជ្ជា (AND, OR, XOR ជាដើម)។",
       "ti": "ብሎጂካዊ መሻገሪታት (AND, OR, XOR ወዘተ) ሰርኪት ፍጠርን ኣስመስልን።",
-      "dv": "ލޮޖިކް ގޭޓްތަކާއެކު (AND، OR، XOR އަދި އެހެނިހެން) ސާކިޓް އެޅުވާ އަދި ސިމިއުލޭޓް ކުރޭ."
+      "dv": "ލޮޖިކް ގޭޓްތަކާއެކު (AND، OR، XOR އަދި އެހެނިހެން) ސާކިޓް އެޅުވާ އަދި ސިމިއުލޭޓް ކުރޭ.",
+      "yue-Hans": "建立同模拟逻辑闸电路（AND、OR、XOR 等）。",
+      "yue-Hant": "建立同模擬邏輯閘電路（AND、OR、XOR 等）。",
+      "kmr": "Şebekeyan bi dergehên mantiqî (AND, OR, XOR û hwd.) çêbike û simulasyonê bike.",
+      "kmr-Latn": "Şebekeyan bi dergehên mantiqî (AND, OR, XOR û hwd.) çêbike û simulasyonê bike.",
+      "kmr-Arab": "شەبەکەیان ب دەرگەهێن مانتقی (AND, OR, XOR ئوو هود.) چێبکە ئوو سمولاسیۆنێ بکە.",
+      "ckb": "بازنە دروست بکە و شبیه‌سازی بکە بە دەروازە لۆژیکییەکان (AND، OR، XOR، هتد).",
+      "ckb-Arab": "بازنە دروست بکە و شبیه‌سازی بکە بە دەروازە لۆژیکییەکان (AND، OR، XOR، هتد).",
+      "af-ZA": "Skep en simuleer kringe met logikahekke (AND, OR, XOR, ens.).",
+      "af-NA": "Skep en simuleer kringe met logikahekke (AND, OR, XOR, ens.)."
     },
     "label": {
       "_": "Logic Circuit",
@@ -210,7 +219,16 @@
       "lo": "ວົງຈອນຕັກກະ",
       "km": "សៀគ្វីតក្កវិជ្ជា",
       "ti": "ሎጂካዊ ሰርኪት",
-      "dv": "ލޮޖިކް ސާކިޓް"
+      "dv": "ލޮޖިކް ސާކިޓް",
+      "yue-Hans": "逻辑电路",
+      "yue-Hant": "邏輯電路",
+      "kmr": "Mantiqa şebekeyê",
+      "kmr-Latn": "Mantiqa şebekeyê",
+      "kmr-Arab": "مانتقا شەبەکەیێ",
+      "ckb": "بازنەی لۆژیکی",
+      "ckb-Arab": "بازنەی لۆژیکی",
+      "af-ZA": "Logikakring",
+      "af-NA": "Logikakring"
     }
   },
   "./widgets/webwriter-logic-circuit": {
@@ -317,7 +335,16 @@
       "lo": "ວົງຈອນຕັກກະ",
       "km": "សៀគ្វីតក្កវិជ្ជា",
       "ti": "ሎጂካዊ ሰርኪት",
-      "dv": "ލޮޖިކް ސާކިޓް"
+      "dv": "ލޮޖިކް ސާކިޓް",
+      "yue-Hans": "逻辑电路",
+      "yue-Hant": "邏輯電路",
+      "kmr": "Mantiqa şebekeyê",
+      "kmr-Latn": "Mantiqa şebekeyê",
+      "kmr-Arab": "مانتقا شەبەکەیێ",
+      "ckb": "بازنەی لۆژیکی",
+      "ckb-Arab": "بازنەی لۆژیکی",
+      "af-ZA": "Logikakring",
+      "af-NA": "Logikakring"
     }
   },
   "./snippets/halfadder": {
@@ -424,7 +451,16 @@
       "lo": "ຕົວບວກເຄິ່ງໜຶ່ງ",
       "km": "ឧបករណ៍បូកពាក់កណ្ដាល",
       "ti": "ፍርቂ ደመር",
-      "dv": "ހާފް އެޑަރ"
+      "dv": "ހާފް އެޑަރ",
+      "yue-Hans": "半加器",
+      "yue-Hant": "半加器",
+      "kmr": "Nîvaddar",
+      "kmr-Latn": "Nîvaddar",
+      "kmr-Arab": "نیڤاددار",
+      "ckb": "نیوسەرجەمکەر",
+      "ckb-Arab": "نیوسەرجەمکەر",
+      "af-ZA": "Halfopteller",
+      "af-NA": "Halfopteller"
     }
   },
   "./snippets/RS-FlipFlop": {
@@ -531,7 +567,16 @@
       "lo": "RS ຟລິບຟລັອບ",
       "km": "RS flip-flop",
       "ti": "RS ፍሊፕ-ፍሎፕ",
-      "dv": "RS ފްލިޕް ފްލޮޕް"
+      "dv": "RS ފްލިޕް ފްލޮޕް",
+      "yue-Hans": "RS 触发器",
+      "yue-Hant": "RS 觸發器",
+      "kmr": "FlipFlop ya RS",
+      "kmr-Latn": "FlipFlop ya RS",
+      "kmr-Arab": "فلپفلۆپ یا RS",
+      "ckb": "فلیپ‌فلۆپی RS",
+      "ckb-Arab": "فلیپ‌فلۆپی RS",
+      "af-ZA": "RS-wipkring",
+      "af-NA": "RS-wipkring"
     }
   }
 }
