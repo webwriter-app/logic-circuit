@@ -45,8 +45,6 @@ npm install @webwriter/logic-circuit
 | `LogicCircuit.scopedElements` | - | Registers scoped custom elements used within the logic circuit widget. | - | ✗ |
 | `lineElements` (`lineElements`) | `array` | The list of all current wire (line) elements. | `[]` | ✗ |
 | `gateElements` (`gateElements`) | `array` | The list of all current gate elements. | `[]` | ✗ |
-| `reflectGates` (`reflectGates`) | `String` | Stringified representation of gate state, synced via attribute. | `""` | ✓ |
-| `reflectCons` (`reflectCons`) | `String` | Stringified representation of connector state, synced via attribute. | `""` | ✓ |
 | `gateID` (`gateID`) | `number` | Internal gate ID counter for uniquely identifying gates. | `0` | ✗ |
 | `lineID` (`lineID`) | `number` | Internal line ID counter for uniquely identifying wires. | `0` | ✗ |
 | `zoom` (`zoom`) | `number` | Current zoom level of the circuit canvas. | `1` | ✗ |

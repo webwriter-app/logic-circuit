@@ -1,5 +1,5 @@
 import { html } from 'lit';
-import { LitElementWw } from '@webwriter/lit';
+import { LitElementWw, type OptionDeclaration } from '@webwriter/lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import NOTGate from './src/gates/not-gate.js';
@@ -35,8 +35,9 @@ import { add, connect, info, remove, trash } from './src/assets/icons.js';
 import { resetLines, createLine} from './src/helper/line-helper.js';
 import { addGate, moveGate, transferOutputToNextGate } from './src/helper/gate-helper.js';
 import { gateCounter, resetGates } from './src/helper/gate-helper.js';
-import LOCALIZE from "../localization/generated";
-import { localized, msg } from "@lit/localize";
+import type { MsgFn } from "@lit/localize";
+import { createLocalizer, effectiveLanguage, sourceMsg } from "../localization/localizer";
+import { restoreData, writeData } from './src/data-state.js';
 
 const workspaceWidth: number = 3000;
 const workspaceHeight: number = 2000;
@@ -65,7 +66,7 @@ type GateDragState = {
  * @csspart gate - Styles individual gate components
  * @csspart line - Styles the connecting lines between gates
  *
- * @slot - The default slot (currently unused in this widget)
+ * @slot data - Direct application/json block storing gates and connections.
  *
  * @attr {number} simulation-delay - Delay (in ms) between simulation ticks
  * @attr {number} allow-simulation - Whether simulation is enabled (1 = enabled, 0 = disabled)
@@ -77,19 +78,40 @@ type GateDragState = {
  * @attr {number} xor-gate-allowed - Whether XOR gates are allowed
  * @attr {number} xnor-gate-allowed - Whether XNOR gates are allowed
  * @attr {number} splitter-allowed - Whether splitters are allowed
- * @attr {string} reflect-gates - Stringified representation of gates (for syncing or reflecting state)
- * @attr {string} reflect-cons - Stringified representation of connections (for syncing or reflecting state)
  */
 @customElement('webwriter-logic-circuit')
-@localized()
 export default class LogicCircuit extends LitElementWw {
+    // Inherited language must not be reflected as an authored attribute.
+    static override properties = { lang: { attribute: false, noAccessor: true } };
+    override get lang(): string { return effectiveLanguage(this); }
+    override set lang(value: string) { this.setAttribute("lang", value); }
+
+    private static makeOptions(msg: MsgFn): Record<string, OptionDeclaration> {
+        return {
+            allowSimulation: { type: "number", label: { _: msg("Allow simulation") }, min: 0, max: 1, step: 1 },
+            simulationDelay: { type: "number", label: { _: msg("Simulation delay") }, min: 0, unit: "ms" },
+            notGateAllowed: { type: "number", label: { _: msg("NOT gate limit") }, min: -1, step: 1 },
+            andGateAllowed: { type: "number", label: { _: msg("AND gate limit") }, min: -1, step: 1 },
+            orGateAllowed: { type: "number", label: { _: msg("OR gate limit") }, min: -1, step: 1 },
+            nandGateAllowed: { type: "number", label: { _: msg("NAND gate limit") }, min: -1, step: 1 },
+            norGateAllowed: { type: "number", label: { _: msg("NOR gate limit") }, min: -1, step: 1 },
+            xnorGateAllowed: { type: "number", label: { _: msg("XNOR gate limit") }, min: -1, step: 1 },
+            xorGateAllowed: { type: "number", label: { _: msg("XOR gate limit") }, min: -1, step: 1 },
+            splitterAllowed: { type: "number", label: { _: msg("Splitter limit") }, min: -1, step: 1 },
+        };
+    }
+    static options = LogicCircuit.makeOptions(sourceMsg);
+    readonly options = LogicCircuit.makeOptions(sourceMsg);
     static shadowRootOptions = {
         ...LitElementWw.shadowRootOptions,
         delegatesFocus: true,
     };
 
     /** i18n handler for the widget. */
-    public localize = LOCALIZE;
+    public localize = createLocalizer(this, () => {
+        Object.assign(this.options, LogicCircuit.makeOptions(this.msg));
+    });
+    readonly msg = this.localize.msg;
 
     /** Styles for the widget. */
     static styles = Styles;
@@ -129,10 +151,23 @@ export default class LogicCircuit extends LitElementWw {
     @property({ type: Array }) accessor gateElements = [];
 
     /** Stringified representation of gate state, synced via attribute. */
-    @property({ type: String, reflect: true }) accessor reflectGates: String = "";
+    @property({ type: String, attribute: false }) accessor reflectGates: string = "";
 
     /** Stringified representation of connector state, synced via attribute. */
-    @property({ type: String, reflect: true }) accessor reflectCons: String = "";
+    @property({ type: String, attribute: false }) accessor reflectCons: string = "";
+
+    private skipDataWrite = false;
+    private dataObserver = new MutationObserver(() => this.restoreData());
+
+    private restoreData() {
+        const data = restoreData(this);
+        const changed = data.gates !== this.reflectGates || data.connections !== this.reflectCons;
+        if (changed) {
+            this.reflectGates = data.gates;
+            this.reflectCons = data.connections;
+            this.skipDataWrite = true;
+        }
+    }
 
     /** Internal gate ID counter for uniquely identifying gates. */
     @property({ type: Number }) accessor gateID: number = 0;
@@ -305,28 +340,28 @@ export default class LogicCircuit extends LitElementWw {
 
                 <div class="workspaceContainer" id="workspace">
                     <sl-checkbox id="simCheckbox" class="simulateCheckbox" @sl-change=${() => this.simulateCircuit()} checked
-                        >${msg("Simulate")}</sl-checkbox
+                        >${this.msg("Simulate")}</sl-checkbox
                     >
 
                     <sl-switch class="flipSwitch" id="switch" @sl-change=${() => this.handleFlipAllGates()}
-                        >${msg("Show all truth tables")}</sl-switch
+                        >${this.msg("Show all truth tables")}</sl-switch
                     >
 
-                    <div class="trashCanIcon" style="font-size: 35px;" title="${msg("Drag items here to delete them")}">${trash}</div>
+                    <div class="trashCanIcon" style="font-size: 35px;" title="${this.msg("Drag items here to delete them")}">${trash}</div>
                     
                     <div id="instructions" class="instructions">
                         <div class="instruction">
-                        ${add}${msg("Drag and drop elements from the left sidebar to add them.")}
+                        ${add}${this.msg("Drag and drop elements from the left sidebar to add them.")}
                         </div>
                         <div class="instruction">
-                        ${connect}${msg("Left click a connection endpoint to start a connection and then click another connection endpoint to add it.")}
+                        ${connect}${this.msg("Left click a connection endpoint to start a connection and then click another connection endpoint to add it.")}
                         </div>
                         <div class="instruction">
-                        ${remove}${msg("Right click on a connection to remove it.")}
+                        ${remove}${this.msg("Right click on a connection to remove it.")}
                         </div>
                     </div>
 
-                    <div class="infoButton" @click=${() => this.toggleInstructions()}>${info}${msg("Instructions")}</div>
+                    <div class="infoButton" @click=${() => this.toggleInstructions()}>${info}${this.msg("Instructions")}</div>
 
                     <div class="workspaceArea" id="workspaceDraggable">
                         <svg class="svgArea" id="svgCanvas"></svg>
@@ -336,105 +371,6 @@ export default class LogicCircuit extends LitElementWw {
 
             <div class="drag-overlay" id="dragOverlay"></div>
 
-            <div part="options" class="optionsMenu">
-                <p>Simulation:</p>
-                <div class="optionsItem">
-                    <sl-checkbox class="optionsCheckbox" @sl-change=${() => this.handleAllowSimulation()} checked
-                        >${msg("Allow Simulation")}</sl-checkbox
-                    >
-                </div>
-                <div class="optionsItem">
-                    <sl-input
-                        class="optionsCheckbox"
-                        type="number"
-                        size="small"
-                        @sl-change=${(e) => this.handleInputChange(e, 'simulationDelay')}
-                        .value=${this.simulationDelay}
-                        min="0"
-                    ></sl-input>
-                    <p>${msg("Delay (in ms)")}</p>
-                </div>
-                <p></p>
-                <p>${msg("Limit max. number of Gates:")}</p>
-
-                <div class="optionsItem">
-                    <sl-input
-                        class="optionsCheckbox"
-                        type="number"
-                        size="small"
-                        @sl-change=${(e) => this.handleInputChange(e, 'notGateAllowed')}
-                        .value=${this.notGateAllowed >= 0 ? this.notGateAllowed : ''}
-                        min="0"
-                    ></sl-input>
-                    <p>NOT-${msg("Gates")}</p>
-                </div>
-                <div class="optionsItem">
-                    <sl-input
-                        class="optionsCheckbox"
-                        type="number"
-                        size="small"
-                        @sl-change=${(e) => this.handleInputChange(e, 'andGateAllowed')}
-                        .value=${this.andGateAllowed >= 0 ? this.andGateAllowed : ''}
-                        min="0"
-                    ></sl-input>
-                    <p>AND-${msg("Gates")}</p>
-                </div>
-                <div class="optionsItem">
-                    <sl-input
-                        class="optionsCheckbox"
-                        type="number"
-                        size="small"
-                        @sl-change=${(e) => this.handleInputChange(e, 'orGateAllowed')}
-                        .value=${this.orGateAllowed >= 0 ? this.orGateAllowed : ''}
-                        min="0"
-                    ></sl-input>
-                    <p>OR-${msg("Gates")}</p>
-                </div>
-                <div class="optionsItem">
-                    <sl-input
-                        class="optionsCheckbox"
-                        type="number"
-                        size="small"
-                        @sl-change=${(e) => this.handleInputChange(e, 'nandGateAllowed')}
-                        .value=${this.nandGateAllowed >= 0 ? this.nandGateAllowed : ''}
-                        min="0"
-                    ></sl-input>
-                    <p>NAND-${msg("Gates")}</p>
-                </div>
-                <div class="optionsItem">
-                    <sl-input
-                        class="optionsCheckbox"
-                        type="number"
-                        size="small"
-                        @sl-change=${(e) => this.handleInputChange(e, 'norGateAllowed')}
-                        .value=${this.norGateAllowed >= 0 ? this.norGateAllowed : ''}
-                        min="0"
-                    ></sl-input>
-                    <p>NOR-${msg("Gates")}</p>
-                </div>
-                <div class="optionsItem">
-                    <sl-input
-                        class="optionsCheckbox"
-                        type="number"
-                        size="small"
-                        @sl-change=${(e) => this.handleInputChange(e, 'xnorGateAllowed')}
-                        .value=${this.xnorGateAllowed >= 0 ? this.xnorGateAllowed : ''}
-                        min="0"
-                    ></sl-input>
-                    <p>XNOR-${msg("Gates")}</p>
-                </div>
-                <div class="optionsItem">
-                    <sl-input
-                        class="optionsCheckbox"
-                        type="number"
-                        size="small"
-                        @sl-change=${(e) => this.handleInputChange(e, 'xorGateAllowed')}
-                        .value=${this.xorGateAllowed >= 0 ? this.xorGateAllowed : ''}
-                        min="0"
-                    ></sl-input>
-                    <p>XOR-${msg("Gates")}</p>
-                </div>
-            </div>
         `;
     }
 
@@ -446,6 +382,11 @@ export default class LogicCircuit extends LitElementWw {
      */
     updated(changedProperties) {
         super.updated(changedProperties);
+        const dataChanged = changedProperties.has('reflectGates') || changedProperties.has('reflectCons');
+        if (this.hasUpdated && dataChanged && !this.skipDataWrite) {
+            writeData(this, this.reflectGates, this.reflectCons);
+        }
+        if (dataChanged) this.skipDataWrite = false;
         if (changedProperties.has('allowSimulation')) {
             if (this.allowSimulation === 1) {
                 this.simCheckbox.style.display = 'block';
@@ -461,6 +402,8 @@ export default class LogicCircuit extends LitElementWw {
      */
     connectedCallback() {
         super.connectedCallback();
+        this.restoreData();
+        this.dataObserver.observe(this, { childList: true, subtree: true });
         this.addEventListener('contextmenu', this.handleContextMenu);
         this.addEventListener('sl-show', this.handleSidebarTooltipShow);
         this.addEventListener('sl-hide', this.handleSidebarTooltipHide);
@@ -472,6 +415,7 @@ export default class LogicCircuit extends LitElementWw {
      * Cleans up mouse-related event listeners to avoid memory leaks.
      */
     disconnectedCallback() {
+        this.dataObserver.disconnect();
         this.cleanupGateDrag();
         this.cancelConnection();
         this.isDragging = false;

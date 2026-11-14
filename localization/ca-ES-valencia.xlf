@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+<file target-language="ca-ES-valencia" source-language="en" original="lit-localize-inputs" datatype="plaintext">
+<body>
+<trans-unit id="sb785914856ab26c5">
+  <source>Only one connection allowed</source>
+<target>Només es permet una connexió</target></trans-unit>
+<trans-unit id="sc49c6f9b07b93aec">
+  <source>Connectors are from the same type</source>
+<target>Els connectors són del mateix tipus</target></trans-unit>
+<trans-unit id="s21ab242e1b149ec7">
+  <source>Show Truthtable</source>
+<target>Mostra la taula de veritat</target></trans-unit>
+<trans-unit id="sdc673e73b5c13aea">
+  <source>Delete</source>
+<target>Suprimeix</target></trans-unit>
+<trans-unit id="s125d2fd8e606e489">
+  <source>Show truth table</source>
+<target>Mostra la taula de veritat</target></trans-unit>
+<trans-unit id="sb71b7e740dffbb49">
+  <source>Allow simulation</source>
+<target>Permet la simulació</target></trans-unit>
+<trans-unit id="s62137ccc921db4d5">
+  <source>Simulation delay</source>
+<target>Retard de simulació</target></trans-unit>
+<trans-unit id="sd46f5029be767c7e">
+  <source>NOT gate limit</source>
+<target>Límit de portes NOT</target></trans-unit>
+<trans-unit id="s65a3495a4e7fe612">
+  <source>AND gate limit</source>
+<target>Límit de portes AND</target></trans-unit>
+<trans-unit id="sf0f0ca29ba5fb310">
+  <source>OR gate limit</source>
+<target>Límit de portes OR</target></trans-unit>
+<trans-unit id="s314ad64e38e4f66e">
+  <source>NAND gate limit</source>
+<target>Límit de portes NAND</target></trans-unit>
+<trans-unit id="s2ecba74fb1b4d50c">
+  <source>NOR gate limit</source>
+<target>Límit de portes NOR</target></trans-unit>
+<trans-unit id="s303b4df3f2a7be8e">
+  <source>XNOR gate limit</source>
+<target>Límit de portes XNOR</target></trans-unit>
+<trans-unit id="s3d706ad4635cf53a">
+  <source>XOR gate limit</source>
+<target>Límit de portes XOR</target></trans-unit>
+<trans-unit id="sb4f06f05b6904651">
+  <source>Splitter limit</source>
+<target>Límit de divisors</target></trans-unit>
+<trans-unit id="scfcffcf35292bc6f">
+  <source>Simulate</source>
+<target>Simula</target></trans-unit>
+<trans-unit id="s582cc89defd16fdf">
+  <source>Show all truth tables</source>
+<target>Mostra totes les taules de veritat</target></trans-unit>
+<trans-unit id="s4635f32ac7e5b41b">
+  <source>Drag items here to delete them</source>
+<target>Arrossega els elements ací per a suprimir-los</target></trans-unit>
+<trans-unit id="s6aa6cfde13238a46">
+  <source>Drag and drop elements from the left sidebar to add them.</source>
+<target>Arrossega els elements des de la barra lateral esquerra i deixa’ls anar ací per a afegir-los.</target></trans-unit>
+<trans-unit id="s2b77630e54db68e1">
+  <source>Left click a connection endpoint to start a connection and then click another connection endpoint to add it.</source>
+<target>Fes clic amb el botó esquerre en un extrem per a iniciar una connexió i després fes clic en un altre extrem per a afegir-la.</target></trans-unit>
+<trans-unit id="sfc8aedc3e52543e9">
+  <source>Right click on a connection to remove it.</source>
+<target>Fes clic amb el botó dret en una connexió per a eliminar-la.</target></trans-unit>
+<trans-unit id="s34bc4cc9fb5b7aa4">
+  <source>Instructions</source>
+<target>Instruccions</target></trans-unit>
+</body>
+</file>
+</xliff>

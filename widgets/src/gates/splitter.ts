@@ -1,6 +1,5 @@
 import { html } from 'lit';
 import Gate from './gate.js';
-import { localized, msg } from "@lit/localize";
 
 /**
  * Represents a Splitter in the logic circuit.
@@ -9,7 +8,7 @@ import { localized, msg } from "@lit/localize";
  *
  * @extends Gate
  */
-@localized()
+
 export default class Splitter extends Gate {
     constructor() {
         super();
@@ -37,9 +36,9 @@ export default class Splitter extends Gate {
 
             <sl-menu class="contextMenuGates" id="contextMenu" style="display: none;">
                 <sl-menu-item id="flipCheckbox" type="checkbox" @click="${() => this.flipGate()}"
-                    >${msg("Show Truthtable")}</sl-menu-item
+                    >${this.msg("Show Truthtable")}</sl-menu-item
                 >
-                <sl-menu-item @click="${() => this.deleteGate()}">${msg("Delete")}</sl-menu-item>
+                <sl-menu-item @click="${() => this.deleteGate()}">${this.msg("Delete")}</sl-menu-item>
             </sl-menu>
         `;
     }
