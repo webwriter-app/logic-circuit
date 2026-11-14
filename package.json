@@ -137,7 +137,7 @@
   "dependencies": {
     "@lit/localize": "^0.12.2",
     "@shoelace-style/shoelace": "^2.13.1",
-    "@webwriter/lit": "^2.1.6",
+    "@webwriter/lit": "^3.0.0",
     "lit": "^3.1.2"
   },
   "exports": {
@@ -154,5 +154,8 @@
   "editingConfig": {
     ".": {}
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "devDependencies": {
+    "@webwriter/build": "^1.13.1"
+  }
 }
