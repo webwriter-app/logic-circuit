@@ -1,5 +1,5 @@
-# Logic Circuit (`@webwriter/logic-circuit@1.2.1`)
-[License: MIT](LICENSE) | Version: 1.2.1
+# Logic Circuit (`@webwriter/logic-circuit@2.0.0`)
+[License: MIT](LICENSE) | Version: 2.0.0
 
 Create and simulate circuits with logic gates (AND, OR, XOR, etc.).
 
@@ -13,7 +13,7 @@ Create and simulate circuits with logic gates (AND, OR, XOR, etc.).
 
 
 
-## `LogicCircuit` (`<webwriter-logic-circuit>`)
+## `WebwriterLogicCircuit` (`<webwriter-logic-circuit>`)
 
 
 ### Usage
@@ -40,66 +40,39 @@ npm install @webwriter/logic-circuit
 ## Fields
 | Name (Attribute Name) | Type | Description | Default | Reflects |
 | :-------------------: | :--: | :---------: | :-----: | :------: |
-| `LogicCircuit.shadowRootOptions` | `object` | - | `{ ...LitElementWw.shadowRootOptions, delegatesFocus: true, }` | ✗ |
-| `localize` | - | i18n handler for the widget. | `LOCALIZE` | ✗ |
-| `LogicCircuit.scopedElements` | - | Registers scoped custom elements used within the logic circuit widget. | - | ✗ |
-| `lineElements` (`lineElements`) | `array` | The list of all current wire (line) elements. | `[]` | ✗ |
-| `gateElements` (`gateElements`) | `array` | The list of all current gate elements. | `[]` | ✗ |
-| `gateID` (`gateID`) | `number` | Internal gate ID counter for uniquely identifying gates. | `0` | ✗ |
-| `lineID` (`lineID`) | `number` | Internal line ID counter for uniquely identifying wires. | `0` | ✗ |
-| `zoom` (`zoom`) | `number` | Current zoom level of the circuit canvas. | `1` | ✗ |
-| `dragStartX` (`dragStartX`) | `number` | X coordinate where the drag operation started. | `0` | ✗ |
-| `dragStartY` (`dragStartY`) | `number` | Y coordinate where the drag operation started. | `0` | ✗ |
-| `simulate` (`simulate`) | `boolean` | Whether the simulation is running. | `true` | ✗ |
-| `simulationDelay` (`simulationDelay`) | `number` | Delay in milliseconds between simulation steps. | `500` | ✓ |
-| `allowSimulation` (`allowSimulation`) | `number` | Whether simulation is allowed (1 = allowed, 0 = disallowed). | `1` | ✓ |
-| `notGateAllowed` (`notGateAllowed`) | `number` | Limit or enable state for NOT gates (-1 = unlimited, 0+ = limited). | `-1` | ✓ |
-| `andGateAllowed` (`andGateAllowed`) | `number` | Limit or enable state for AND gates. | `-1` | ✓ |
-| `orGateAllowed` (`orGateAllowed`) | `number` | Limit or enable state for OR gates. | `-1` | ✓ |
-| `nandGateAllowed` (`nandGateAllowed`) | `number` | Limit or enable state for NAND gates. | `-1` | ✓ |
-| `norGateAllowed` (`norGateAllowed`) | `number` | Limit or enable state for NOR gates. | `-1` | ✓ |
-| `xnorGateAllowed` (`xnorGateAllowed`) | `number` | Limit or enable state for XNOR gates. | `-1` | ✓ |
-| `xorGateAllowed` (`xorGateAllowed`) | `number` | Limit or enable state for XOR gates. | `-1` | ✓ |
-| `splitterAllowed` (`splitterAllowed`) | `number` | Limit or enable state for splitter gates. | `-1` | ✓ |
-| `isDragging` (`isDragging`) | `boolean` | Whether the user is currently dragging the canvas or an element. | `false` | ✗ |
-| `isDrawingLine` | `boolean` | Whether a connection line is currently being drawn. | `false` | ✗ |
-| `startConnector` | `ConnectorElement` | Reference to the starting connector for a wire being drawn. | `null` | ✗ |
-| `endConnector` | `ConnectorElement` | Reference to the ending connector for a wire being drawn. | `null` | ✗ |
-| `svgCanvas` | - | Reference to the SVG canvas element. | - | ✗ |
-| `workspaceContainer` | - | Reference to the overall workspace container. | - | ✗ |
-| `wsDrag` | - | Reference to the draggable inner workspace. | - | ✗ |
-| `dragOverlay` | `HTMLElement` | Overlay containing the fixed drag preview. | - | ✗ |
-| `simCheckbox` | - | Reference to the simulation checkbox toggle. | - | ✗ |
-| `instructionsContainer` | - | Reference to the instructions container. | - | ✗ |
-| `getGateElements` | - | Get the current list of gate elements. | - | ✗ |
-| `getLineElements` | - | Get the current list of line elements. | - | ✗ |
-| `svgPathToMouse` | `SVGPathElement \| null` | The temporary path element used when drawing a wire to follow the mouse. | `null` | ✗ |
+| `WebwriterLogicCircuit.shadowRootOptions` | `object` | - | `{ ...LitElementWw.shadowRootOptions, delegatesFocus: true, }` | ✗ |
+| `WebwriterLogicCircuit.scopedElements` | `Record<string, CustomElementConstructor>` | The scene draws with WebGL where the browser has it and with SVG elsewhere. | `{ ...sceneElements, 'ww-scene': webglAvailable() ? PixiScene : Scene, 'sl-button': SlButton, 'sl-icon': SlIcon, 'sl-tooltip': SlTooltip, 'sl-popup': SlPopup, 'sl-switch': SlSwitch, 'sl-menu': SlMenu, 'sl-menu-item': SlMenuItem, 'sl-checkbox': SlCheckbox, }` | ✗ |
+| `WebwriterLogicCircuit.actions` | `object` | - | `{ deleteSelection: { label: (widget: Texts) => widget.msg("Delete"), shortcut: ["Delete", "Backspace"], hidden: true }, }` | ✗ |
+| `localize` | - | i18n handler for the widget. | - | ✗ |
+| `msg` | - | - | - | ✗ |
+| `selection` | `ReadonlySet<string>` | The keys of the selected gates and wires. | `new Set()` | ✗ |
+| `signals` | `Signals` | The signals at the ports while the circuit simulates. | `new Map()` | ✗ |
+| `on` | `ReadonlySet<string>` | The input gates that are switched on. | `new Set()` | ✗ |
+| `tables` | `ReadonlySet<string>` | The gates that show their truth table. | `new Set()` | ✗ |
+| `simulate` | `boolean` | - | `true` | ✗ |
+| `allTables` | `boolean` | - | `false` | ✗ |
+| `instructionsOpen` | `boolean` | - | `false` | ✗ |
+| `menu` | `{ gate: Gate; x: number; y: number } \| null` | - | `null` | ✗ |
+| `carried` | `{ type: GateType; x: number; y: number; overWorkspace: boolean } \| null` | The gate that is dragged from the sidebar, under the pointer. | `null` | ✗ |
+| `overTrash` | `boolean` | - | `false` | ✗ |
+| `WebwriterLogicCircuit.settings` | - | - | `declarations` | ✗ |
+| `settingsCore` | - | - | `new SettingsCore(this, { ...options, root: () => this.renderRoot, rendered: () => this.updateComplete })` | ✗ |
+| `options` | - | - | - | ✗ |
 
 *Fields including [properties](https://developer.mozilla.org/en-US/docs/Glossary/Property/JavaScript) and [attributes](https://developer.mozilla.org/en-US/docs/Glossary/Attribute) define the current state of the widget and offer customization options.*
 
 ## Methods
 | Name | Description | Parameters |
 | :--: | :---------: | :-------: |
-| `toggleInstructions` | Toggles the visibility of the instructions container in the UI. | -
-| `handleAllowSimulation` | Toggles simulation mode on or off.<br>Resets the circuit and updates the simulation checkbox and internal flag. | -
-| `handleFlipAllGates` | Enables or disables the "truth table" display on all gates,<br>depending on the state of the main switch. | -
-| `handleCanvasPointerDown` | Handles pointer down interactions on the workspace.<br>- Starts dragging the canvas if the background is clicked.<br>- Cancels in-progress line drawing.<br>- Hides any open gate context menus. | `event: PointerEvent`
-| `handlePointerMove` | Handles pointer movement during canvas dragging or line drawing.<br>Updates canvas position or live line path accordingly. | `event: PointerEvent`
-| `transformWorkspace` | Applies the current workspace offset and zoom transform to the container. | -
-| `handleCanvasPointerEnd` | Stops canvas panning. | `event: PointerEvent`
-| `handleWheel` | Handles zooming the workspace with the mouse wheel.<br>Clamps zoom between 0.5 and 2.5, and recalculates boundaries. | `event: WheelEvent`
-| `handleContextMenu` | Prevents the default browser context menu. | `event: MouseEvent`
-| `handleInputChange` | Parses a numeric input field and sets the corresponding property.<br>Defaults to -1 if the value is invalid. | `event: InputEvent`, `propertyName: string`
-| `simulateCircuit` | Starts circuit simulation.<br>Calculates outputs from all input gates and propagates through the circuit.<br>Stops simulation if the checkbox is unchecked. | -
-| `resetCircuit` | Resets all gates and lines in the circuit to their initial state. | -
-| `calculateBoundaries` | Ensures the workspace stays within bounds during dragging or zooming.<br>Clamps `workspaceOffsetX` and `workspaceOffsetY` based on viewport and canvas size. | -
+| `deleteSelection` | Widget action and key: removes the selected gates and wires. | -
+| `finalize` | - | -
 
 *[Methods](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Method_definitions) allow programmatic access to the widget.*
 
 ## Slots
 | Name | Description | Content Type |
 | :--: | :---------: | :----------: |
-| *(default)* | The default slot (currently unused in this widget) | - |
+| `data` | Direct application/json block storing gates and connections. | - |
 
 *[Slots](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_templates_and_slots) define how the content of the widget is rendered.*
 
@@ -129,4 +102,4 @@ npm install @webwriter/logic-circuit
 
 
 ---
-*Generated with @webwriter/build@1.9.1*
+*Generated with @webwriter/build@1.14.0*
