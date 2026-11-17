@@ -7,7 +7,6 @@ import { loaded, mount, mountHost, node, setup, snippet, teardown, until } from 
 mocha.setup(getMochaConfig());
 
 const modes = [{ mode: "read", edit: false }, { mode: "edit", edit: true }];
-const same = (a: unknown, b: unknown, message: string) => assert.deepEqual(a, b, message);
 
 for (const { mode, edit } of modes) describe(`<webwriter-logic-circuit> ${mode} mode`, function () {
   this.timeout(20000);

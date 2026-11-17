@@ -14,7 +14,7 @@ const SYMBOLS: Partial<Record<GateType, string>> = { NOT: not, AND: and, OR: or,
 const LABELS: Record<GateType, string> = { NOT: "NOT", AND: "AND", OR: "OR", NAND: "NAND", NOR: "NOR", XNOR: "XNOR", XOR: "XOR", SPLITTER: "Splitter", INPUT: "Input", OUTPUT: "Output" };
 
 /** What a gate shows of the circuit. */
-export type GateState = {
+type GateState = {
     /** The value shown by an input or output gate. */
     value?: boolean;
     /** Show the truth table instead of the symbol. */
@@ -27,7 +27,7 @@ export type GateState = {
 };
 
 /** The truth table of a gate. The splitter shows its single output twice. */
-export function truthTable(type: GateType, row = -1): TemplateResult {
+function truthTable(type: GateType, row = -1): TemplateResult {
     const cells = (values: boolean[], index: number) => values.map((value) => html`<td class=${classMap({ highlight: row === index })}>${Number(value)}</td>`);
     const rows = truthRows(type);
     if (type === "SPLITTER") {

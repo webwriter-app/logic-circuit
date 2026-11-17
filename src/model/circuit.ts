@@ -6,7 +6,7 @@ export type Gate = { id: number; type: GateType; x: number; y: number; key: stri
 export type Wire = { from: string; to: string; key: string };
 
 /** The key of a gate, which is also the start of its connector names in the data block. */
-export const nodeKey = (type: GateType, id: number) => `${type.toLowerCase()}Gate${id}`;
+const nodeKey = (type: GateType, id: number) => `${type.toLowerCase()}Gate${id}`;
 
 const CONNECTOR = /^([a-z]+Gate\d+)(In[12]|Out[23]?)$/;
 const split = (entries: string[]) => entries.filter(Boolean).map((entry) => entry.split("|"));

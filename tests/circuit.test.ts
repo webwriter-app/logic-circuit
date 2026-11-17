@@ -2,7 +2,7 @@
 import "mocha/mocha.js";
 import { assert } from "chai";
 import { getMochaConfig } from "@webwriter/build/test";
-import { CONS, GATES, block, center, click, contextMenu, fire, onWire, scene, data, drag, freeBlock, frame, loaded, mount, mountHost, node, nodes, port, select, setup, snippet, teardown, transactions, until, wires } from "./helpers";
+import { CONS, GATES, block, center, click, contextMenu, fire, onWire, scene, data, drag, freeBlock, frame, loaded, mount, node, nodes, port, select, setup, snippet, teardown, transactions, until, wires } from "./helpers";
 
 mocha.setup(getMochaConfig());
 
