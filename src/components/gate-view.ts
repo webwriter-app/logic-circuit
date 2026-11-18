@@ -55,7 +55,7 @@ export function gateBox(type: GateType, state: GateState = {}, extra: TemplateRe
     const { value, table, row, signals, onToggle } = state;
     const lit = (type === "INPUT" || type === "OUTPUT") && value === true;
     return html`
-        <div class=${classMap({ gate: true, gateTrue: lit })}>
+        <div class=${classMap({ gate: true, gateTrue: lit })} part=${signals ? "gate" : nothing}>
             ${table && SYMBOLS[type] ? html`<div class="flippedGate">${truthTable(type, row)}</div>` : SYMBOLS[type] ? html`<img src=${SYMBOLS[type]!} alt="" draggable="false" />` : nothing}
             <p class="gateText">${LABELS[type]}</p>
             ${type === "INPUT" ? html`<button class="gatepointer" @click=${onToggle}>${String(value ?? false)}</button>` : type === "OUTPUT" ? html`<div class="gatepointer">${String(value ?? false)}</div>` : nothing}

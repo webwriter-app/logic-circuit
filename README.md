@@ -42,19 +42,22 @@ npm install @webwriter/logic-circuit
 | :-------------------: | :--: | :---------: | :-----: | :------: |
 | `WebwriterLogicCircuit.shadowRootOptions` | `object` | - | `{ ...LitElementWw.shadowRootOptions, delegatesFocus: true, }` | ✗ |
 | `WebwriterLogicCircuit.scopedElements` | `Record<string, CustomElementConstructor>` | The scene draws with WebGL where the browser has it and with SVG elsewhere. | `{ ...sceneElements, 'ww-scene': webglAvailable() ? PixiScene : Scene, 'sl-button': SlButton, 'sl-icon': SlIcon, 'sl-tooltip': SlTooltip, 'sl-popup': SlPopup, 'sl-switch': SlSwitch, 'sl-menu': SlMenu, 'sl-menu-item': SlMenuItem, 'sl-checkbox': SlCheckbox, }` | ✗ |
-| `WebwriterLogicCircuit.actions` | `object` | - | `{ deleteSelection: { label: (widget: Texts) => widget.msg("Delete"), shortcut: ["Delete", "Backspace"], hidden: true }, }` | ✗ |
+| `WebwriterLogicCircuit.optionGroups` | `object` | - | `{ simulation: { label: (widget: Texts) => widget.msg("Simulation") }, limits: { label: (widget: Texts) => widget.msg("Gate limits"), collapsible: true, collapsed: true, advanced: true }, }` | ✗ |
+| `WebwriterLogicCircuit.convertTo` | `object` | - | `{ table: 'toTable', 'text/csv': 'exportCsv', 'image/svg+xml': 'exportSvg', '.json': 'exportJson' }` | ✗ |
+| `WebwriterLogicCircuit.convertFrom` | `object` | - | `{ '.json': 'importJson' }` | ✗ |
+| `WebwriterLogicCircuit.actions` | `object` | - | `{ clearCircuit: { label: (widget: Texts) => widget.msg("Clear circuit"), intent: 'danger' as const, confirm: (widget: Texts) => widget.msg("Remove all gates and connections?"), }, deleteSelection: { label: (widget: Texts) => widget.msg("Delete"), shortcut: ["Delete", "Backspace"], hidden: true }, }` | ✗ |
 | `localize` | - | i18n handler for the widget. | - | ✗ |
 | `msg` | - | - | - | ✗ |
 | `selection` | `ReadonlySet<string>` | The keys of the selected gates and wires. | `new Set()` | ✗ |
-| `signals` | `Signals` | The signals at the ports while the circuit simulates. | `new Map()` | ✗ |
+| `levels` | `Signals` | The signals at the ports while the circuit simulates. | `new Map()` | ✗ |
 | `on` | `ReadonlySet<string>` | The input gates that are switched on. | `new Set()` | ✗ |
 | `tables` | `ReadonlySet<string>` | The gates that show their truth table. | `new Set()` | ✗ |
 | `simulate` | `boolean` | - | `true` | ✗ |
 | `allTables` | `boolean` | - | `false` | ✗ |
 | `instructionsOpen` | `boolean` | - | `false` | ✗ |
 | `menu` | `{ gate: Gate; x: number; y: number } \| null` | - | `null` | ✗ |
-| `carried` | `{ type: GateType; x: number; y: number; overWorkspace: boolean } \| null` | The gate that is dragged from the sidebar, under the pointer. | `null` | ✗ |
 | `overTrash` | `boolean` | - | `false` | ✗ |
+| `signals` | `object` | What other widgets read: see `@signal` in the class description. | `{ outputs: computed(() => this.#outputs.get()), truth: computed(() => { this.#structureVersion.get(); return truthTable(this.#circuit.gates, this.#circuit.wires) ?? { columns: [], rows: [] }; }), }` | ✗ |
 | `WebwriterLogicCircuit.settings` | - | - | `declarations` | ✗ |
 | `settingsCore` | - | - | `new SettingsCore(this, { ...options, root: () => this.renderRoot, rendered: () => this.updateComplete })` | ✗ |
 | `options` | - | - | - | ✗ |
@@ -64,6 +67,7 @@ npm install @webwriter/logic-circuit
 ## Methods
 | Name | Description | Parameters |
 | :--: | :---------: | :-------: |
+| `clearCircuit` | Widget action: removes every gate and wire. | -
 | `deleteSelection` | Widget action and key: removes the selected gates and wires. | -
 | `finalize` | - | -
 
@@ -80,13 +84,17 @@ npm install @webwriter/logic-circuit
 | Name | Description |
 | :--: | :---------: |
 | --circuit-background | Background color of the workspace |
+| --ww-text-color | Text color, from the document theme |
+| --ww-font-family | Font, from the document theme |
+| --ww-theme-accent-1 | Highlight of the drop target and of the truth table row in use |
 
 *[Custom CSS properties](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascading_variables/Using_CSS_custom_properties) offer defined customization of the widget's style.*
 
 ## CSS parts
 | Name | Description |
 | :--: | :---------: |
-| gate | Styles individual gate components |
+| board | The workspace the gates sit on |
+| gate | Styles individual gate components on the board |
 | line | Styles the connecting lines between gates |
 
 *[CSS parts](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_shadow_parts) allow freely styling internals of the widget with CSS.*

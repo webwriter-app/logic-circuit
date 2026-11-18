@@ -2,7 +2,8 @@
 import "mocha/mocha.js";
 import { assert } from "chai";
 import { getMochaConfig } from "@webwriter/build/test";
-import { CONS, GATES, block, center, click, contextMenu, fire, onWire, scene, data, drag, freeBlock, frame, loaded, mount, node, nodes, port, select, setup, snippet, teardown, transactions, until, wires } from "./helpers";
+import { halfAdderCsv, halfAdderJson } from "./fixtures";
+import { CONS, GATES, block, center, click, contextMenu, fire, onWire, scene, data, drag, freeBlock, frame, loaded, mount, mountHost, node, type Widget, nodes, port, select, setup, snippet, teardown, transactions, until, wires } from "./helpers";
 
 mocha.setup(getMochaConfig());
 
@@ -310,6 +311,175 @@ for (const { mode, edit } of modes) describe(`<webwriter-logic-circuit> ${mode} 
     await drag(source, center(source), { clientX: area.left + 200, clientY: area.top + 200 });
     await until(() => data(w).gates.length === 1, "written");
     assert.equal(data(w).note, "keep", "unknown key");
+  });
+
+  it("moves a gate by a touch drag", async function () {
+    const w = await mount(snippet(), edit);
+    await loaded(w);
+    const gate = node(w, "xorGate0");
+    const from = center(gate);
+    const touch = (type: string, at: { clientX: number; clientY: number }) => gate.dispatchEvent(new PointerEvent(type, { bubbles: true, composed: true, cancelable: true, pointerId: 12, button: 0, isPrimary: true, pointerType: "touch", ...at }));
+    touch("pointerdown", from);
+    touch("pointermove", { clientX: from.clientX + 8, clientY: from.clientY + 8 });
+    await frame(); await frame();
+    const to = { clientX: from.clientX + 60, clientY: from.clientY + 40 };
+    touch("pointermove", to);
+    await frame(); await frame();
+    touch("pointerup", to);
+    await until(() => data(w).gates[0] !== GATES[0], "position written");
+    same(data(w).gates[0].split("|"), ["0", "XOR", "2030px", "1266px"], "moved by the touch drag");
+  });
+
+  it("offers every control as a native button or a tab stop, and opens the instructions by the keyboard path", async function () {
+    const w = await mount(snippet(), edit);
+    await loaded(w);
+    const root = w.shadowRoot!;
+    for (const selector of [".trashCanIcon", ".infoButton"]) assert.equal(root.querySelector(selector)!.localName, "button", selector);
+    assert.isTrue([...root.querySelectorAll(".sidebar-item")].every(item => item.getAttribute("tabindex") === "0"), "palette items are tab stops");
+    const info = root.querySelector<HTMLButtonElement>(".infoButton")!;
+    assert.equal(info.getAttribute("aria-expanded"), "false");
+    info.click();
+    await w.updateComplete;
+    assert.equal(info.getAttribute("aria-expanded"), "true");
+    assert.isTrue(root.querySelector(".instructions")!.classList.contains("open"));
+  });
+
+  it("stacks the palette above the board in a narrow widget and beside it in a wide one", async function () {
+    mountHost().style.width = "300px";
+    const narrow = await mount(snippet(), edit);
+    await until(() => nodes(narrow).length === 8, "gates");
+    const direction = (w: Widget) => getComputedStyle(w.shadowRoot!.querySelector(".container")!).flexDirection;
+    assert.equal(direction(narrow), "column", "narrow");
+    assert.isAtMost(narrow.scrollWidth, narrow.clientWidth, "no sideways scroll");
+    mountHost().style.width = "900px";
+    const wide = await mount(snippet(), edit);
+    await loaded(wide);
+    assert.equal(direction(wide), "row", "wide");
+  });
+
+  it("follows the document's text color, font and accent", async function () {
+    mountHost().style.cssText += "--ww-text-color: rgb(10, 20, 30); --ww-font-family: Georgia, serif; --ww-theme-accent-1: rgb(200, 0, 0);";
+    const w = await mount(snippet(), edit);
+    await loaded(w);
+    const style = getComputedStyle(w);
+    assert.equal(style.color, "rgb(10, 20, 30)");
+    assert.include(style.fontFamily, "Georgia");
+    assert.equal(getComputedStyle(w.shadowRoot!.querySelector(".sidebar-counter")!).color, "rgb(10, 20, 30)", "text inherits");
+  });
+
+  it("names the board, the gates and the wires as parts and prints a note for an empty circuit", async function () {
+    const w = await mount(snippet(), edit);
+    await loaded(w);
+    const root = w.shadowRoot!;
+    assert.exists(root.querySelector('[part="board"]'));
+    assert.exists(root.querySelector('ww-node [part="gate"]'));
+    assert.exists(root.querySelector('ww-path[part="line"]'));
+    assert.isNull(root.querySelector('.sidebar [part="gate"]'), "palette gates are not parts");
+    assert.equal(getComputedStyle(root.querySelector(".print-note")!).display, "none", "the note is for paper only");
+    const empty = await mount(freeBlock([]), edit);
+    await until(() => empty.shadowRoot!.querySelector(".frame"), "rendered");
+    assert.isTrue(empty.shadowRoot!.querySelector(".frame")!.classList.contains("empty"));
+  });
+});
+
+for (const { mode, edit } of modes) describe(`<webwriter-logic-circuit> data and integration, ${mode} mode`, function () {
+  this.timeout(20000);
+  beforeEach(setup);
+  afterEach(teardown);
+
+  const asFile = (text: string, name: string, type: string) => new File([text], name, { type });
+
+  it("converts to a native table with the truth table", async function () {
+    const w = await mount(snippet(), edit);
+    const table = w.toTable() as HTMLTableElement;
+    assert.equal(table.localName, "table");
+    assert.deepEqual([...table.tHead!.rows[0].cells].map(c => c.textContent), ["In1", "In2", "Out1", "Out2"]);
+    assert.deepEqual([...table.tBodies[0].rows].map(r => [...r.cells].map(c => c.textContent).join("")), ["0000", "0110", "1010", "1101"]);
+    const empty = await mount(freeBlock([], []), edit);
+    assert.isNull(empty.toTable(), "no inputs and outputs, no table");
+  });
+
+  it("exports the truth table as CSV, the circuit as SVG and the data block as JSON", async function () {
+    const w = await mount(snippet(), edit);
+    const csv = w.exportCsv()!;
+    assert.equal(csv.name, "truth-table.csv");
+    assert.equal(await csv.text(), halfAdderCsv);
+    const svg = await w.exportSvg()!.text();
+    const doc = new DOMParser().parseFromString(svg, "image/svg+xml");
+    assert.equal(doc.documentElement.localName, "svg");
+    assert.equal(doc.querySelectorAll("polyline").length, 8, "a line per connection");
+    const boxes = [...doc.querySelectorAll("rect")].slice(1).map((rect) => ({ x: +rect.getAttribute("x")!, y: +rect.getAttribute("y")!, w: +rect.getAttribute("width")!, h: +rect.getAttribute("height")! }));
+    for (const line of doc.querySelectorAll("polyline")) {
+      const points = line.getAttribute("points")!.split(" ").map((point) => point.split(",").map(Number));
+      for (const [x, y] of [points[0], points[points.length - 1]]) {
+        assert.isTrue(boxes.some((box) => x >= box.x - 4 && x <= box.x + box.w + 4 && y >= box.y && y <= box.y + box.h), `wire end ${x},${y} meets a gate box`);
+      }
+    }
+    assert.isNull(doc.querySelector("parsererror"));
+    assert.deepEqual(JSON.parse(await w.exportJson().text()), { gates: GATES, connections: CONS });
+    assert.deepEqual(Object.keys((w.constructor as any).convertTo).sort(), [".json", "image/svg+xml", "table", "text/csv"]);
+  });
+
+  it("imports a JSON circuit only when the apply function runs, and round-trips the export", async function () {
+    const w = await mount(freeBlock([], []), edit);
+    const apply = await w.importJson(asFile(halfAdderJson, "circuit.json", "application/json"));
+    assert.deepEqual(data(w).gates, [], "unchanged before apply");
+    apply();
+    await loaded(w);
+    assert.deepEqual(data(w), { gates: GATES, connections: CONS });
+    const again = mountHost().appendChild(document.createElement("div")).appendChild(Object.assign(document.createElement("webwriter-logic-circuit"), { innerHTML: '<script type="application/json" slot="data">{"gates":[],"connections":[]}</script>' })) as Widget;
+    await again.updateComplete;
+    (await again.importJson(await w.exportJson()))();
+    await until(() => data(again).gates.length === 8, "circuit imported");
+    assert.deepEqual(data(again), data(w), "round trip");
+  });
+
+  it("refuses files that are no circuit and leaves the circuit alone", async function () {
+    const w = await mount(snippet(), edit);
+    for (const text of ["not json", "[]", '{"gates":["0|AND|1px|1px","0|AND|2px|2px"],"connections":[]}', '{"gates":["0|AND|1px|1px"],"connections":["andGate0Out|orGate9In1"]}', '{"gates":["x|FOO|1|1"],"connections":[]}']) {
+      let message = "";
+      try { await w.importJson(asFile(text, "x.json", "application/json")); } catch (error) { message = (error as Error).message; }
+      assert.isNotEmpty(message, text);
+    }
+    assert.deepEqual(data(w), { gates: GATES, connections: CONS });
+  });
+
+  it("clears the circuit by an action as one undo step", async function () {
+    const w = await mount(snippet(), edit);
+    await loaded(w);
+    const log = transactions(w);
+    w.clearCircuit();
+    await until(() => nodes(w).length === 0, "gates gone");
+    assert.deepEqual(data(w), { gates: [], connections: [] });
+    assert.deepEqual(log, ["start", "end"]);
+    assert.isFalse(w.clearCircuit(), "nothing left to clear");
+  });
+
+  it("renumbers the signals when an output gate is moved above another", async function () {
+    const w = await mount(snippet(), edit);
+    await loaded(w);
+    assert.deepEqual(w.signals.truth.get().rows[1], [0, 1, 1, 0]);
+    const lower = node(w, "outputGate7");
+    const from = center(lower);
+    await drag(lower, from, { clientX: from.clientX, clientY: from.clientY - 150 });
+    await until(() => data(w).gates[7] !== GATES[7], "position written");
+    await until(() => w.signals.truth.get().rows[1].join() === "0,1,0,1", "carry is now Out1");
+  });
+
+  it("publishes the output values and the truth table as signals", async function () {
+    const w = await mount(snippet(`simulationdelay="20"`), edit);
+    await loaded(w);
+    assert.deepEqual(w.signals.outputs.get(), [0, 0]);
+    node(w, "inputGate2").querySelector<HTMLElement>("button.gatepointer")!.click();
+    node(w, "inputGate3").querySelector<HTMLElement>("button.gatepointer")!.click();
+    await until(() => w.signals.outputs.get().join() === "0,1", "carry on");
+    assert.deepEqual(w.signals.truth.get().rows[3], [1, 1, 0, 1]);
+    assert.deepEqual(w.signals.truth.get().columns, ["In1", "In2", "Out1", "Out2"]);
+    assert.strictEqual(w.signals.outputs, w.signals.outputs, "stable instance");
+    const checkbox = w.shadowRoot!.querySelector("#simCheckbox") as any;
+    checkbox.checked = false;
+    checkbox.dispatchEvent(new CustomEvent("sl-change", { bubbles: true, composed: true }));
+    await until(() => w.signals.outputs.get().join() === "0,0", "outputs read 0 while the simulation is off");
   });
 });
 

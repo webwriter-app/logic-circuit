@@ -14,11 +14,27 @@
             {
               "description": "Background color of the workspace",
               "name": "--circuit-background"
+            },
+            {
+              "description": "Text color, from the document theme",
+              "name": "--ww-text-color"
+            },
+            {
+              "description": "Font, from the document theme",
+              "name": "--ww-font-family"
+            },
+            {
+              "description": "Highlight of the drop target and of the truth table row in use",
+              "name": "--ww-theme-accent-1"
             }
           ],
           "cssParts": [
             {
-              "description": "Styles individual gate components",
+              "description": "The workspace the gates sit on",
+              "name": "board"
+            },
+            {
+              "description": "Styles individual gate components on the board",
               "name": "gate"
             },
             {
@@ -54,12 +70,39 @@
             },
             {
               "kind": "field",
+              "name": "optionGroups",
+              "type": {
+                "text": "object"
+              },
+              "static": true,
+              "default": "{ simulation: { label: (widget: Texts) => widget.msg(\"Simulation\") }, limits: { label: (widget: Texts) => widget.msg(\"Gate limits\"), collapsible: true, collapsed: true, advanced: true }, }"
+            },
+            {
+              "kind": "field",
+              "name": "convertTo",
+              "type": {
+                "text": "object"
+              },
+              "static": true,
+              "default": "{ table: 'toTable', 'text/csv': 'exportCsv', 'image/svg+xml': 'exportSvg', '.json': 'exportJson' }"
+            },
+            {
+              "kind": "field",
+              "name": "convertFrom",
+              "type": {
+                "text": "object"
+              },
+              "static": true,
+              "default": "{ '.json': 'importJson' }"
+            },
+            {
+              "kind": "field",
               "name": "actions",
               "type": {
                 "text": "object"
               },
               "static": true,
-              "default": "{ deleteSelection: { label: (widget: Texts) => widget.msg(\"Delete\"), shortcut: [\"Delete\", \"Backspace\"], hidden: true }, }"
+              "default": "{ clearCircuit: { label: (widget: Texts) => widget.msg(\"Clear circuit\"), intent: 'danger' as const, confirm: (widget: Texts) => widget.msg(\"Remove all gates and connections?\"), }, deleteSelection: { label: (widget: Texts) => widget.msg(\"Delete\"), shortcut: [\"Delete\", \"Backspace\"], hidden: true }, }"
             },
             {
               "kind": "field",
@@ -82,13 +125,19 @@
               "kind": "field",
               "name": "#viewport",
               "privacy": "private",
-              "default": "new Viewport(this, { bounds: () => BOARD, can: () => !this.#scene.marquee })"
+              "default": "new Viewport(this, { bounds: () => BOARD, can: () => !this.#scene.marquee, // A circuit opens at the corner of the board where circuits start. start: { x: -HOME.x, y: -HOME.y, scale: 1 }, fit: { padding: 20, maxScale: 1, follow: 'none', target: () => this.#gatesBox() }, })"
             },
             {
               "kind": "field",
               "name": "#scene",
               "privacy": "private",
               "default": "new SceneController(this, { viewport: this.#viewport.core })"
+            },
+            {
+              "kind": "field",
+              "name": "#drag",
+              "privacy": "private",
+              "default": "new Drag(this, { viewport: this.#viewport.core })"
             },
             {
               "kind": "field",
@@ -107,7 +156,7 @@
             },
             {
               "kind": "field",
-              "name": "signals",
+              "name": "levels",
               "type": {
                 "text": "Signals"
               },
@@ -166,20 +215,31 @@
             },
             {
               "kind": "field",
-              "name": "carried",
-              "type": {
-                "text": "{ type: GateType; x: number; y: number; overWorkspace: boolean } | null"
-              },
-              "default": "null",
-              "description": "The gate that is dragged from the sidebar, under the pointer."
-            },
-            {
-              "kind": "field",
               "name": "overTrash",
               "type": {
                 "text": "boolean"
               },
               "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "#outputs",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "#structureVersion",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "signals",
+              "type": {
+                "text": "object"
+              },
+              "readonly": true,
+              "default": "{ outputs: computed(() => this.#outputs.get()), truth: computed(() => { this.#structureVersion.get(); return truthTable(this.#circuit.gates, this.#circuit.wires) ?? { columns: [], rows: [] }; }), }",
+              "description": "What other widgets read: see `@signal` in the class description."
             },
             {
               "kind": "field",
@@ -193,6 +253,15 @@
             {
               "kind": "field",
               "name": "#structure",
+              "privacy": "private",
+              "type": {
+                "text": "string"
+              },
+              "default": "''"
+            },
+            {
+              "kind": "field",
+              "name": "#order",
               "privacy": "private",
               "type": {
                 "text": "string"
@@ -218,33 +287,6 @@
             },
             {
               "kind": "field",
-              "name": "#placed",
-              "privacy": "private",
-              "type": {
-                "text": "boolean"
-              },
-              "default": "false"
-            },
-            {
-              "kind": "field",
-              "name": "#pressedNode",
-              "privacy": "private",
-              "type": {
-                "text": "boolean"
-              },
-              "default": "false"
-            },
-            {
-              "kind": "field",
-              "name": "#pointer",
-              "privacy": "private",
-              "type": {
-                "text": "object"
-              },
-              "default": "{ x: 0, y: 0 }"
-            },
-            {
-              "kind": "field",
               "name": "#abort",
               "privacy": "private",
               "type": {
@@ -258,6 +300,11 @@
               "privacy": "private",
               "description": "The gates and wires of the data block, read again when the block changes.",
               "readonly": true
+            },
+            {
+              "kind": "method",
+              "name": "clearCircuit",
+              "description": "Widget action: removes every gate and wire."
             },
             {
               "kind": "method",
@@ -405,6 +452,32 @@
             },
             {
               "kind": "method",
+              "name": "#inTrash",
+              "privacy": "private",
+              "parameters": [
+                {
+                  "name": "pointer",
+                  "type": {
+                    "text": "{ clientX: number; clientY: number } | null"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#moving",
+              "privacy": "private",
+              "parameters": [
+                {
+                  "name": "event",
+                  "type": {
+                    "text": "CustomEvent<MovingDetail>"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
               "name": "#move",
               "privacy": "private",
               "parameters": [
@@ -431,34 +504,17 @@
             },
             {
               "kind": "method",
-              "name": "#pressed",
+              "name": "#context",
               "privacy": "private",
               "parameters": [
                 {
                   "name": "event",
                   "type": {
-                    "text": "PointerEvent"
+                    "text": "CustomEvent<ContextDetail>"
                   }
                 }
-              ]
-            },
-            {
-              "kind": "method",
-              "name": "#moved",
-              "privacy": "private",
-              "parameters": [
-                {
-                  "name": "event",
-                  "type": {
-                    "text": "PointerEvent"
-                  }
-                }
-              ]
-            },
-            {
-              "kind": "method",
-              "name": "#released",
-              "privacy": "private"
+              ],
+              "description": "A wire is removed by the context menu or a long press, a gate opens its menu."
             },
             {
               "kind": "field",
@@ -468,70 +524,23 @@
             },
             {
               "kind": "method",
-              "name": "#show",
+              "name": "#gatesBox",
               "privacy": "private",
-              "parameters": [
-                {
-                  "name": "gates",
-                  "type": {
-                    "text": "boolean"
-                  }
-                }
-              ],
-              "description": "Shows the gates, as far as they fit at full size. Without them, or without `gates`, the corner where circuits start."
+              "description": "What the fit button shows: the gates, or the corner where circuits start."
             },
             {
               "kind": "method",
-              "name": "#controls",
+              "name": "#drop",
               "privacy": "private",
               "parameters": [
                 {
                   "name": "event",
                   "type": {
-                    "text": "MouseEvent"
+                    "text": "CustomEvent<DragCommitDetail>"
                   }
                 }
               ],
-              "description": "The fit button shows the gates; the scene's own fit would show the whole board."
-            },
-            {
-              "kind": "method",
-              "name": "#pickUp",
-              "privacy": "private",
-              "parameters": [
-                {
-                  "name": "event",
-                  "type": {
-                    "text": "PointerEvent"
-                  }
-                },
-                {
-                  "name": "type",
-                  "type": {
-                    "text": "GateType"
-                  }
-                }
-              ]
-            },
-            {
-              "kind": "method",
-              "name": "#placeFromKey",
-              "privacy": "private",
-              "parameters": [
-                {
-                  "name": "event",
-                  "type": {
-                    "text": "KeyboardEvent"
-                  }
-                },
-                {
-                  "name": "type",
-                  "type": {
-                    "text": "GateType"
-                  }
-                }
-              ],
-              "description": "Enter or Space on a gate of the sidebar puts it in the middle of the view."
+              "description": "A gate from the sidebar was dropped on the board."
             },
             {
               "kind": "method",
@@ -556,12 +565,6 @@
                   "type": {
                     "text": "Gate"
                   }
-                },
-                {
-                  "name": "wires",
-                  "type": {
-                    "text": "{ from: string; to: string }[]"
-                  }
                 }
               ]
             },
@@ -577,7 +580,7 @@
               "default": "declarations",
               "inheritedFrom": {
                 "name": "Settings",
-                "module": "dist/widgets/webwriter-logic-circuit.js"
+                "module": "dist/chunks/chunk-WWRLNGDD.js"
               }
             },
             {
@@ -586,7 +589,7 @@
               "static": true,
               "inheritedFrom": {
                 "name": "Settings",
-                "module": "dist/widgets/webwriter-logic-circuit.js"
+                "module": "dist/chunks/chunk-WWRLNGDD.js"
               }
             },
             {
@@ -595,7 +598,7 @@
               "default": "new SettingsCore(this, { ...options, root: () => this.renderRoot, rendered: () => this.updateComplete })",
               "inheritedFrom": {
                 "name": "Settings",
-                "module": "dist/widgets/webwriter-logic-circuit.js"
+                "module": "dist/chunks/chunk-WWRLNGDD.js"
               }
             },
             {
@@ -604,7 +607,7 @@
               "readonly": true,
               "inheritedFrom": {
                 "name": "Settings",
-                "module": "dist/widgets/webwriter-logic-circuit.js"
+                "module": "dist/chunks/chunk-WWRLNGDD.js"
               }
             }
           ],

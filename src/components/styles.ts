@@ -4,7 +4,15 @@ import '@shoelace-style/shoelace/dist/themes/light.css';
 export const Styles = css`
     :host {
         display: block;
-        font-family: Arial, sans-serif;
+        box-sizing: border-box;
+        min-width: 300px;
+        max-width: 2100px;
+        color: var(--ww-text-color, inherit);
+        font-family: var(--ww-font-family, Arial, sans-serif);
+    }
+
+    .frame {
+        container-type: inline-size;
     }
 
     .container {
@@ -12,6 +20,13 @@ export const Styles = css`
         height: max-content;
         border: 2px solid #6a6a6a;
         border-radius: 5px;
+    }
+
+    .print-note {
+        display: none;
+        margin: 0;
+        padding: 1em;
+        border: 1px solid currentColor;
     }
 
     .sidebar {
@@ -29,6 +44,12 @@ export const Styles = css`
         display: flex;
     }
 
+    .sidebar-item:focus-visible,
+    button:focus-visible {
+        outline: 2px solid Highlight;
+        outline-offset: 2px;
+    }
+
     .sidebar-item .gate {
         cursor: grab;
         touch-action: none;
@@ -40,13 +61,15 @@ export const Styles = css`
 
     .workspace {
         flex: 1;
+        min-width: 0;
+        min-height: 360px;
         position: relative;
         overflow: hidden;
         z-index: 1;
     }
 
     .workspace:has([data-ww-drop-over]) {
-        box-shadow: inset 0 0 0 3px #5176e8;
+        box-shadow: inset 0 0 0 3px var(--ww-theme-accent-1, #5176e8);
     }
 
     ww-scene {
@@ -55,7 +78,7 @@ export const Styles = css`
     }
 
     ww-shape.board {
-        fill: #ffffff;
+        fill: var(--circuit-background, #ffffff);
         stroke: #000000;
         stroke-width: 1px;
     }
@@ -77,25 +100,29 @@ export const Styles = css`
         stroke-dasharray: 6px, 3px;
     }
 
-    .simulateCheckbox {
+    /* Wide: Simulate at the left, the switch at the right and the zoom controls below it. */
+    .toolbar {
         position: absolute;
-        top: 10px;
-        left: 10px;
+        inset: 10px 10px auto;
         z-index: 10;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: start;
+        row-gap: 15px;
+        pointer-events: none;
+    }
+
+    .toolbar > * {
+        pointer-events: auto;
     }
 
     .flipSwitch {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        z-index: 10;
+        grid-column: 2;
     }
 
     .viewControls {
-        position: absolute;
-        top: 44px;
-        right: 10px;
-        z-index: 10;
+        grid-column: 2;
+        justify-self: end;
     }
 
     .trashCanIcon,
@@ -120,6 +147,7 @@ export const Styles = css`
         justify-content: center;
         align-items: center;
         cursor: pointer;
+        padding: 0;
     }
 
     .trashCanIconDragOver {
@@ -132,10 +160,12 @@ export const Styles = css`
         left: 10px;
         font-size: 80%;
         padding: 5px 10px;
+        min-height: 30px;
         display: flex;
         align-items: center;
         gap: 5px;
         cursor: pointer;
+        font-family: inherit;
     }
 
     .instructions {
@@ -145,7 +175,8 @@ export const Styles = css`
         padding: 10px;
         display: none;
         flex-direction: column;
-        max-width: 500px;
+        max-width: min(500px, calc(100% - 20px));
+        box-sizing: border-box;
     }
 
     .instructions.open {
@@ -204,7 +235,7 @@ export const Styles = css`
         color: black;
         background: none;
         border: none;
-        padding: 0;
+        padding: 6px 8px;
         cursor: pointer;
     }
 
@@ -287,7 +318,8 @@ export const Styles = css`
     }
 
     td.highlight {
-        background-color: #8da7fc;
+        --highlight: color-mix(in srgb, var(--ww-theme-accent-1) 45%, white);
+        background-color: var(--highlight, #8da7fc);
     }
 
     .vertical-line {
@@ -320,5 +352,74 @@ export const Styles = css`
         left: 30px;
         z-index: 13;
         background-color: transparent;
+    }
+
+    @media (pointer: coarse) {
+        .port {
+            width: 24px;
+            height: 24px;
+            margin: -12px;
+        }
+    }
+
+    /* A narrow widget puts the gate palette above the board. */
+    @container (max-width: 520px) {
+        .container {
+            flex-direction: column;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px 12px;
+        }
+
+        .simulateCheckbox {
+            margin-right: auto;
+        }
+
+        .viewControls {
+            margin-left: auto;
+        }
+
+        .sidebar {
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 4px 12px;
+            border-width: 0 0 1px;
+        }
+    }
+
+    @media print {
+        :host {
+            max-width: none;
+        }
+
+        .sidebar,
+        .toolbar,
+        .trashCanIcon,
+        .infoButton,
+        .instructions {
+            display: none;
+        }
+
+        .container {
+            break-inside: avoid;
+            border-color: currentColor;
+        }
+
+        .workspace {
+            min-height: 440px;
+        }
+
+        .empty .container {
+            display: none;
+        }
+
+        .empty .print-note {
+            display: block;
+        }
     }
 `;

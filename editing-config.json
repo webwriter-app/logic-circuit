@@ -229,7 +229,15 @@
       "ckb-Arab": "بازنەی لۆژیکی",
       "af-ZA": "Logikakring",
       "af-NA": "Logikakring"
-    }
+    },
+    "importFormats": [
+      ".json"
+    ],
+    "exportFormats": [
+      "text/csv",
+      "image/svg+xml",
+      ".json"
+    ]
   },
   "./widgets/webwriter-logic-circuit": {
     "label": {

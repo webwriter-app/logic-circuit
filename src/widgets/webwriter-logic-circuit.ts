@@ -1,6 +1,6 @@
 import { html, nothing, type PropertyValues } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
-import { LitElementWw } from '@webwriter/lit';
+import { LitElementWw, computed, signal } from '@webwriter/lit';
 import { Settings } from '@webwriter/lit/settings';
 import { localizer } from '@webwriter/lit/localize';
 import { jsonData } from '@webwriter/lit/data';
@@ -33,6 +33,7 @@ import { gateBox, truthTableWithHeader } from '../components/gate-view';
 import { addGate, canConnect, moveGates, parseGates, parseWires, remove as removeEntries, wireEntry, type Gate } from '../model/circuit';
 import { GATE_TYPES, LIMIT_SETTING, PORTS, hasTruthTable, truthRowIndex, type GateType, type LimitedType } from '../model/gates';
 import { same, start, step, type Signals } from '../model/simulation';
+import { circuitToSvg, outputValues, ports, readCircuit, tableToCsv, truthTable } from '../model/exchange';
 import { sourceLocale, targetLocales } from '../../localization/generated/locale-codes';
 
 /** The workspace is larger than the window that shows it. */
@@ -53,8 +54,17 @@ type Texts = { msg: MsgFn };
  * @tag webwriter-logic-circuit
  *
  * @cssprop --circuit-background - Background color of the workspace
- * @csspart gate - Styles individual gate components
+ * @cssprop --ww-text-color - Text color, from the document theme
+ * @cssprop --ww-font-family - Font, from the document theme
+ * @cssprop --ww-theme-accent-1 - Highlight of the drop target and of the truth table row in use
+ * @csspart board - The workspace the gates sit on
+ * @csspart gate - Styles individual gate components on the board
  * @csspart line - Styles the connecting lines between gates
+ *
+ * @signal outputs - The values (0 or 1) at the output gates in reading order (top to bottom, then left to right), as a series. Every output reads 0 while the simulation is off.
+ * @signal truth - The truth table of the circuit as a table with the columns In1.., Out1.. (inputs and outputs in reading order). It is empty for a circuit without inputs or outputs or with more than 8 inputs. A circuit with a loop gives the state it settles in from all inputs off.
+ *
+ * Conversions: `table` (truth table, both gates in reading order), `text/csv` (the truth table), `image/svg+xml` (the circuit with rectangular IEC symbols; inputs show their switch state) and `.json` (the data block `{gates, connections}`, which can be imported again). The truth table, CSV and SVG drop gate limits and settings; only the JSON file carries the full circuit. Importing a JSON file replaces the circuit.
  *
  * @slot data - Direct application/json block storing gates and connections.
  *
@@ -71,16 +81,16 @@ type Texts = { msg: MsgFn };
  */
 @customElement('webwriter-logic-circuit')
 export class WebwriterLogicCircuit extends Settings(LitElementWw, {
-    allowSimulation: { type: Number, default: 1, min: 0, max: 1, step: 1, attribute: "allowsimulation", label: (widget: Texts) => ({ _: widget.msg("Allow simulation") }) },
-    simulationDelay: { type: Number, default: 500, min: 0, unit: "ms", attribute: "simulationdelay", label: (widget: Texts) => ({ _: widget.msg("Simulation delay") }) },
-    notGateAllowed: { type: Number, default: -1, min: -1, step: 1, attribute: "notgateallowed", label: (widget: Texts) => ({ _: widget.msg("NOT gate limit") }) },
-    andGateAllowed: { type: Number, default: -1, min: -1, step: 1, attribute: "andgateallowed", label: (widget: Texts) => ({ _: widget.msg("AND gate limit") }) },
-    orGateAllowed: { type: Number, default: -1, min: -1, step: 1, attribute: "orgateallowed", label: (widget: Texts) => ({ _: widget.msg("OR gate limit") }) },
-    nandGateAllowed: { type: Number, default: -1, min: -1, step: 1, attribute: "nandgateallowed", label: (widget: Texts) => ({ _: widget.msg("NAND gate limit") }) },
-    norGateAllowed: { type: Number, default: -1, min: -1, step: 1, attribute: "norgateallowed", label: (widget: Texts) => ({ _: widget.msg("NOR gate limit") }) },
-    xnorGateAllowed: { type: Number, default: -1, min: -1, step: 1, attribute: "xnorgateallowed", label: (widget: Texts) => ({ _: widget.msg("XNOR gate limit") }) },
-    xorGateAllowed: { type: Number, default: -1, min: -1, step: 1, attribute: "xorgateallowed", label: (widget: Texts) => ({ _: widget.msg("XOR gate limit") }) },
-    splitterAllowed: { type: Number, default: -1, min: -1, step: 1, attribute: "splitterallowed", label: (widget: Texts) => ({ _: widget.msg("Splitter limit") }) },
+    allowSimulation: { group: "simulation", type: Number, default: 1, min: 0, max: 1, step: 1, attribute: "allowsimulation", label: (widget: Texts) => ({ _: widget.msg("Allow simulation") }) },
+    simulationDelay: { group: "simulation", type: Number, default: 500, min: 0, unit: "ms", attribute: "simulationdelay", label: (widget: Texts) => ({ _: widget.msg("Simulation delay") }) },
+    notGateAllowed: { group: "limits", type: Number, default: -1, min: -1, step: 1, attribute: "notgateallowed", label: (widget: Texts) => ({ _: widget.msg("NOT gate limit") }) },
+    andGateAllowed: { group: "limits", type: Number, default: -1, min: -1, step: 1, attribute: "andgateallowed", label: (widget: Texts) => ({ _: widget.msg("AND gate limit") }) },
+    orGateAllowed: { group: "limits", type: Number, default: -1, min: -1, step: 1, attribute: "orgateallowed", label: (widget: Texts) => ({ _: widget.msg("OR gate limit") }) },
+    nandGateAllowed: { group: "limits", type: Number, default: -1, min: -1, step: 1, attribute: "nandgateallowed", label: (widget: Texts) => ({ _: widget.msg("NAND gate limit") }) },
+    norGateAllowed: { group: "limits", type: Number, default: -1, min: -1, step: 1, attribute: "norgateallowed", label: (widget: Texts) => ({ _: widget.msg("NOR gate limit") }) },
+    xnorGateAllowed: { group: "limits", type: Number, default: -1, min: -1, step: 1, attribute: "xnorgateallowed", label: (widget: Texts) => ({ _: widget.msg("XNOR gate limit") }) },
+    xorGateAllowed: { group: "limits", type: Number, default: -1, min: -1, step: 1, attribute: "xorgateallowed", label: (widget: Texts) => ({ _: widget.msg("XOR gate limit") }) },
+    splitterAllowed: { group: "limits", type: Number, default: -1, min: -1, step: 1, attribute: "splitterallowed", label: (widget: Texts) => ({ _: widget.msg("Splitter limit") }) },
 }) {
     static shadowRootOptions = {
         ...LitElementWw.shadowRootOptions,
@@ -103,7 +113,20 @@ export class WebwriterLogicCircuit extends Settings(LitElementWw, {
         'sl-checkbox': SlCheckbox,
     };
 
+    static optionGroups = {
+        simulation: { label: (widget: Texts) => widget.msg("Simulation") },
+        limits: { label: (widget: Texts) => widget.msg("Gate limits"), collapsible: true, collapsed: true, advanced: true },
+    };
+
+    static convertTo = { table: 'toTable', 'text/csv': 'exportCsv', 'image/svg+xml': 'exportSvg', '.json': 'exportJson' };
+    static convertFrom = { '.json': 'importJson' };
+
     static actions = {
+        clearCircuit: {
+            label: (widget: Texts) => widget.msg("Clear circuit"),
+            intent: 'danger' as const,
+            confirm: (widget: Texts) => widget.msg("Remove all gates and connections?"),
+        },
         deleteSelection: { label: (widget: Texts) => widget.msg("Delete"), shortcut: ["Delete", "Backspace"], hidden: true },
     };
 
@@ -132,7 +155,7 @@ export class WebwriterLogicCircuit extends Settings(LitElementWw, {
     /** The keys of the selected gates and wires. */
     @state() accessor selection: ReadonlySet<string> = new Set();
     /** The signals at the ports while the circuit simulates. */
-    @state() accessor signals: Signals = new Map();
+    @state() accessor levels: Signals = new Map();
     /** The input gates that are switched on. */
     @state() accessor on: ReadonlySet<string> = new Set();
     /** The gates that show their truth table. */
@@ -143,8 +166,20 @@ export class WebwriterLogicCircuit extends Settings(LitElementWw, {
     @state() accessor menu: { gate: Gate; x: number; y: number } | null = null;
     @state() accessor overTrash = false;
 
+    #outputs = signal<number[]>([]);
+    #structureVersion = signal(0);
+    /** What other widgets read: see `@signal` in the class description. */
+    readonly signals = {
+        outputs: computed(() => this.#outputs.get()),
+        truth: computed(() => {
+            this.#structureVersion.get();
+            return truthTable(this.#circuit.gates, this.#circuit.wires) ?? { columns: [], rows: [] };
+        }),
+    };
+
     #parsed: { source: object; gates: Gate[]; wires: ReturnType<typeof parseWires> } | null = null;
     #structure = '';
+    #order = '';
     #timer: ReturnType<typeof setTimeout> | undefined;
     #ticks = 0;
     #abort: AbortController | null = null;
@@ -172,6 +207,7 @@ export class WebwriterLogicCircuit extends Settings(LitElementWw, {
         this.#abort?.abort();
         clearTimeout(this.#timer);
         this.#structure = '';
+        this.#order = '';
     }
 
     willUpdate(changed: PropertyValues<this>) {
@@ -180,8 +216,89 @@ export class WebwriterLogicCircuit extends Settings(LitElementWw, {
         const structure = gates.map((gate) => gate.key).join() + '|' + wires.map((wire) => wire.key).join();
         if (structure !== this.#structure) {
             this.#structure = structure;
+            this.#structureVersion.set(this.#structureVersion.get() + 1);
             this.#restart();
         }
+        const { inputs, outputs } = ports(gates);
+        const order = inputs.map((gate) => gate.key).join() + '|' + outputs.map((gate) => gate.key).join();
+        if (order !== this.#order) {
+            this.#order = order;
+            this.#structureVersion.set(this.#structureVersion.get() + 1);
+        }
+    }
+
+    updated(changed: PropertyValues<this>) {
+        super.updated(changed);
+        const next = outputValues(ports(this.#circuit.gates).outputs, this.simulate ? this.levels : new Map());
+        const current = this.#outputs.get();
+        if (next.length !== current.length || next.some((value, index) => value !== current[index])) this.#outputs.set(next);
+    }
+
+    /** Widget action: removes every gate and wire. */
+    clearCircuit() {
+        const { gates, connections } = this.#data.get();
+        if (!gates.length && !connections.length) return false;
+        this.#write(() => {
+            this.#data.set({ gates: [], connections: [] });
+            this.selection = new Set();
+            this.on = new Set();
+            this.tables = new Set();
+            this.menu = null;
+        });
+    }
+
+    /** @internal Conversion to a native table: the truth table. */
+    toTable() {
+        const table = truthTable(this.#circuit.gates, this.#circuit.wires);
+        if (!table) return null;
+        const doc = this.ownerDocument;
+        const element = doc.createElement('table');
+        const row = (cells: (string | number | null)[], tag: 'th' | 'td') => {
+            const tr = doc.createElement('tr');
+            for (const cell of cells) tr.append(Object.assign(doc.createElement(tag), { textContent: String(cell ?? '') }));
+            return tr;
+        };
+        const head = doc.createElement('thead');
+        const body = doc.createElement('tbody');
+        head.append(row(table.columns, 'th'));
+        body.append(...table.rows.map((cells) => row(cells, 'td')));
+        element.append(head, body);
+        return element;
+    }
+
+    /** @internal Export of the truth table as CSV. */
+    exportCsv() {
+        const table = truthTable(this.#circuit.gates, this.#circuit.wires);
+        return table ? new File([tableToCsv(table)], 'truth-table.csv', { type: 'text/csv' }) : null;
+    }
+
+    /** @internal Export of the circuit drawing as SVG. */
+    exportSvg() {
+        const { gates, wires } = this.#circuit;
+        return gates.length ? new File([circuitToSvg(gates, wires, this.on)], 'logic-circuit.svg', { type: 'image/svg+xml' }) : null;
+    }
+
+    /** @internal Export of the data block as JSON. */
+    exportJson() {
+        const { gates, connections } = this.#data.get();
+        return new File([JSON.stringify({ gates, connections }, null, 2)], 'logic-circuit.json', { type: 'application/json' });
+    }
+
+    /** @internal Reads and checks a JSON circuit, and returns the function that replaces the circuit with it. */
+    async importJson(file: File) {
+        let circuit: ReturnType<typeof readCircuit>;
+        try {
+            circuit = readCircuit(await file.text());
+        } catch (error) {
+            throw new Error((error as Error).message === 'json' ? this.msg("The file is not valid JSON.") : this.msg("The file does not contain a logic circuit."));
+        }
+        return () => {
+            this.#data.set(circuit);
+            this.selection = new Set();
+            this.on = new Set();
+            this.tables = new Set();
+            this.menu = null;
+        };
     }
 
     /** Widget action and key: removes the selected gates and wires. */
@@ -196,19 +313,19 @@ export class WebwriterLogicCircuit extends Settings(LitElementWw, {
         clearTimeout(this.#timer);
         this.#ticks = 0;
         if (!this.simulate) {
-            this.signals = new Map();
+            this.levels = new Map();
             return;
         }
-        this.signals = start(this.#circuit.gates, this.on);
+        this.levels = start(this.#circuit.gates, this.on);
         this.#schedule();
     }
 
     #schedule() {
         clearTimeout(this.#timer);
         this.#timer = setTimeout(() => {
-            const next = step(this.#circuit.gates, this.#circuit.wires, this.on, this.signals);
-            if (same(next, this.signals) || ++this.#ticks > MAX_TICKS) return;
-            this.signals = next;
+            const next = step(this.#circuit.gates, this.#circuit.wires, this.on, this.levels);
+            if (same(next, this.levels) || ++this.#ticks > MAX_TICKS) return;
+            this.levels = next;
             this.#schedule();
         }, this.simulationDelay);
     }
@@ -218,7 +335,7 @@ export class WebwriterLogicCircuit extends Settings(LitElementWw, {
         if (!on.delete(key)) on.add(key);
         this.on = on;
         if (!this.simulate) return;
-        this.signals = new Map(this.signals).set(`${key}:Out`, on.has(key));
+        this.levels = new Map(this.levels).set(`${key}:Out`, on.has(key));
         this.#ticks = 0;
         this.#schedule();
     }
@@ -311,6 +428,7 @@ export class WebwriterLogicCircuit extends Settings(LitElementWw, {
             if (!gate) return;
             event.preventDefault();
             this.menu = { gate, x: point.clientX, y: point.clientY };
+            this.updateComplete.then(() => this.renderRoot.querySelector<HTMLElement>('sl-menu-item')?.focus());
         }
     }
 
@@ -358,7 +476,7 @@ export class WebwriterLogicCircuit extends Settings(LitElementWw, {
 
     #gateNode(gate: Gate) {
         const { key, type } = gate;
-        const at = (name: string) => this.signals.get(`${key}:${name}`);
+        const at = (name: string) => this.levels.get(`${key}:${name}`);
         const driven = at('In1') !== undefined || at('In2') !== undefined;
         const value = type === 'INPUT' ? this.on.has(key) : at('In1') === true && this.simulate;
         const row = this.simulate && driven ? truthRowIndex(type, !!at('In1'), !!at('In2')) : -1;
@@ -383,6 +501,7 @@ export class WebwriterLogicCircuit extends Settings(LitElementWw, {
     render() {
         const { gates, wires } = this.#circuit;
         return html`
+            <div class=${gates.length ? 'frame' : 'frame empty'}>
             <div class="container">
                 <div class="sidebar">${GATE_TYPES.map((type) => this.#sidebarItem(type))}</div>
 
@@ -390,29 +509,33 @@ export class WebwriterLogicCircuit extends Settings(LitElementWw, {
                     <ww-scene select="multiple" connect-click data-ww-viewport="canvas" data-ww-viewport-wheel="zoom" data-ww-viewport-zoom="0.5 2.5"
                         data-ww-drop="gate" data-ww-drop-position="point" data-ww-drop-space="world" aria-label="Circuit"
                         @ww-select=${this.#select} @ww-moving=${this.#moving} @ww-move=${this.#move} @ww-connect=${this.#connect} @ww-context=${this.#context} @ww-dragcommit=${this.#drop}>
-                        <ww-shape class="board" kind="rect" width=${BOARD.width} height=${BOARD.height}></ww-shape>
+                        <ww-shape class="board" part="board" kind="rect" width=${BOARD.width} height=${BOARD.height}></ww-shape>
                         ${wires.map((wire) => html`
-                            <ww-path data-ww-key=${wire.key} from=${wire.from} to=${wire.to} route="orthogonal" selectable
-                                class=${this.simulate && this.signals.get(wire.from) === true ? 'live' : ''} ?selected=${this.selection.has(wire.key)}></ww-path>`)}
+                            <ww-path part="line" data-ww-key=${wire.key} from=${wire.from} to=${wire.to} route="orthogonal" selectable
+                                class=${this.simulate && this.levels.get(wire.from) === true ? 'live' : ''} ?selected=${this.selection.has(wire.key)}></ww-path>`)}
                         ${repeat(gates, (gate) => gate.key, (gate) => this.#gateNode(gate))}
                     </ww-scene>
 
-                    <sl-checkbox id="simCheckbox" class="simulateCheckbox" style=${this.allowSimulation === 1 ? '' : 'display: none;'} ?checked=${this.simulate}
-                        @sl-change=${(event: Event) => { this.simulate = (event.target as SlCheckbox).checked; this.#restart(); }}>${this.msg("Simulate")}</sl-checkbox>
-                    <sl-switch class="flipSwitch" id="switch" @sl-change=${this.#flipAllTables}>${this.msg("Show all truth tables")}</sl-switch>
-                    <span class="viewControls" data-ww-viewport-controls></span>
-
-                    <div class=${this.overTrash ? 'trashCanIcon trashCanIconDragOver' : 'trashCanIcon'} title=${this.msg("Drag items here to delete them")} @click=${this.deleteSelection}>
-                        <sl-icon src=${trash}></sl-icon>
+                    <div class="toolbar">
+                        <sl-checkbox id="simCheckbox" class="simulateCheckbox" style=${this.allowSimulation === 1 ? '' : 'display: none;'} ?checked=${this.simulate}
+                            @sl-change=${(event: Event) => { this.simulate = (event.target as SlCheckbox).checked; this.#restart(); }}>${this.msg("Simulate")}</sl-checkbox>
+                        <sl-switch class="flipSwitch" id="switch" @sl-change=${this.#flipAllTables}>${this.msg("Show all truth tables")}</sl-switch>
+                        <span class="viewControls" data-ww-viewport-controls></span>
                     </div>
 
-                    <div class=${this.instructionsOpen ? 'instructions open' : 'instructions'}>
+                    <button type="button" class=${this.overTrash ? 'trashCanIcon trashCanIconDragOver' : 'trashCanIcon'} title=${this.msg("Drag items here to delete them")} aria-label=${this.msg("Delete")} @click=${this.deleteSelection}>
+                        <sl-icon src=${trash}></sl-icon>
+                    </button>
+
+                    <div id="instructions" class=${this.instructionsOpen ? 'instructions open' : 'instructions'}>
                         <div class="instruction"><sl-icon class="instructionIcon" src=${add}></sl-icon>${this.msg("Drag and drop elements from the left sidebar to add them.")}</div>
                         <div class="instruction"><sl-icon class="instructionIcon" src=${connect}></sl-icon>${this.msg("Drag from a connection endpoint to another connection endpoint to add a connection.")}</div>
                         <div class="instruction"><sl-icon class="instructionIcon" src=${remove}></sl-icon>${this.msg("Select a connection and press Delete to remove it.")}</div>
                     </div>
-                    <div class="infoButton" @click=${() => (this.instructionsOpen = !this.instructionsOpen)}><sl-icon class="instructionIcon" src=${info}></sl-icon>${this.msg("Instructions")}</div>
+                    <button type="button" class="infoButton" aria-expanded=${this.instructionsOpen ? 'true' : 'false'} aria-controls="instructions" @click=${() => (this.instructionsOpen = !this.instructionsOpen)}><sl-icon class="instructionIcon" src=${info}></sl-icon>${this.msg("Instructions")}</button>
                 </div>
+            </div>
+            <p class="print-note">${this.msg("Empty logic circuit")}</p>
             </div>
 
             ${this.#menu()}
