@@ -572,43 +572,6 @@
               "kind": "method",
               "name": "#menu",
               "privacy": "private"
-            },
-            {
-              "kind": "field",
-              "name": "settings",
-              "static": true,
-              "default": "declarations",
-              "inheritedFrom": {
-                "name": "Settings",
-                "module": "dist/chunks/chunk-WWRLNGDD.js"
-              }
-            },
-            {
-              "kind": "method",
-              "name": "finalize",
-              "static": true,
-              "inheritedFrom": {
-                "name": "Settings",
-                "module": "dist/chunks/chunk-WWRLNGDD.js"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "settingsCore",
-              "default": "new SettingsCore(this, { ...options, root: () => this.renderRoot, rendered: () => this.updateComplete })",
-              "inheritedFrom": {
-                "name": "Settings",
-                "module": "dist/chunks/chunk-WWRLNGDD.js"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "options",
-              "readonly": true,
-              "inheritedFrom": {
-                "name": "Settings",
-                "module": "dist/chunks/chunk-WWRLNGDD.js"
-              }
             }
           ],
           "attributes": [
@@ -695,9 +658,7 @@
           },
           "tagName": "webwriter-logic-circuit",
           "customElement": true,
-          "summary": "Logic circuit simulator widget for composing and simulating digital circuits with logic gates.",
-          "modulePath": "src/widgets/webwriter-logic-circuit.ts",
-          "definitionPath": "src/widgets/webwriter-logic-circuit.ts"
+          "summary": "Logic circuit simulator widget for composing and simulating digital circuits with logic gates."
         }
       ],
       "exports": [

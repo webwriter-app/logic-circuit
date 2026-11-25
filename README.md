@@ -58,9 +58,6 @@ npm install @webwriter/logic-circuit
 | `menu` | `{ gate: Gate; x: number; y: number } \| null` | - | `null` | ✗ |
 | `overTrash` | `boolean` | - | `false` | ✗ |
 | `signals` | `object` | What other widgets read: see `@signal` in the class description. | `{ outputs: computed(() => this.#outputs.get()), truth: computed(() => { this.#structureVersion.get(); return truthTable(this.#circuit.gates, this.#circuit.wires) ?? { columns: [], rows: [] }; }), }` | ✗ |
-| `WebwriterLogicCircuit.settings` | - | - | `declarations` | ✗ |
-| `settingsCore` | - | - | `new SettingsCore(this, { ...options, root: () => this.renderRoot, rendered: () => this.updateComplete })` | ✗ |
-| `options` | - | - | - | ✗ |
 
 *Fields including [properties](https://developer.mozilla.org/en-US/docs/Glossary/Property/JavaScript) and [attributes](https://developer.mozilla.org/en-US/docs/Glossary/Attribute) define the current state of the widget and offer customization options.*
 
@@ -69,7 +66,6 @@ npm install @webwriter/logic-circuit
 | :--: | :---------: | :-------: |
 | `clearCircuit` | Widget action: removes every gate and wire. | -
 | `deleteSelection` | Widget action and key: removes the selected gates and wires. | -
-| `finalize` | - | -
 
 *[Methods](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Method_definitions) allow programmatic access to the widget.*
 
@@ -110,4 +106,4 @@ npm install @webwriter/logic-circuit
 
 
 ---
-*Generated with @webwriter/build@1.14.0*
+*Generated with @webwriter/build@1.15.0*
