@@ -1,6 +1,6 @@
 {
   "name": "@webwriter/logic-circuit",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Create and simulate circuits with logic gates (AND, OR, XOR, etc.).",
   "repository": "https://github.com/webwriter-app/logic-circuit",
   "keywords": [
@@ -162,6 +162,7 @@
     },
     "./icon": "./icon.svg",
     "./preview": "./assets/preview.mp4",
+    "./preview/de": "./assets/preview-de.mp4",
     "./editing-config.json": "./editing-config.json",
     "./custom-elements.json": "./custom-elements.json"
   },
