@@ -1,5 +1,5 @@
-# Logic Circuit (`@webwriter/logic-circuit@2.1.1`)
-[License: MIT](LICENSE) | Version: 2.1.1
+# Logic Circuit (`@webwriter/logic-circuit@2.1.2`)
+[License: MIT](LICENSE) | Version: 2.1.2
 
 Create and simulate circuits with logic gates (AND, OR, XOR, etc.).
 
